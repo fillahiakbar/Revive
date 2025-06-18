@@ -20,6 +20,10 @@ function handleRadioClick(radio, genreId) {
         onGenreSelected(genreId);
     }
 }
+const res = await fetch(`/api/anime-by-genres?ids=${selectedGenres.join(',')}&page=${page}`, {
+    headers: {'Accept': 'application/json'}
+});
+
 
 function clearRadioSelection() {
     const radios = document.querySelectorAll('input[name="genre"]');

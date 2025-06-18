@@ -13,7 +13,7 @@
 <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
     <input type="text" name="q" value="{{ $query }}"
            class="w-full bg-white/20 text-white rounded px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-           placeholder="Contoh: One Piece">
+           placeholder="Example: One Piece">
 </div>
 
 
@@ -75,10 +75,9 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             @foreach($genres as $genre)
                 <label class="flex items-center space-x-2cursor-pointer">
-                    <input type="checkbox" name="genres[]" value="{{ $genre['id'] }}"
-                           @if(in_array($genre['id'], $selected)) checked @endif
-                           class="accent-green-500">
-                    <span class="mr-4">{{ $genre['name'] }}</span>
+<input type="checkbox" name="genres[]" value="{{ $genre['id'] }}">
+@if(in_array($genre['id'], $selected))@endif
+<span class="mr-4">{{ $genre['name'] }}</span>
                 </label>
             @endforeach
         </div>  

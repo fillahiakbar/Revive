@@ -18,38 +18,67 @@ class AnimeController extends Controller
         return view('home');
     }
 
-    public function show($id)
-    {
-        $animeResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/full");
+public function show($id)
+{
+    // Ambil detail anime lengkap
+    $animeResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/full");
 
-        $allEpisodes = [];
-        $page = 1;
+    // Ambil rekomendasi (similar anime)
+    $recommendationResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/recommendations");
 
-        do {
-            $episodesResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/episodes", [
-                'page' => $page
-            ]);
+    // Ambil semua episode
+    $allEpisodes = [];
+    $page = 1;
 
-            if (!$episodesResponse->successful()) {
-                break;
-            }
+    do {
+        $episodesResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/episodes", [
+            'page' => $page
+        ]);
 
-            $data = $episodesResponse->json();
-            $allEpisodes = array_merge($allEpisodes, $data['data']);
-            $hasNext = $data['pagination']['has_next_page'] ?? false;
-            $page++;
-
-            usleep(500000); // 0.5 detik delay untuk rate limiting
-
-        } while ($hasNext);
-
-        if ($animeResponse->successful()) {
-            $anime = $animeResponse['data'];
-            return view('anime.show', compact('anime', 'allEpisodes'));
+        if (!$episodesResponse->successful()) {
+            break;
         }
 
-        abort(404, 'Anime not found');
+        $data = $episodesResponse->json();
+        $allEpisodes = array_merge($allEpisodes, $data['data']);
+        $hasNext = $data['pagination']['has_next_page'] ?? false;
+        $page++;
+
+        usleep(500000); // delay 0.5 detik (rate limit)
+
+    } while ($hasNext);
+
+    // Jika anime ditemukan
+    if ($animeResponse->successful()) {
+        $anime = $animeResponse['data'];
+
+        // Ambil hanya 12 rekomendasi pertama (optional)
+        $similarAnime = [];
+
+        if ($recommendationResponse->successful()) {
+            $recommendations = $recommendationResponse['data'];
+            foreach ($recommendations as $item) {
+                if (isset($item['entry'])) {
+                    $similarAnime[] = [
+                        'mal_id' => $item['entry']['mal_id'] ?? null,
+                        'title' => $item['entry']['title'] ?? 'Unknown',
+                        'type' => $item['entry']['type'] ?? 'Unknown',
+                        'images' => $item['entry']['images'] ?? [],
+                        'episodes' => null, // optional karena data rekomendasi tidak punya ini
+                        'score' => null, // optional
+                        'duration' => null, // optional
+                    ];
+                }
+                if (count($similarAnime) >= 12) break;
+            }
+        }
+
+        return view('anime.show', compact('anime', 'allEpisodes', 'similarAnime'));
     }
+
+    // Jika gagal ambil anime
+    abort(404, 'Anime not found');
+}
 
     public function list(Request $request)
     {
@@ -144,6 +173,9 @@ class AnimeController extends Controller
         $types = $request->query('types', []);
         $sort = $request->query('sort', 'title_asc');
         $genreIds = $request->query('genres', []);
+if (!is_array($genreIds)) {
+    $genreIds = explode(',', $genreIds); // handle dari ?genres=1,2,3
+}
         $page = $request->query('page', 1);
 
         // Query dasar ke Jikan API
@@ -294,20 +326,20 @@ class AnimeController extends Controller
      public function byGenre($genre_id, Request $request)
 {
     try {
-        // Debug: Lihat apakah method dipanggil
         \Log::info('byGenre method called with genre_id: ' . $genre_id);
-        
-        // Ambil data genre dari MAL API
-        $genreResponse = Http::timeout(30)->get("https://api.jikan.moe/v4/genres/anime/{$genre_id}");
-        
-        if (!$genreResponse->successful()) {
-            \Log::error('Genre API failed', ['genre_id' => $genre_id, 'status' => $genreResponse->status()]);
+
+        // Ambil semua genre dan cari yang cocok
+        $allGenresResponse = Http::timeout(30)->get('https://api.jikan.moe/v4/genres/anime');
+        $allGenres = $allGenresResponse->successful() ? $allGenresResponse->json()['data'] : [];
+
+        $genreData = collect($allGenres)->firstWhere('mal_id', (int) $genre_id);
+
+        if (!$genreData) {
+            \Log::warning("Genre not found for ID: $genre_id");
             abort(404, 'Genre not found');
         }
-        
-        $genreData = $genreResponse->json()['data'];
-        
-        // Parameter untuk API call
+
+        // Ambil anime-anime berdasarkan genre
         $params = [
             'genres' => $genre_id,
             'page' => $request->get('page', 1),
@@ -316,47 +348,30 @@ class AnimeController extends Controller
             'sort' => 'desc',
             'sfw' => true
         ];
-        
-        // Ambil anime berdasarkan genre
+
         $animeResponse = Http::timeout(30)->get("https://api.jikan.moe/v4/anime", $params);
-        
+
         if (!$animeResponse->successful()) {
             \Log::error('Anime API failed', ['params' => $params, 'status' => $animeResponse->status()]);
             $animeList = [];
             $pagination = null;
         } else {
             $animeData = $animeResponse->json();
-            $animeList = $animeData['data'] ?? [];
+            $animeList = collect($animeData['data'] ?? [])->filter(fn($anime) => $this->isAnimeAppropriate($anime))->values()->all();
             $pagination = $animeData['pagination'] ?? null;
-            
-            // Filter anime yang appropriate
-            $animeList = collect($animeList)->filter(function($anime) {
-                return $this->isAnimeAppropriate($anime);
-            })->values()->all();
         }
-        
-        // Ambil semua genre untuk filter (optional)
-        $allGenresResponse = Http::timeout(30)->get('https://api.jikan.moe/v4/genres/anime');
-        $allGenres = $allGenresResponse->successful() ? $allGenresResponse->json()['data'] : [];
-        
-        \Log::info('byGenre data prepared', [
-            'genre_id' => $genre_id,
-            'anime_count' => count($animeList),
-            'genre_name' => $genreData['name'] ?? 'Unknown'
-        ]);
-        
+
         return view('anime.by-genre', compact('animeList', 'genreData', 'pagination', 'allGenres', 'genre_id'));
-        
+
     } catch (\Exception $e) {
         \Log::error('Error in byGenre method', [
             'genre_id' => $genre_id,
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
         ]);
-        
         return back()->with('error', 'Failed to load anime data: ' . $e->getMessage());
     }
 }
+
     /**
      * Search anime
      */

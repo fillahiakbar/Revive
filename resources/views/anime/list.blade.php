@@ -1,3 +1,4 @@
+<!-- list.blade.php -->
 <x-app-layout>
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">

@@ -24,7 +24,7 @@
 
          {{-- Anime Grid --}}
             <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
+             <div id="anime-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
                 @forelse($animes as $anime)
                     <a href="{{ route('anime.show', $anime['mal_id']) }}"
                        class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
@@ -90,8 +90,8 @@
                 @endforelse
 
                 {{-- Grid Filler --}}
-                @if($animes->count() > 0 && $animes->count() < 24)
-                    @for($i = $animes->count(); $i < 24; $i++)
+                @if(count($animes) > 0 && count($animes) < 24)
+                    @for($i = count($animes); $i < 24; $i++)
                         <div class="invisible">
                             <div class="w-full h-60 bg-transparent"></div>
                             <div class="p-2 text-xs">
@@ -139,9 +139,9 @@
                     document.getElementById('loading').classList.remove('hidden');
 
                     try {
-                        const res = await fetch(`/genres?ids=${selectedGenres.join(',')}&page=${page}`, {
-                            headers: {'Accept': 'application/json'}
-                        });
+                        const res = await fetch(`/genres?genres=${selectedGenres.join(',')}&page=${page}`, {
+    headers: {'Accept': 'application/json'}
+});
 
                         const data = await res.json();
 

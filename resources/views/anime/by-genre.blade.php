@@ -1,144 +1,150 @@
-{{-- Ganti @extends('layouts.app') dengan x-app-layout --}}
 <x-app-layout>
-    <div class="min-h-screen bg-gray-900 text-white pt-20">
+    <div class="min-h-screen  text-white pt-20">
         {{-- Header Section --}}
-        <div class="bg-gray-800 border-b border-gray-700">
+        <div class="">
             <div class="container mx-auto px-4 py-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-bold text-white mb-2">
+                        <h1 class="text-3xl font-bold text-white pt-20 mb-2">
                             {{ $genreData['name'] ?? 'Unknown Genre' }} Anime
                         </h1>
-                        <p class="text-gray-400">
-                            {{ count($animeList) }} anime found
-                        </p>
                     </div>
                     
                     {{-- Back Button --}}
                     <a href="{{ route('anime.genres') }}" 
-                       class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
-                        ← Back to Genres
+                       class=" hover:text-red-700  px-4 py-2 pt-20 rounded-lg transition-colors">
+                        Back to Genre
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="container mx-auto px-4 py-8">
-            {{-- Filter & Sort Section --}}
-            <div class="mb-8 bg-gray-800 rounded-lg p-6">
-                <form method="GET" class="flex flex-wrap gap-4 items-center">
-                    {{-- Sort Options --}}
-                    <div class="flex items-center gap-2">
-                        <label class="text-gray-300">Sort by:</label>
-                        <select name="sort" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
-                            <option value="popularity" {{ request('sort') == 'popularity' ? 'selected' : '' }}>Popularity</option>
-                            <option value="score" {{ request('sort') == 'score' ? 'selected' : '' }}>Score</option>
-                            <option value="title" {{ request('sort') == 'title' ? 'selected' : '' }}>Title</option>
-                            <option value="start_date" {{ request('sort') == 'start_date' ? 'selected' : '' }}>Release Date</option>
-                        </select>
+           {{-- Info Pagination --}}
+@if($pagination && ($pagination['items_count'] ?? 0) > 0)
+    <div class="text-white text-sm mb-4 text-center lg:text-right">
+        Showing {{ (($pagination['current_page'] ?? 1) - 1) * 24 + 1 }}
+        to {{ (($pagination['current_page'] ?? 1) - 1) * 24 + count($animeList) }}
+        of {{ $pagination['items_count'] ?? '?' }} results
+        (Page {{ $pagination['current_page'] ?? 1 }} of {{ $pagination['last_visible_page'] ?? '?' }})
+    </div>
+@endif
+
+{{-- Anime Grid --}}
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pl-24 pr-24 gap-4 min-h-[600px]">
+    @forelse($animeList as $anime)
+        <a href="{{ route('anime.show', $anime['mal_id']) }}"
+           class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
+
+            {{-- Badge --}}
+            <div class="absolute left-1 z-10 flex flex-col gap-1">
+                <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5 rounded text-white font-medium">
+                    {{ $anime['type'] ?? 'Unknown' }}
+                </span>
+            </div>
+
+            {{-- Image --}}
+            <div class="w-full h-60 bg-gray-800 flex items-center justify-center">
+                @if(isset($anime['images']['jpg']['image_url']) && $anime['images']['jpg']['image_url'])
+                    <img src="{{ $anime['images']['jpg']['image_url'] }}"
+                         alt="{{ $anime['title'] }}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                         loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden w-full h-full items-center justify-center text-gray-500">
+                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                  clip-rule="evenodd"></path>
+                        </svg>
                     </div>
-                    
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors">
-                        Apply Filter
-                    </button>
-                </form>
-            </div>
-
-            {{-- Debug Info (hapus setelah testing) --}}
-            <div class="mb-4 bg-yellow-600 text-yellow-900 p-4 rounded-lg">
-                <strong>Debug Info:</strong><br>
-                Genre ID: {{ $genre_id }}<br>
-                Genre Name: {{ $genreData['name'] ?? 'N/A' }}<br>
-                Anime Count: {{ count($animeList) }}<br>
-                Current URL: {{ request()->url() }}
-            </div>
-
-            {{-- Anime Grid --}}
-            @if(count($animeList) > 0)
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                    @foreach($animeList as $anime)
-                        <div class="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors group">
-                            {{-- Anime Poster --}}
-                            <div class="aspect-[3/4] overflow-hidden">
-                                <img src="{{ $anime['images']['jpg']['large_image_url'] ?? $anime['images']['jpg']['image_url'] ?? 'https://via.placeholder.com/300x400' }}" 
-                                     alt="{{ $anime['title'] }}"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            </div>
-                            
-                            {{-- Anime Info --}}
-                            <div class="p-4">
-                                <h3 class="font-semibold text-white text-sm mb-2 line-clamp-2">
-                                    {{ $anime['title'] }}
-                                </h3>
-                                
-                                <div class="flex items-center justify-between text-xs text-gray-400">
-                                    <span>{{ $anime['year'] ?? 'N/A' }}</span>
-                                    @if(isset($anime['score']) && $anime['score'])
-                                        <span class="bg-yellow-600 text-yellow-100 px-2 py-1 rounded">
-                                            ⭐ {{ number_format($anime['score'], 1) }}
-                                        </span>
-                                    @endif
-                                </div>
-                                
-                                {{-- Action Buttons --}}
-                                <div class="mt-3 flex gap-2">
-                                    <a href="{{ route('anime.show', $anime['mal_id']) }}" 
-                                       class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-2 px-3 rounded text-center transition-colors">
-                                        View Detail
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- Pagination --}}
-                @if($pagination && ($pagination['has_next_page'] ?? false))
-                    <div class="mt-12 flex justify-center gap-4">
-                        {{-- Previous Page --}}
-                        @if(($pagination['current_page'] ?? 1) > 1)
-                            <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => ($pagination['current_page'] ?? 1) - 1])) }}" 
-                               class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition-colors">
-                                ← Previous
-                            </a>
-                        @endif
-                        
-                        {{-- Current Page Info --}}
-                        <span class="bg-red-600 px-4 py-2 rounded">
-                            Page {{ $pagination['current_page'] ?? 1 }} of {{ $pagination['last_visible_page'] ?? 1 }}
-                        </span>
-                        
-                        {{-- Next Page --}}
-                        @if($pagination['has_next_page'] ?? false)
-                            <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => ($pagination['current_page'] ?? 1) + 1])) }}" 
-                               class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition-colors">
-                                Next →
-                            </a>
-                        @endif
+                @else
+                    <div class="flex items-center justify-center text-gray-500">
+                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                  clip-rule="evenodd"></path>
+                        </svg>
                     </div>
                 @endif
-            @else
-                {{-- No Anime Found --}}
-                <div class="text-center py-20">
-                    <div class="text-6xl mb-4">😢</div>
-                    <h3 class="text-2xl font-bold text-gray-300 mb-2">No Anime Found</h3>
-                    <p class="text-gray-400">Sorry, no anime found for this genre.</p>
-                    <a href="{{ route('anime.genres') }}" 
-                       class="inline-block mt-4 bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors">
-                        Browse Other Genres
-                    </a>
-                </div>
-            @endif
+            </div>
+
+            {{-- Detail --}}
+            <div class="p-2 text-xs">
+                <h3 class="font-bold truncate" title="{{ $anime['title'] }}">
+                    {{ $anime['title'] ?? 'Unknown Title' }}
+                </h3>
+                <p class="text-gray-400">
+                    {{ $anime['duration'] ?? 'N/A' }}
+                </p>
+                @if(isset($anime['episodes']))
+                    <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
+                @endif
+            </div>
+        </a>
+    @empty
+        {{-- No Result --}}
+        <div class="col-span-full text-center text-gray-500 py-20">
+            <div class="text-6xl mb-4">📺</div>
+            <h3 class="text-xl font-bold mb-2">No Anime Found</h3>
+            <p>No anime available for this genre</p>
         </div>
+    @endforelse
+</div>
+
+{{-- Pagination --}}
+@if ($pagination && ($pagination['last_visible_page'] ?? 1) > 1)
+    <div class="flex justify-center mt-10">
+        <nav class="flex items-center space-x-2 rtl:space-x-reverse">
+            @if(($pagination['current_page'] ?? 1) > 1)
+                <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => 1])) }}"
+                   class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                   title="First Page">&laquo;</a>
+                <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => ($pagination['current_page'] - 1)])) }}"
+                   class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                   title="Previous Page">&lsaquo;</a>
+            @endif
+
+            @php
+                $start = max(1, $pagination['current_page'] - 2);
+                $end = min($pagination['last_visible_page'], $pagination['current_page'] + 2);
+            @endphp
+            @for ($i = $start; $i <= $end; $i++)
+                <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => $i])) }}"
+                   class="w-10 h-10 flex items-center justify-center rounded-full text-sm transition {{ $pagination['current_page'] == $i ? 'bg-red-500 text-white font-bold' : 'bg-white text-black hover:bg-gray-300' }}"
+                   title="Page {{ $i }}">{{ $i }}</a>
+            @endfor
+
+            @if(($pagination['has_next_page'] ?? false))
+                <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => ($pagination['current_page'] + 1)])) }}"
+                   class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                   title="Next Page">&rsaquo;</a>
+                <a href="{{ request()->url() }}?{{ http_build_query(array_merge(request()->query(), ['page' => $pagination['last_visible_page']])) }}"
+                   class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                   title="Last Page">&raquo;</a>
+            @endif
+        </nav>
     </div>
 
-    {{-- Custom CSS --}}
-    <style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    </style>
+    <div class="text-center mt-4 text-gray-400 text-sm">
+        Page {{ $pagination['current_page'] ?? 1 }} of {{ $pagination['last_visible_page'] ?? '?' }}
+        ({{ $pagination['items_count'] ?? '?' }} total results)
+    </div>
+@endif
+
+{{-- JS Fallback --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const images = document.querySelectorAll('img[src]');
+        images.forEach(img => {
+            img.addEventListener('error', function () {
+                this.style.display = 'none';
+                const fallback = this.nextElementSibling;
+                if (fallback) fallback.style.display = 'flex';
+            });
+        });
+    });
+</script>
+
+
+
 </x-app-layout>
