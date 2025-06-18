@@ -1,0 +1,151 @@
+<x-app-layout>
+    <!-- Hero Section -->
+    <div class="relative text-white min-h-screen flex items-center pr-24 justify-start overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="{{ asset('path/to/your/background-image.png') }}" alt="Background" class="w-full h-full object-cover opacity-20">
+        </div>
+        <div class="relative z-10 px-4">
+            <h1 class="text-8xl font-extrabold mb-4">عن الفريق</h1>
+            <p class="pt-4 text-4xl font-medium">نترجم الذكريات... ونخلّدها</p>
+        </div>
+    </div>
+
+    <!-- Main Content Section - Dark Blue Background -->
+    <div class="min-h-screen">
+        <div class="container mx-auto px-8 py-20">
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-50 mb-8"></div>
+
+            <!-- Section 1 -->
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="text-white text-right mb-16 pr-24">
+                    <div class="relative">
+                        <div class="w-32 h-1 bg-red-500 mb-4 ml-auto"></div>
+                        <h2 class="text-5xl font-bold mb-8 text-white">من نحن؟</h2>
+                        <div class="space-y-6 text-lg leading-relaxed"></div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-64 flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="mb-8">
+                            <div class="flex items-start justify-between ml-20 mb-4">
+                                <div class="space-y-6 text-2xl leading-relaxed">
+                                    <p>
+                                        نحن <span class="text-white font-semibold">REVIVE</span> - فريق متخصص في التصوير والإنتاج والتصميم والتقنيات المبتكرة. نقدم خدمات شاملة في مجال الإنتاج المرئي والصوتي.
+                                    </p>
+                                    <p>
+                                        نحن لا نقوم بتوثيق اللحظات فحسب، بل نحييها من جديد. وسنحرص وننجز المهام الخاصة.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-50 mb-8"></div>
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="text-white text-right mb-16 pr-24">
+                    <div class="relative">
+                        <div class="w-32 h-1 bg-red-500 mb-4 ml-auto"></div>
+                        <h2 class="text-5xl font-bold mb-8 text-white">رؤيتنا</h2>
+                        <div class="space-y-6 text-lg leading-relaxed"></div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-64 flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="mb-8">
+                            <div class="flex items-start justify-between ml-20 mb-4">
+                                <div class="space-y-6 text-2xl leading-relaxed rtl:text-right text-white/90 pr-10">
+                                    <p>
+                                        أن نكون الجسر الذي يصل بين الماضي والحاضر، بين اليابان والعالم العربي، بين المجهول والعاشق الباحث عن شيءٍ مُختلف.
+                                    </p>
+                                    <p>
+                                        نُؤمن أنَّ في كُلِّ أنمي منسي كنزٌ دفين، وأنَّ وظيفتنا اكتشافه وترميمه وتقديمه في أبهى صورة.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-50 mb-8"></div>
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="text-white text-right mb-16 pr-24">
+                    <div class="relative">
+                        <div class="w-32 h-1 bg-red-500 mb-4 ml-auto"></div>
+                        <h2 class="text-5xl font-bold mb-8 text-white">أهدافنا</h2>
+                        <div class="space-y-6 text-lg leading-relaxed"></div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-64 flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="mb-8">
+                            <div class="flex items-start justify-between ml-20 mb-4">
+                                <div class="text-2xl leading-relaxed">
+                                    <ul class="space-y-6 list-disc list-inside rtl:pr-4 rtl:text-right text-white/90">
+                                        <li>إحياء اﻷعمال الكلاسيكية التي لم يُنصفها الزمن.</li>
+                                        <li>الحفاظ على جوهر العمل وأصالته دون تحريفٍ أو اجتزاء.</li>
+                                        <li>إعادة تقديم العمل بجودةٍ بصريةٍ ولغويةٍ تعكس الاحترام للفن وللمُشاهد.</li>
+                                        <li>أرشفةٌ ذكيةٌ تُسهِّل الوصول وتخلد هذه الأعمال للأجيال القادمة.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-50 mb-8"></div>
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="text-white text-right mb-16 pr-24">
+                    <div class="relative">
+                        <div class="w-32 h-1 bg-red-500 mb-4 ml-auto"></div>
+                        <h2 class="text-5xl font-bold mb-8 text-white">فريقنا</h2>
+                        <div class="space-y-6 text-lg leading-relaxed"></div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-64 flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="mb-8">
+                            <div class="flex items-start justify-between ml-20 mb-4">
+                                <div class="space-y-6 text-2xl leading-relaxed pr-10">
+                                    <p>
+                                        في الظلِّ نعمل، لا نبحث عن شهرة بل عن أثر. نحن مُترجمون ومُحرِّرون ومُدقِّقون، عُشَّاقٌ قبل أن نكون مُتطوِّعين. يجمعنا شغفٌ واحد: ألا يُنسى أيُّ عملٍ يستحقُّ أن يُروى.
+                                    </p>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+   <div class="max-w-7xl mx-auto px-4 py-20 text-white">
+    <div class="mt-8">
+        <div class="bg-white/30 backdrop-blur-lg p-10 border border-white/20 text-center">
+            <!-- Judul Kontak -->
+            <h2 class="text-4xl font-bold mb-10 rtl:text-center text-white">تواصل معنا</h2>
+
+            <!-- Ikon Media Sosial -->
+            <div class="flex justify-center items-center gap-10 text-4xl rtl:flex-row-reverse">
+                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-discord"></i></a>
+                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-x-twitter"></i></a>
+                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-telegram-plane"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</x-app-layout>

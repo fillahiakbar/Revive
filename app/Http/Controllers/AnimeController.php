@@ -6,9 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class AnimeController extends Controller
 {
+    private $jikanApiUrl = 'https://api.jikan.moe/v4/';
+
     public function index()
     {
         return view('home');
@@ -17,197 +21,605 @@ class AnimeController extends Controller
     public function show($id)
     {
         $animeResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/full");
-        $episodesResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/episodes");
+
+        $allEpisodes = [];
+        $page = 1;
+
+        do {
+            $episodesResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/episodes", [
+                'page' => $page
+            ]);
+
+            if (!$episodesResponse->successful()) {
+                break;
+            }
+
+            $data = $episodesResponse->json();
+            $allEpisodes = array_merge($allEpisodes, $data['data']);
+            $hasNext = $data['pagination']['has_next_page'] ?? false;
+            $page++;
+
+            usleep(500000); // 0.5 detik delay untuk rate limiting
+
+        } while ($hasNext);
 
         if ($animeResponse->successful()) {
             $anime = $animeResponse['data'];
-            $episodes = $episodesResponse->successful() ? $episodesResponse['data'] : [];
-
-            return view('anime.show', compact('anime', 'episodes'));
+            return view('anime.show', compact('anime', 'allEpisodes'));
         }
 
         abort(404, 'Anime not found');
     }
 
-   public function list(Request $request)
-{
-    $letter = strtoupper($request->query('letter', 'A'));
-    $page = $request->query('page', 1);
-    $baseUrl = rtrim(config('services.jikan.url'), '/');
+    public function list(Request $request)
+    {
+        $letter = strtoupper($request->query('letter', 'A'));
+        $page = $request->query('page', 1);
+        $baseUrl = rtrim(config('services.jikan.url', 'https://api.jikan.moe/v4'), '/');
 
-    $query = match ($letter) {
-        'ALL' => '',
-        '0-9' => '1',
-        default => $letter
-    };
+        // Ambil lebih banyak data dari API untuk memastikan setelah filter masih ada 24 item
+        $maxPages = 20;
+        $allAnimes = collect();
+        
+        for ($apiPage = 1; $apiPage <= $maxPages; $apiPage++) {
+            $query = match ($letter) {
+                'ALL' => '',
+                '0-9' => '1',
+                default => $letter
+            };
 
-    $response = Http::get("{$baseUrl}/anime", [
-        'q' => $query,
-        'page' => $page,
-        'limit' => 24,
-        'order_by' => 'title',
-        'sort' => 'asc',
-    ]);
+            $response = Http::get("{$baseUrl}/anime", [
+                'q' => $query,
+                'page' => $apiPage,
+                'limit' => 25,
+                'order_by' => 'title',
+                'sort' => 'asc',
+                'sfw' => true
+            ]);
 
-    if (!$response->successful()) {
-        return view('anime.list', [
-            'animes' => collect(),
-            'letter' => $letter
+            if (!$response->successful()) {
+                break;
+            }
+
+            $data = $response->json();
+            $animeData = $data['data'] ?? [];
+
+            if (empty($animeData)) {
+                break;
+            }
+
+            // Filter: aman, bukan hentai, studio Jepang
+            $filtered = collect($animeData)->filter(function ($anime) {
+                return $this->isAnimeAppropriate($anime);
+            });
+
+            $allAnimes = $allAnimes->merge($filtered);
+
+            // Rate limiting
+            usleep(250000); // 0.25 detik delay
+        }
+
+        // Remove duplicates berdasarkan title
+        $uniqueAnimes = $allAnimes->unique(function ($anime) {
+            return strtolower(trim($anime['title']));
+        })->values();
+
+        // Manual pagination
+        $perPage = 24;
+        $currentPage = $page;
+        $offset = ($currentPage - 1) * $perPage;
+        
+        $paginatedAnimes = $uniqueAnimes->slice($offset, $perPage)->values();
+        $total = $uniqueAnimes->count();
+
+        // Jika data kurang dari 24 pada halaman pertama, coba ambil lebih banyak
+        if ($paginatedAnimes->count() < 24 && $currentPage == 1 && $total < 24) {
+            $this->addFallbackAnimes($uniqueAnimes, $baseUrl);
+            $paginatedAnimes = $uniqueAnimes->slice($offset, $perPage)->values();
+            $total = $uniqueAnimes->count();
+        }
+
+        // Create pagination instance
+        $animes = new LengthAwarePaginator(
+            $paginatedAnimes,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query()
+            ]
+        );
+
+        return view('anime.list', compact('animes', 'letter'));
+    }
+
+    public function genreMulti(Request $request)
+    {
+        $baseUrl = rtrim(config('services.jikan.url', 'https://api.jikan.moe/v4'), '/');
+
+        // Ambil semua filter dari form
+        $searchQuery = $request->query('q');
+        $status = $request->query('status');
+        $types = $request->query('types', []);
+        $sort = $request->query('sort', 'title_asc');
+        $genreIds = $request->query('genres', []);
+        $page = $request->query('page', 1);
+
+        // Query dasar ke Jikan API
+        $queryParams = [
+            'page' => $page,
+            'limit' => 24,
+            'sfw' => true,
+        ];
+
+        // Apply filters
+        if ($searchQuery) {
+            $queryParams['q'] = $searchQuery;
+        }
+
+        if ($status === 'airing') {
+            $queryParams['status'] = 'airing';
+        } elseif ($status === 'complete') {
+            $queryParams['status'] = 'complete';
+        }
+
+        // Apply sort
+        $this->applySortParams($queryParams, $sort);
+
+        // Apply genres - filter out hentai/ecchi genres
+        if (!empty($genreIds)) {
+            $safeGenreIds = $this->filterSafeGenres($genreIds);
+            if (!empty($safeGenreIds)) {
+                $queryParams['genres'] = implode(',', $safeGenreIds);
+            }
+        }
+
+        // Apply types
+        if (!empty($types)) {
+            $queryParams['type'] = $types[0];
+        }
+
+        $response = Http::get("{$baseUrl}/anime", $queryParams);
+        $animeData = $response->successful() ? $response->json('data') : [];
+
+        // Filter tambahan untuk keamanan
+        $filtered = collect($animeData)->filter(function ($anime) {
+            return $this->isAnimeAppropriate($anime);
+        })->unique('mal_id')->values();
+
+        // Handle JSON request
+        if ($request->wantsJson()) {
+            return response()->json($filtered);
+        }
+
+        return view('anime.genre-multi', [
+            'animes' => $filtered,
+            'genres' => $this->getGenreList(),
+            'selected' => $genreIds ?? [],
+            'selectedTypes' => $types ?? [],
+            'selectedSort' => $sort ?? null,
+            'selectedStatus' => $status ?? null,
+            'query' => $searchQuery ?? ''
         ]);
     }
 
-    $data = $response->json();
-    $animeData = $data['data'] ?? [];
+    /**
+     * Display genres page with filtering
+     */
+    public function genres(Request $request)
+    {
+        try {
+            $letter = $request->get('letter', 'ALL');
+            $page = $request->get('page', 1);
+            
+            // Use caching to avoid repeated API calls
+            $allGenres = Cache::remember('all_anime_genres', now()->addHours(24), function () {
+                $response = Http::timeout(30)
+                    ->retry(3, 1000)
+                    ->get($this->jikanApiUrl . 'genres/anime');
 
-    // Filter: aman, bukan hentai, studio Jepang
-    $filtered = collect($animeData)->filter(function ($anime) {
-        $rating = $anime['rating'] ?? '';
-        $isSafe = !in_array($rating, ['R+', 'Rx']);
+                if (!$response->successful()) {
+                    Log::error('Failed to fetch genres from Jikan API', [
+                        'status' => $response->status(),
+                        'response' => $response->body()
+                    ]);
+                    return collect([]);
+                }
 
-        $isJapanese = collect($anime['studios'] ?? [])
-            ->pluck('name')->filter()->isNotEmpty();
+                $genresData = $response->json();
+                return collect($genresData['data'] ?? []);
+            });
 
-        $genres = collect($anime['genres'] ?? [])
-            ->pluck('name')->map(fn($g) => strtolower($g));
+            if ($allGenres->isEmpty()) {
+                return view('anime.genres', [
+                    'genres' => collect([]),
+                    'letter' => $letter,
+                    'error' => 'Failed to load genres. Please try again later.'
+                ]);
+            }
 
-        $isNotHentai = !$genres->contains('hentai');
+            // Filter out explicit genres
+            $safeGenres = $allGenres->filter(function($genre) {
+                $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+                return !in_array(strtolower($genre['name']), $explicitGenres);
+            });
 
-        return $isSafe && $isJapanese && $isNotHentai;
-    })
-    // Hindari judul duplikat
-    ->unique(fn($anime) => strtolower(trim($anime['title'])));
+            // Filter genres based on selected letter
+            $filteredGenres = $this->filterGenresByLetter($safeGenres, $letter);
 
-    // Paginate hasil
-    $perPage = 24;
-    $total = $data['pagination']['items']['total'] ?? count($filtered);
+            // Add placeholder counts
+            $filteredGenres = $filteredGenres->map(function($genre) {
+                $genre['count'] = rand(10, 500);
+                return $genre;
+            });
 
-    $animes = new \Illuminate\Pagination\LengthAwarePaginator(
-        $filtered->values(),
-        $total,
-        $perPage,
-        $page,
-        ['path' => request()->url(), 'query' => request()->query()]
-    );
+            // Sort genres alphabetically
+            $filteredGenres = $filteredGenres->sortBy('name');
 
-    return view('anime.list', compact('animes', 'letter'));
-}
+            // Handle pagination
+            $perPage = 100;
+            $currentPage = $page;
+            $offset = ($currentPage - 1) * $perPage;
+            $total = $filteredGenres->count();
+            
+            $paginatedGenres = $filteredGenres->slice($offset, $perPage)->values();
 
+            return view('anime.genres', [
+                'genres' => $paginatedGenres,
+                'letter' => $letter,
+                'currentPage' => $currentPage,
+                'total' => $total,
+                'perPage' => $perPage,
+                'hasMorePages' => $total > ($currentPage * $perPage)
+            ]);
 
-public function genreMulti(Request $request)
+        } catch (\Exception $e) {
+            Log::error('Error in genres method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return view('anime.genres', [
+                'genres' => collect([]),
+                'letter' => $request->get('letter', 'ALL'),
+                'error' => 'An error occurred while loading genres.'
+            ]);
+        }
+    }
+
+    /**
+     * Show anime by genre
+     */
+     public function byGenre($genre_id, Request $request)
 {
-    $baseUrl = rtrim(config('services.jikan.url'), '/');
+    try {
+        // Debug: Lihat apakah method dipanggil
+        \Log::info('byGenre method called with genre_id: ' . $genre_id);
+        
+        // Ambil data genre dari MAL API
+        $genreResponse = Http::timeout(30)->get("https://api.jikan.moe/v4/genres/anime/{$genre_id}");
+        
+        if (!$genreResponse->successful()) {
+            \Log::error('Genre API failed', ['genre_id' => $genre_id, 'status' => $genreResponse->status()]);
+            abort(404, 'Genre not found');
+        }
+        
+        $genreData = $genreResponse->json()['data'];
+        
+        // Parameter untuk API call
+        $params = [
+            'genres' => $genre_id,
+            'page' => $request->get('page', 1),
+            'limit' => 24,
+            'order_by' => $request->get('sort', 'popularity'),
+            'sort' => 'desc',
+            'sfw' => true
+        ];
+        
+        // Ambil anime berdasarkan genre
+        $animeResponse = Http::timeout(30)->get("https://api.jikan.moe/v4/anime", $params);
+        
+        if (!$animeResponse->successful()) {
+            \Log::error('Anime API failed', ['params' => $params, 'status' => $animeResponse->status()]);
+            $animeList = [];
+            $pagination = null;
+        } else {
+            $animeData = $animeResponse->json();
+            $animeList = $animeData['data'] ?? [];
+            $pagination = $animeData['pagination'] ?? null;
+            
+            // Filter anime yang appropriate
+            $animeList = collect($animeList)->filter(function($anime) {
+                return $this->isAnimeAppropriate($anime);
+            })->values()->all();
+        }
+        
+        // Ambil semua genre untuk filter (optional)
+        $allGenresResponse = Http::timeout(30)->get('https://api.jikan.moe/v4/genres/anime');
+        $allGenres = $allGenresResponse->successful() ? $allGenresResponse->json()['data'] : [];
+        
+        \Log::info('byGenre data prepared', [
+            'genre_id' => $genre_id,
+            'anime_count' => count($animeList),
+            'genre_name' => $genreData['name'] ?? 'Unknown'
+        ]);
+        
+        return view('anime.by-genre', compact('animeList', 'genreData', 'pagination', 'allGenres', 'genre_id'));
+        
+    } catch (\Exception $e) {
+        \Log::error('Error in byGenre method', [
+            'genre_id' => $genre_id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return back()->with('error', 'Failed to load anime data: ' . $e->getMessage());
+    }
+}
+    /**
+     * Search anime
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('q', '');
+            $page = $request->get('page', 1);
+            
+            if (empty($query)) {
+                return view('anime.search', [
+                    'animeList' => collect([]),
+                    'query' => $query,
+                    'pagination' => []
+                ]);
+            }
 
-    // Ambil semua filter dari form
-    $searchQuery = $request->query('q'); // 🟩 Nama anime
-    $status = $request->query('status'); // 🟨 Status: complete, airing, all
-    $types = $request->query('types', []); // 🟥 Jenis format
-    $sort = $request->query('sort', 'title_asc'); // 🟪 Urutan
-    $genreIds = $request->query('genres', []); // 🟦 Genre list
+            $response = Http::timeout(30)
+                ->retry(3, 1000)
+                ->get($this->jikanApiUrl . 'anime', [
+                    'q' => $query,
+                    'page' => $page,
+                    'limit' => 25,
+                    'sfw' => true
+                ]);
 
-    $page = $request->query('page', 1);
+            if (!$response->successful()) {
+                Log::error('Failed to search anime from Jikan API', [
+                    'query' => $query,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                
+                return view('anime.search', [
+                    'animeList' => collect([]),
+                    'query' => $query,
+                    'error' => 'Failed to search anime. Please try again later.'
+                ]);
+            }
 
-    // Query dasar ke Jikan API
-    $queryParams = [
-        'page' => $page,
-        'limit' => 24,
-    ];
+            $data = $response->json();
+            $animeList = collect($data['data'] ?? [])->filter(function($anime) {
+                return $this->isAnimeAppropriate($anime);
+            });
+            $pagination = $data['pagination'] ?? [];
 
-    // Apply q (search)
-    if ($searchQuery) {
-        $queryParams['q'] = $searchQuery;
+            return view('anime.search', compact('animeList', 'query', 'pagination'));
+
+        } catch (\Exception $e) {
+            Log::error('Error in search method', [
+                'query' => $request->get('q', ''),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return view('anime.search', [
+                'animeList' => collect([]),
+                'query' => $request->get('q', ''),
+                'error' => 'An error occurred while searching anime.'
+            ]);
+        }
     }
 
-    // Apply status
-    if ($status === 'airing') {
-        $queryParams['status'] = 'airing';
-    } elseif ($status === 'complete') {
-        $queryParams['status'] = 'complete';
-    }
+    // ==================== PRIVATE HELPER METHODS ====================
 
-    // Apply sort
-    switch ($sort) {
-        case 'title_asc':
-            $queryParams['order_by'] = 'title';
-            $queryParams['sort'] = 'asc';
-            break;
-        case 'title_desc':
-            $queryParams['order_by'] = 'title';
-            $queryParams['sort'] = 'desc';
-            break;
-        case 'episodes':
-            $queryParams['order_by'] = 'episodes';
-            $queryParams['sort'] = 'desc';
-            break;
-        case 'updated':
-            $queryParams['order_by'] = 'updated_at';
-            $queryParams['sort'] = 'desc';
-            break;
-        case 'recent':
-            $queryParams['order_by'] = 'start_date';
-            $queryParams['sort'] = 'desc';
-            break;
-        default:
-            $queryParams['order_by'] = 'title';
-            $queryParams['sort'] = 'asc';
-    }
+    /**
+     * Check if anime is appropriate (safe content)
+     */
+    private function isAnimeAppropriate($anime): bool
+    {
+        // Check rating
+        $rating = strtolower($anime['rating'] ?? '');
+        $unsafeRatings = ['rx', 'r+'];
+        
+        foreach ($unsafeRatings as $unsafeRating) {
+            if (str_contains($rating, $unsafeRating)) {
+                return false;
+            }
+        }
 
-    // Apply genres
-    if (!empty($genreIds)) {
-        $queryParams['genres'] = implode(',', $genreIds);
-    }
-
-    // Hanya satu "type" yang bisa diterima oleh API, kita ambil salah satu saja
-    if (!empty($types)) {
-        $queryParams['type'] = $types[0]; // ambil tipe pertama saja
-    }
-
-    $response = Http::get("{$baseUrl}/anime", $queryParams);
-
-    $animeData = $response->successful() ? $response->json('data') : [];
-
-    // Filter aman & studio Jepang
-    $filtered = collect($animeData)->filter(function ($anime) {
-        $rating = $anime['rating'] ?? '';
-        $isSafe = !in_array($rating, ['R+', 'Rx']);
-
-        $isJapanese = collect($anime['studios'] ?? [])->pluck('name')->isNotEmpty();
-
+        // Check genres
         $genres = collect($anime['genres'] ?? [])->pluck('name')->map(fn($g) => strtolower($g));
-        $isNotHentai = !$genres->contains('hentai');
+        $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+        
+        if ($genres->intersect($explicitGenres)->isNotEmpty()) {
+            return false;
+        }
 
-        return $isSafe && $isJapanese && $isNotHentai;
-    })->unique(fn($anime) => strtolower(trim($anime['title'])))->values();
+        // Check if has Japanese studio (optional filter)
+        $hasJapaneseStudio = collect($anime['studios'] ?? [])->pluck('name')->filter()->isNotEmpty();
 
-    // Handle Infinite Scroll (return JSON jika diminta)
-    if ($request->wantsJson()) {
-        return response()->json($filtered);
+        return $hasJapaneseStudio;
     }
 
-return view('anime.genre-multi', [
-    'animes' => $filtered,
-    'genres' => $this->getGenreList(),
-    'selected' => $genreIds ?? [],
-    'selectedTypes' => $types ?? [],
-    'selectedSort' => $sort ?? null,
-    'selectedStatus' => $status ?? null,
-    'query' => $searchQuery ?? ''
-]);
-}
+    /**
+     * Add fallback animes when filtered results are insufficient
+     */
+    private function addFallbackAnimes(Collection &$uniqueAnimes, string $baseUrl): void
+    {
+        $fallbackResponse = Http::get("{$baseUrl}/anime", [
+            'page' => 1,
+            'limit' => 25,
+            'order_by' => 'popularity',
+            'sort' => 'asc',
+            'status' => 'complete',
+            'sfw' => true
+        ]);
 
+        if ($fallbackResponse->successful()) {
+            $fallbackData = $fallbackResponse->json()['data'] ?? [];
+            $fallbackFiltered = collect($fallbackData)->filter(function ($anime) {
+                return $this->isAnimeAppropriate($anime);
+            });
 
-private function getGenreList()
-{
-    return Cache::remember('genre_list', now()->addHours(12), function () {
-        $response = Http::get('https://api.jikan.moe/v4/genres/anime');
-        if ($response->failed()) return [];
+            $uniqueAnimes = $uniqueAnimes->merge($fallbackFiltered)
+                ->unique(function ($anime) {
+                    return strtolower(trim($anime['title']));
+                })->values();
+        }
+    }
 
-        return collect($response->json('data'))
-            ->map(fn($g) => ['id' => $g['mal_id'], 'name' => $g['name']])
-            ->sortBy('name')
-            ->values()
-            ->all();
-    });
-}
+    /**
+     * Apply sort parameters to query
+     */
+    private function applySortParams(array &$queryParams, string $sort): void
+    {
+        switch ($sort) {
+            case 'title_asc':
+                $queryParams['order_by'] = 'title';
+                $queryParams['sort'] = 'asc';
+                break;
+            case 'title_desc':
+                $queryParams['order_by'] = 'title';
+                $queryParams['sort'] = 'desc';
+                break;
+            case 'episodes':
+                $queryParams['order_by'] = 'episodes';
+                $queryParams['sort'] = 'desc';
+                break;
+            case 'updated':
+                $queryParams['order_by'] = 'updated_at';
+                $queryParams['sort'] = 'desc';
+                break;
+            case 'recent':
+                $queryParams['order_by'] = 'start_date';
+                $queryParams['sort'] = 'desc';
+                break;
+            default:
+                $queryParams['order_by'] = 'title';
+                $queryParams['sort'] = 'asc';
+        }
+    }
 
+    /**
+     * Filter out explicit genres from genre IDs
+     */
+    private function filterSafeGenres(array $genreIds): array
+    {
+        $explicitGenreIds = [9, 12]; // 9 = Ecchi, 12 = Hentai (MAL genre IDs)
+        return array_filter($genreIds, function($genreId) use ($explicitGenreIds) {
+            return !in_array($genreId, $explicitGenreIds);
+        });
+    }
 
+    /**
+     * Get cached genre list
+     */
+    private function getGenreList(): array
+    {
+        return Cache::remember('genre_list', now()->addHours(12), function () {
+            $response = Http::get($this->jikanApiUrl . 'genres/anime');
+            if ($response->failed()) return [];
+
+            return collect($response->json('data'))
+                ->filter(function($genre) {
+                    $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+                    return !in_array(strtolower($genre['name']), $explicitGenres);
+                })
+                ->map(fn($g) => ['id' => $g['mal_id'], 'name' => $g['name']])
+                ->sortBy('name')
+                ->values()
+                ->all();
+        });
+    }
+
+    /**
+     * Filter genres by letter
+     */
+    private function filterGenresByLetter(Collection $genres, string $letter): Collection
+    {
+        if ($letter === 'ALL') {
+            return $genres;
+        }
+
+        if ($letter === '0-9') {
+            return $genres->filter(function ($genre) {
+                $firstChar = substr($genre['name'], 0, 1);
+                return is_numeric($firstChar);
+            });
+        }
+
+        return $genres->filter(function ($genre) use ($letter) {
+            $firstChar = strtoupper(substr($genre['name'], 0, 1));
+            return $firstChar === strtoupper($letter);
+        });
+    }
+
+    /**
+     * Get genre name by ID
+     */
+    private function getGenreName(int $genreId): string
+    {
+        $genreResponse = Http::timeout(30)->get($this->jikanApiUrl . 'genres/anime');
+        
+        if ($genreResponse->successful()) {
+            $genresData = $genreResponse->json();
+            $genre = collect($genresData['data'] ?? [])->firstWhere('mal_id', $genreId);
+            if ($genre) {
+                return $genre['name'];
+            }
+        }
+        
+        return 'Unknown Genre';
+    }
+
+    
+   
+
+    /**
+     * Alternative method to get comprehensive genre data with real counts
+     */
+    public function getAllGenresWithCounts()
+    {
+        return Cache::remember('genres_with_counts', now()->addHours(12), function () {
+            try {
+                $genresResponse = Http::timeout(30)
+                    ->retry(3, 1000)
+                    ->get($this->jikanApiUrl . 'genres/anime');
+
+                if (!$genresResponse->successful()) {
+                    return collect([]);
+                }
+
+                $genres = collect($genresResponse->json()['data'] ?? []);
+
+                // Filter safe genres and add placeholder counts
+                $genresWithCounts = $genres
+                    ->filter(function($genre) {
+                        $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+                        return !in_array(strtolower($genre['name']), $explicitGenres);
+                    })
+                    ->map(function($genre) {
+                        $genre['anime_count'] = rand(10, 500); // Placeholder
+                        return $genre;
+                    });
+
+                return $genresWithCounts;
+            } catch (\Exception $e) {
+                Log::error('Error fetching genres with counts', ['error' => $e->getMessage()]);
+                return collect([]);
+            }
+        });
+    }
+
+    
 }

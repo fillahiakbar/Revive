@@ -23,7 +23,7 @@ class WelcomeController extends Controller
         // 2. Ambil data top anime untuk section "الأكثر زيارة"
         $topAnimeResponse = Http::get($baseApiUrl . '/top/anime');
         $mostVisited = $topAnimeResponse->successful()
-            ? array_slice($topAnimeResponse->json('data'), 0, 4)
+            ? array_slice($topAnimeResponse->json('data'), 0, 5)
             : [];
 
         // 3. Ambil data terbaru untuk section "أحدث الإصدارات"
@@ -45,5 +45,10 @@ class WelcomeController extends Controller
             'latestReleases',
             'currentWorks'
         ));
+    }
+
+        public function about()
+    {
+        return view('about');
     }
 }

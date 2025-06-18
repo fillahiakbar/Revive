@@ -5,6 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
 
 
+.badge-tv { background-color: #3b82f6; }
+.badge-movie { background-color: #ef4444; }
+.badge-ova { background-color: #8b5cf6; }
+.badge-ona { background-color: #f97316; }
+.badge-special { background-color: #ec4899; }
+.badge-music { background-color: #eab308; }
+.badge-unknown { background-color: #6b7280; }
+
 [x-cloak] {
     display: none;
 }
@@ -33,4 +41,366 @@
   box-shadow:
     0 -20px 0 white,
     0  20px 0 white;
+}
+
+/* Global Background Styles */
+body {
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Ensure background stays fixed on mobile */
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll !important;
+    }
+}
+
+/* Backdrop blur support */
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Smooth transitions for content */
+.content-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Glass morphism effect */
+.glass-effect {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Improved readability */
+.text-shadow-strong {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================ */
+/* ANIME SECTION CUSTOM STYLES */
+/* ============================================ */
+
+/* Anime Section Background Overlay */
+.anime-section-bg {
+    position: relative;
+    overflow: hidden;
+}
+
+.anime-section-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 255) 0%,
+        rgba(255, 255, 255, 0.3) 25%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.8) 75%,
+        rgba(255, 255, 255, 1) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Alternative white gradient variations */
+
+/* Subtle white overlay */
+.anime-section-bg.subtle::before {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.4) 100%
+    );
+}
+
+/* Radial white gradient from center */
+.anime-section-bg.radial::before {
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 30%,
+        rgba(255, 255, 255, 0.7) 70%,
+        rgba(255, 255, 255, 1) 100%
+    );
+}
+
+/* Top to bottom fade */
+.anime-section-bg.fade-top::before {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.4) 30%,
+        rgba(255, 255, 255, 0) 100%
+    );
+}
+
+/* Bottom to top fade */
+.anime-section-bg.fade-bottom::before {
+    background: linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0) 100%
+    );
+}
+
+/* Anime Item Hover Effects */
+.anime-item {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+
+.anime-item:hover::after {
+    opacity: 1;
+}
+
+/* Anime Image Hover Effects */
+.anime-image {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.anime-item:hover .anime-image {
+    transform: scale(1.1) rotate(2deg);
+}
+
+
+
+.anime-item:hover .anime-image::after {
+    opacity: 1;
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+    position: relative;
+    overflow: hidden;
+    animation: progressFill 1.5s ease-out;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.4), 
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes progressFill {
+    from { width: 0%; }
+    to { width: var(--progress-width, 0%); }
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Pulse Animation untuk Progress Bar */
+.progress-pulse {
+    animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(100%);
+    }
+}
+
+/* Enhanced Progress Bar Hover Effect */
+.anime-item:hover .progress-bar {
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* Pulse Animation untuk Status */
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Genre Tags Hover Effect */
+.genre-tag {
+    position: relative;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.genre-tag:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Status Badge Animation */
+.status-badge {
+    position: relative;
+    overflow: hidden;
+}
+
+.status-badge.airing {
+    animation: statusGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes statusGlow {
+    0% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+}
+
+/* Featured Info Overlay Animation */
+.featured-overlay {
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUpFade 0.8s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+@keyframes slideUpFade {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Decorative Elements */
+.decorative-gradient {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    animation: float 6s ease-in-out infinite;
+}
+
+.decorative-gradient:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.decorative-gradient:nth-child(2) {
+    animation-delay: 3s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Hover Arrow Animation */
+.hover-arrow {
+    transition: transform 0.3s ease;
+}
+
+.anime-item:hover .hover-arrow {
+    transform: translateX(5px);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .anime-item:hover {
+        transform: scale(1.02) translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+    }
+    
+    .anime-item:hover .anime-image {
+        transform: scale(1.05);
+    }
+    
+    .decorative-gradient {
+        display: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .anime-section-bg::before {
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.95) 0%,
+            rgba(0, 0, 0, 0.8) 30%,
+            rgba(0, 0, 0, 0.6) 60%,
+            rgba(0, 0, 0, 0.4) 80%,
+            rgba(0, 0, 0, 0.2) 100%
+        );
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    .anime-item,
+    .anime-image,
+    .progress-bar,
+    .genre-tag,
+    .hover-arrow,
+    .decorative-gradient {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .anime-item:hover {
+        transform: none !important;
+    }
 }

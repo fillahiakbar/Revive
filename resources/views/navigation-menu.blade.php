@@ -6,7 +6,32 @@
         <div class="flex items-center gap-20 pr-10 text-sm justify-end">
             <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-20 w-auto" />
             <a href="/revive" class="hover:text-red-500 transition">الصفحة الرئيسية</a>
-            <a href="/list" class="hover:text-red-500 transition">قائمة الانمي</a>
+            
+            <!-- Dropdown untuk قائمة الانمي -->
+            <div class="relative group">
+                <button class="hover:text-red-500 transition flex items-center gap-1">
+                    قائمة الانمي
+                    <svg class="w-4 h-4 transform group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div class="absolute top-full right-0 w-32 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div class="py-1">
+                        <a href="/list" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">
+                            مكتمل
+                        </a>
+                        <a href="/ongoing" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">
+                            جاري
+                        </a>
+                        <a href="/genres" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">
+                            حسب النوع
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
             <a href="/advenced-search" class="hover:text-red-500 transition">البحث المتقدم</a>
             <a href="/about" class="hover:text-red-500 transition">عن الفريق</a>
         </div>

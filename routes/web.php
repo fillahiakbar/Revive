@@ -12,10 +12,13 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/revive', [WelcomeController::class, 'index'])->name('revive');
+    Route::get('/about', [WelcomeController::class, 'about'])->name('about');
     Route::get('/list', [AnimeController::class, 'list'])->name('anime.list');
+    Route::get('/genres', [AnimeController::class, 'genres'])->name('anime.genres');
+    Route::get('/anime/genre/{genre_id}', [AnimeController::class, 'byGenre'])->name('anime.by-genre');
     Route::get('/anime/{id}', [AnimeController::class, 'show'])->name('anime.show');
     Route::get('/advenced-search', [AnimeController::class, 'genreMulti'])->name('anime.genre.multi');
-
+    Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
 });
 
 Route::get('/admin', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
@@ -23,7 +26,3 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.
 Route::get('/admin/register', [AdminAuthController::class, 'showRegisterForm'])->name('admin.register');
 Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register.submit');
 
-
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin.dashboard');
-});
