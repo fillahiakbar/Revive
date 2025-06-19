@@ -1,4 +1,3 @@
-<!-- show.blade.php -->
 <x-app-layout>
     <div class="bg-no-repeat min-h-screen pt-20">
         <div class="max-w-7xl mx-auto px-4 py-20 text-white">
@@ -24,13 +23,10 @@
 
                                 {{-- Ratings --}}
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
-                                    {{-- IMDB Rating --}}
                                     <div>
                                         <div class="bg-yellow-600 border border-yellow-400 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] uppercase tracking-wide">IMDB</div>
                                         <div class="text-white font-bold text-center text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
-
-                                    {{-- MAL Rating --}}
                                     <div>
                                         <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
@@ -45,8 +41,6 @@
 
                         {{-- Info Boxes --}}
                         <div class="grid md:grid-cols-2 gap-4">
-
-                            {{-- Box 1 - Status Info --}}
                             <div class="bg-white/90 text-black p-4 rounded-lg">
                                 <div class="grid gap-3 text-sm">
                                     <div class="flex justify-between">
@@ -87,8 +81,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- Box 2 - Episode Info --}}
                             <div class="bg-white/90 text-black p-4">
                                 <div class="grid gap-3 text-sm">
                                     <div class="flex justify-between">
@@ -127,11 +119,33 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
+
+            {{-- Download Links Section --}}
+            @if ($downloadLinks && $downloadLinks->isNotEmpty())
+                <div class="bg-white/20 backdrop-blur-lg mt-10 mx-20 lg:mx-20 xl:mx-0 p-6 rounded shadow">
+                    <h2 class="text-xl font-bold mb-4 text-white">روابط التحميل</h2>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($downloadLinks as $link)
+                            @if ($link->torrent_url)
+                                <a href="{{ $link->torrent_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">.Torrent</a>
+                            @endif
+                            @if ($link->mp4upload_url)
+                                <a href="{{ $link->mp4upload_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">Mp4upload</a>
+                            @endif
+                            @if ($link->gdrive_url)
+                                <a href="{{ $link->gdrive_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">GDrive</a>
+                            @endif
+                            @if ($link->subtitle_url)
+                                <a href="{{ $link->subtitle_url }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Mp4 مع الترجمة</a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Synopsis Section --}}
             <div class="mt-8">
@@ -204,6 +218,12 @@
                                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                  loading="lazy"
                                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                             {{-- Badge --}}
+                        <div class="absolute left-1 z-10 flex flex-col gap-1">
+                            <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5 rounded text-white font-medium">
+                                {{ $anime['type'] ?? 'Unknown' }}
+                            </span>
+                        </div>
                                             <div class="hidden w-full h-full items-center justify-center text-gray-500">
                                                 <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd"
@@ -211,6 +231,9 @@
                                                           clip-rule="evenodd"></path>
                                                 </svg>
                                             </div>
+
+                                                               
+
                                         @elseif(isset($similar['images']['jpg']['image_url']) && $similar['images']['jpg']['image_url'])
                                             <img src="{{ $similar['images']['jpg']['image_url'] }}"
                                                  alt="{{ $similar['title'] }}"

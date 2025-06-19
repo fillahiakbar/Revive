@@ -35,9 +35,9 @@ return [
         ],
     ],
     
-    'jikan' => [
-    'url' => env('JIKAN_API_URL'),
-    ],
+'jikan' => [
+    'url' => env('JIKAN_API_URL', 'https://api.jikan.moe/v4'),
+],
 
 
 ];
