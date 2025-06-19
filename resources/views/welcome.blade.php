@@ -41,7 +41,7 @@
     </div>
 </div>
 
-<div class="absolute bottom-20 pb-20 right-20 flex gap-2 z-20">
+<div class="absolute bottom-20 pb-24 right-20 flex gap-2 z-20">
     <button id="next-bg" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
         <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
@@ -58,13 +58,14 @@
     <div class="absolute bottom-0 left-0 right-0 h-16 z-5" style="background: linear-gradient(to bottom, transparent, rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.8));"></div>
 </section>
 {{-- 🌀 Separator Section with Gradient --}}
-<section class="relative w-full h-16 md:h-32 overflow-hidden bg-opacity-20" style="background-color: #1B1B1B;">
+<section class="relative w-full h-16 md:h-32 overflow-hidden pt-20 bg-opacity-20" style="background-color: #1B1B1B;">
     <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(27, 27, 27, 0.6), rgba(27, 27, 27, 0.4), rgba(27, 27, 27, 0.6));"></div>
     <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(27, 27, 27, 0.8), rgba(27, 27, 27, 0.95), rgba(27, 27, 27, 0.9));"></div>
     <div class="absolute inset-0 opacity-10">
         <div class="w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
     </div>
 </section>
+
 
         {{-- 📦 Main Content Section --}}
         <section class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 md:-mt-16 rounded-lg">
@@ -166,7 +167,7 @@
                     </h2>
                     <div class="bg-white/5 backdrop-blur-md">
                         <div class="space-y-5 z-10 rounded-xl p-6 relative ">
-                            <div class="rounded-lg border-2 border-dashed border-purple-500">
+                            <div class="rounded-lg">
                                  @foreach (array_slice($mostVisited, 0, 5) as $index => $anime)
                                 <a href="{{ route('anime.show', ['id' => $anime['mal_id']]) }}" class="block duration-300 rounded-lg group">
                                     <div class="flex items-center p-3 gap-4 relative overflow-hidden bg-gradient-to-r transition-all duration-300">
@@ -229,7 +230,7 @@
                     </div>
                     
                     <button class="w-full bg-white/20 text-white py-3 rounded-lg relative z-10 transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/25 backdrop-blur-sm">
-                        إظهار المزيد
+                        <a href="/genres">إظهار المزيد</a>
                     </button>
                 </div>
             </div>

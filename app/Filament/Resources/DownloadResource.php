@@ -21,7 +21,7 @@ class DownloadResource extends Resource
 {
     return $form->schema([
         Forms\Components\Select::make('title')
-            ->label('Cari Judul Anime dari Jikan')
+            ->label('Search Anime Title')
             ->searchable()
             ->getSearchResultsUsing(function (string $search): array {
                 $results = Http::get('https://api.jikan.moe/v4/anime', [
@@ -56,7 +56,7 @@ class DownloadResource extends Resource
             ->numeric(),
 
         Forms\Components\TextInput::make('episode_number')
-            ->label('Episode ke-')
+            ->label('Episode -')
             ->numeric()
             ->required()
             ->minValue(1),
@@ -81,22 +81,6 @@ class DownloadResource extends Resource
             ->url()
             ->nullable(),
 
-        Forms\Components\Toggle::make('is_spotlight')
-            ->label('Tampilkan di Spotlight')
-            ->afterStateUpdated(function ($state, callable $set) {
-                if ($state) {
-                    $count = Download::where('is_spotlight', true)->count();
-                    $editingId = request()->route('record')?->id;
-                    $isCurrent = Download::find($editingId)?->is_spotlight;
-
-                    if ($count >= 5 && !$isCurrent) {
-                        $set('is_spotlight', false);
-                        throw Forms\Components\ComponentException::make(
-                            'Maksimal hanya 5 spotlight yang diizinkan.'
-                        );
-                    }
-                }
-            }),
     ]);
 }
 
@@ -105,10 +89,9 @@ class DownloadResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->label('Judul')->searchable(),
+                Tables\Columns\TextColumn::make('title')->label('Title')->searchable(),
                 Tables\Columns\TextColumn::make('mal_id')->label('MAL ID'),
                 Tables\Columns\TextColumn::make('episode_number')->label('Episode')->sortable(),
-                Tables\Columns\BooleanColumn::make('is_spotlight')->label('Spotlight'),
                 Tables\Columns\TextColumn::make('created_at')->label('Tanggal')->dateTime(),
             ])
             ->actions([

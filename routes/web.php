@@ -7,8 +7,9 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AnimeDetailController;
 use App\Http\Controllers\AnimeListController;
 use App\Http\Controllers\AnimeGenreController;
+use App\Http\Controllers\AnimeController;
 use App\Http\Controllers\GenreController;
-
+use App\Http\Controllers\AnimeOngoingController;
 
 // Landing redirect ke user
 Route::get('/', function () {
@@ -26,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/genres', [GenreController::class, 'genres'])->name('anime.genres');
     Route::get('/anime/genre/{genre_id}', [AnimeGenreController::class, 'byGenre'])->name('anime.by-genre');
     Route::get('/advenced-search', [AnimeGenreController::class, 'genreMulti'])->name('anime.genre.multi');
-
+    Route::get('/ongoing', [AnimeOngoingController::class, 'index'])->name('anime.ongoing');
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
 });
 

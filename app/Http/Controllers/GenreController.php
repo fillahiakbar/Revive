@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 class GenreController extends Controller
 
 {
+private string $jikanApiUrl = 'https://api.jikan.moe/v4/';
  public function genres(Request $request)
     {
         try {
@@ -92,6 +93,25 @@ class GenreController extends Controller
             ]);
         }
     }
+
+    private function filterGenresByLetter(Collection $genres, string $letter): Collection
+{
+    if ($letter === 'ALL') {
+        return $genres;
+    }
+
+    if ($letter === '0-9') {
+        return $genres->filter(function ($genre) {
+            $firstChar = substr($genre['name'], 0, 1);
+            return is_numeric($firstChar);
+        });
+    }
+
+    return $genres->filter(function ($genre) use ($letter) {
+        $firstChar = strtoupper(substr($genre['name'], 0, 1));
+        return $firstChar === strtoupper($letter);
+    });
+}
 
 
 

@@ -1,14 +1,22 @@
 <x-app-layout>
     <!-- Hero Section -->
-    <div class="relative text-white min-h-screen flex items-center pr-24 justify-start overflow-hidden">
-        <div class="absolute inset-0">
-            <img src="{{ asset('path/to/your/background-image.png') }}" alt="Background" class="w-full h-full object-cover opacity-20">
-        </div>
-        <div class="relative z-10 px-4">
-            <h1 class="text-8xl font-extrabold mb-4">عن الفريق</h1>
-            <p class="pt-4 text-4xl font-medium">نترجم الذكريات... ونخلّدها</p>
+
+
+
+<div class="relative text-white h-screen flex items-center justify-between overflow-hidden">
+    <!-- Phoenix image positioned on the left side only -->
+    <div class="absolute left-0 top-0 w-[80%]  h-screen z-0">
+        <img src="{{ asset('/img/about.png') }}" alt="Phoenix Background" class="w-full h-full object-cover object-left-top">
+    </div>
+    
+    <!-- Content positioned on the right side with dark background -->
+    <div class="relative z-10 w-[40%] h-screen flex items-center justify-center ml-auto px-12">
+        <div class="text-right">
+            <h1 class="text-7xl font-extrabold mb-6">عن الفريق</h1>
+            <p class="text-3xl font-medium">نترجم الذكريات... ونخلّدها</p>
         </div>
     </div>
+</div>
 
     <!-- Main Content Section - Dark Blue Background -->
     <div class="min-h-screen">

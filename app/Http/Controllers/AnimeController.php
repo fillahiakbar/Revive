@@ -78,6 +78,22 @@ class AnimeController extends Controller
         }
     }
 
+    private function isAnimeAppropriate(array $anime): bool
+{
+    $explicitGenres = ['Hentai', 'Ecchi'];
+    if (!isset($anime['genres'])) {
+        return true;
+    }
+
+    foreach ($anime['genres'] as $genre) {
+        if (in_array($genre['name'], $explicitGenres)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
     private function addFallbackAnimes(Collection &$uniqueAnimes, string $baseUrl): void
     {
         $fallbackResponse = Http::get("{$baseUrl}/anime", [

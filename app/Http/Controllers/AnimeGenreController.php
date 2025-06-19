@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class AnimeGenreController extends Controller
 {
+    private string $jikanApiUrl = 'https://api.jikan.moe/v4/';
     public function byGenre($genre_id, Request $request)
 {
     try {
@@ -45,7 +46,13 @@ class AnimeGenreController extends Controller
             $pagination = null;
         } else {
             $animeData = $animeResponse->json();
-            $animeList = collect($animeData['data'] ?? [])->filter(fn($anime) => $this->isAnimeAppropriate($anime))->values()->all();
+            $animeList = collect($animeData['data'] ?? [])
+                ->filter(fn($anime) => $this->isAnimeAppropriate($anime))
+                ->unique(function ($anime) {
+        return strtolower(trim($anime['title'] ?? ''));
+    })
+    ->values()
+    ->all();
             $pagination = $animeData['pagination'] ?? null;
         }
 
@@ -122,16 +129,82 @@ if (!is_array($genreIds)) {
             return response()->json($filtered);
         }
 
-        return view('anime.genre-multi', [
-            'animes' => $filtered,
-            'genres' => $this->getGenreList(),
-            'selected' => $genreIds ?? [],
-            'selectedTypes' => $types ?? [],
-            'selectedSort' => $sort ?? null,
-            'selectedStatus' => $status ?? null,
-            'query' => $searchQuery ?? ''
-        ]);
+return view('anime.genre-multi', [
+    'animes' => $filtered,
+    'genres' => $this->getGenreList(),
+    'selected' => $genreIds ?? [],
+    'selectedTypes' => $types ?? [],
+    'selectedSort' => $sort ?? null,
+    'selectedStatus' => $status ?? null,
+    'query' => $searchQuery ?? '',
+    'hasMorePages' => $response->json('pagination')['has_next_page'] ?? false
+]);
     }
+
+    private function applySortParams(array &$queryParams, string $sort): void
+{
+    switch ($sort) {
+        case 'title_asc':
+            $queryParams['order_by'] = 'title';
+            $queryParams['sort'] = 'asc';
+            break;
+        case 'title_desc':
+            $queryParams['order_by'] = 'title';
+            $queryParams['sort'] = 'desc';
+            break;
+        case 'episodes':
+            $queryParams['order_by'] = 'episodes';
+            $queryParams['sort'] = 'desc';
+            break;
+        case 'updated':
+            $queryParams['order_by'] = 'updated_at';
+            $queryParams['sort'] = 'desc';
+            break;
+        case 'recent':
+            $queryParams['order_by'] = 'start_date';
+            $queryParams['sort'] = 'desc';
+            break;
+        default:
+            $queryParams['order_by'] = 'popularity';
+            $queryParams['sort'] = 'desc';
+    }
+}
+
+ private function getGenreList(): array
+    {
+        return Cache::remember('genre_list', now()->addHours(12), function () {
+            $response = Http::get($this->jikanApiUrl . 'genres/anime');
+            if ($response->failed()) return [];
+
+            return collect($response->json('data'))
+                ->filter(function($genre) {
+                    $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+                    return !in_array(strtolower($genre['name']), $explicitGenres);
+                })
+                ->map(fn($g) => ['id' => $g['mal_id'], 'name' => $g['name']])
+                ->sortBy('name')
+                ->values()
+                ->all();
+        });
+    }
+
+
+    private function isAnimeAppropriate(array $anime): bool
+{
+    $explicitGenres = ['Hentai', 'Ecchi', 'Erotica'];
+
+    if (!isset($anime['genres'])) {
+        return true;
+    }
+
+    foreach ($anime['genres'] as $genre) {
+        if (in_array($genre['name'], $explicitGenres)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 
 }
