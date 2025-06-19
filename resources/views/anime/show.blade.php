@@ -124,28 +124,6 @@
                 </div>
             </div>
 
-            {{-- Download Links Section --}}
-            @if ($downloadLinks && $downloadLinks->isNotEmpty())
-                <div class="bg-white/20 backdrop-blur-lg mt-10 mx-20 lg:mx-20 xl:mx-0 p-6 rounded shadow">
-                    <h2 class="text-xl font-bold mb-4 text-white">روابط التحميل</h2>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($downloadLinks as $link)
-                            @if ($link->torrent_url)
-                                <a href="{{ $link->torrent_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">.Torrent</a>
-                            @endif
-                            @if ($link->mp4upload_url)
-                                <a href="{{ $link->mp4upload_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">Mp4upload</a>
-                            @endif
-                            @if ($link->gdrive_url)
-                                <a href="{{ $link->gdrive_url }}" class="flex items-center gap-1 bg-white text-black border px-3 py-1 rounded hover:bg-gray-100 text-xs shadow">GDrive</a>
-                            @endif
-                            @if ($link->subtitle_url)
-                                <a href="{{ $link->subtitle_url }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Mp4 مع الترجمة</a>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-            @endif
 
             {{-- Synopsis Section --}}
             <div class="mt-8">
@@ -158,45 +136,55 @@
                 </div>
             </div>
 
-            {{-- Episode List --}}
-            <div class="px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10">
-                <h2 class="text-xl font-bold pr-3 text-white">قائمة الحلقات</h2>
+ @if ($downloadLinks && $downloadLinks->isNotEmpty())
+    <div class="px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10">
+        <h2 class="text-xl font-bold pr-3 text-white">روابط الحلقات (من قاعدة البيانات)</h2>
 
-                <div id="episode-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
-                    @foreach ($allEpisodes as $ep)
-                        <div class="overflow-hidden shadow-md pt-3">
-                            <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
-                                {{ $anime['title'] ?? 'Black Clover Episode ' . $ep['mal_id'] }} Episode {{ $ep['mal_id'] ?? '??' }}
-                            </div>
-                            <div class="bg-white flex flex-wrap md:flex-nowrap justify-between items-center px-3 py-2 gap-2">
-                                <div class="flex flex-wrap gap-2">
-                                    <a href="{{ $ep['mp4_arabic_link'] ?? '#' }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs whitespace-nowrap">
-                                        Mp4 مع الترجمة
-                                    </a>
-                                    <a href="{{ $ep['gdrive_link'] ?? '#' }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                        GDrive
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-                                        </svg>
-                                    </a>
-                                    <a href="{{ $ep['mp4upload_link'] ?? '#' }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                        Mp4upload
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-                                        </svg>
-                                    </a>
-                                    <a href="{{ $ep['torrent_link'] ?? '#' }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                        .Torrent
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
+        <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
+            @foreach ($downloadLinks->sortBy('episode_number') as $link)
+                <div class="overflow-hidden shadow-md pt-3">
+                    <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
+                        {{ $link->title }} - Episode {{ $link->episode_number }}
+                    </div>
+                    <div class="bg-white flex flex-wrap md:flex-nowrap justify-between items-center px-3 py-2 gap-2">
+                        <div class="flex flex-wrap gap-2">
+                            @if ($link->links['arabic_sub'] ?? false)
+                                <a href="{{ $link->links['arabic_sub'] }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs whitespace-nowrap">
+                                    Mp4 مع الترجمة
+                                </a>
+                            @endif
+                            @if ($link->links['gdrive'] ?? false)
+                                <a href="{{ $link->links['gdrive'] }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                    GDrive
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                    </svg>
+                                </a>
+                            @endif
+                            @if ($link->links['mp4upload'] ?? false)
+                                <a href="{{ $link->links['mp4upload'] }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                    Mp4upload
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                    </svg>
+                                </a>
+                            @endif
+                            @if ($link->links['torrent'] ?? false)
+                                <a href="{{ $link->links['torrent'] }}" class="flex items-center gap-1 bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                    .Torrent
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                    </svg>
+                                </a>
+                            @endif
                         </div>
-                    @endforeach
+                    </div>
                 </div>
-            </div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
 
             {{-- Similar Anime Section --}}
             @if(isset($similarAnime) && count($similarAnime) > 0)

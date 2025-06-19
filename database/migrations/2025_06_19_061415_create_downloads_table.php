@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('episodes', function (Blueprint $table) {
+Schema::create('downloads', function (Blueprint $table) {
     $table->id();
-    $table->unsignedBigInteger('mal_id');
-    $table->integer('episode_number');
-    $table->string('mp4_arabic_link')->nullable();
-    $table->string('gdrive_link')->nullable();
-    $table->string('mp4upload_link')->nullable();
-    $table->string('torrent_link')->nullable();
+    $table->unsignedBigInteger('mal_id'); // id dari MyAnimeList via Jikan
+    $table->string('title')->nullable();  // Judul (boleh auto isi dari API)
+    $table->json('links');                // Menyimpan semua link
+    $table->boolean('is_spotlight')->default(false); // untuk fitur spotlight
     $table->timestamps();
 });
     }
@@ -28,6 +26,6 @@ Schema::create('episodes', function (Blueprint $table) {
      */
     public function down(): void
     {
-        Schema::dropIfExists('episodes');
+        Schema::dropIfExists('downloads');
     }
 };
