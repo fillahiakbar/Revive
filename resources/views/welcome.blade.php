@@ -58,13 +58,9 @@
     <div class="absolute bottom-0 left-0 right-0 h-16 z-5" style="background: linear-gradient(to bottom, transparent, rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.8));"></div>
 </section>
 {{-- 🌀 Separator Section with Gradient --}}
-<section class="relative w-full h-16 md:h-32 overflow-hidden pt-20 bg-opacity-20" style="background-color: #1B1B1B;">
-    <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(27, 27, 27, 0.6), rgba(27, 27, 27, 0.4), rgba(27, 27, 27, 0.6));"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(27, 27, 27, 0.8), rgba(27, 27, 27, 0.95), rgba(27, 27, 27, 0.9));"></div>
-    <div class="absolute inset-0 opacity-10">
-        <div class="w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-    </div>
-</section>
+<div class="flex justify-center -mt-24 z-15 relative">
+    <img src="{{ asset('/img/rectanggle.png') }}" alt="Logo" class="">
+</div>
 
 
         {{-- 📦 Main Content Section --}}
@@ -165,7 +161,7 @@
                     <h2 class="text-xl font-bold mb-6 text-white pl-3 relative z-10">
                         الأكثر زيارة
                     </h2>
-                    <div class="bg-white/5 backdrop-blur-md">
+                    <div class="bg-white/5 backdrop-blur-md rounded-lg border-white/10">
                         <div class="space-y-5 z-10 rounded-xl p-6 relative ">
                             <div class="rounded-lg">
                                  @foreach (array_slice($mostVisited, 0, 5) as $index => $anime)
@@ -219,7 +215,7 @@
                 <h2 class="text-xl font-bold text-white pl-3 mb-6 relative z-10">
                     التصنيفات
                 </h2>
-                <div class="bg-white/5 backdrop-blur-md rounded-xl p-6 relative overflow-hidden">
+                <div class="bg-white/5 backdrop-blur-md rounded-xl p-6 relative overflow-hidden border-white/10">
                     
                     <div class="grid grid-cols-2 gap-3 text-sm text-white relative z-10 mb-6">
                         @foreach(['Game','Action','Harem','Adventure','Historical','Cars','Horror','Comedy','Isekai','Dementia','Josei','Demons','Kids','Magic','Mecha','Fantasy'] as $tag)

@@ -9,7 +9,7 @@
                 <div class="w-full lg:w-64 flex-shrink-0">
                     <img src="{{ $anime['images']['jpg']['large_image_url'] }}" 
                          alt="{{ $anime['title'] }}"
-                         class="w-full rounded-lg shadow-lg border border-white/10">
+                         class="w-full shadow-lg border border-white/10">
                 </div>
 
                 {{-- Header dengan Judul dan Rating + Info Boxes --}}
@@ -24,11 +24,11 @@
                                 {{-- Ratings --}}
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
                                     <div>
-                                        <div class="bg-yellow-600 border border-yellow-400 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] uppercase tracking-wide">IMDB</div>
+                                        <div class="bg-yellow-600 border border-yellow-400  px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] uppercase tracking-wide">IMDB</div>
                                         <div class="text-white font-bold text-center text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                     <div>
-                                        <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
+                                        <div class="bg-blue-600 border border-blue-400  px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                 </div>
@@ -40,8 +40,8 @@
                         </div>
 
                         {{-- Info Boxes --}}
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-white/90 text-black p-4 rounded-lg">
+                        <div class="grid md:grid-cols-2 gap-4 ">
+                            <div class="bg-white/90 text-black p-4">
                                 <div class="grid gap-3 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">حالة الأنمي:</span>
@@ -93,7 +93,7 @@
                                             @if(isset($anime['episodes']) && $anime['episodes'])
                                                 {{ $anime['episodes'] }}
                                             @else
-                                                <span class="bg-yellow-400 px-2 py-1 rounded text-xs">Unknown</span>
+                                                <span class="bg-yellow-400 px-2 py-1  text-xs">Unknown</span>
                                             @endif
                                         </span>
                                     </div>
@@ -195,7 +195,7 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             @foreach($similarAnime as $similar)
                                 <a href="{{ route('anime.show', $similar['mal_id']) }}"
-                                   class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
+                                   class="relative text-white  overflow-hidden shadow hover:shadow-lg transition group">
 
 
                                     {{-- Image with fallback --}}
@@ -208,7 +208,7 @@
                                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                              {{-- Badge --}}
                         <div class="absolute left-1 z-10 flex flex-col gap-1">
-                            <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5 rounded text-white font-medium">
+                            <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5  text-white font-medium">
                                 {{ $anime['type'] ?? 'Unknown' }}
                             </span>
                         </div>
@@ -271,7 +271,7 @@
                         @if(count($similarAnime) >= 12)
                             <div class="text-center mt-6">
                                 <a href="{{ route('anime.search', ['q' => explode(' ', $anime['title'])[0] ?? $anime['title']]) }}" 
-                                   class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition duration-200 inline-flex items-center gap-2">
+                                   class="bg-red-600 hover:bg-red-700 text-white px-6 py-3  transition duration-200 inline-flex items-center gap-2">
                                     <span>عرض المزيد من الأنمي المشابه</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>

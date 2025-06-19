@@ -74,7 +74,7 @@
             @if(!empty($pagination['has_next_page']))
                 <div class="flex justify-center mt-10">
                     <a href="{{ route('anime.ongoing', ['page' => $pagination['current_page'] + 1]) }}"
-                       class="bg-white text-black px-4 py-2 rounded hover:bg-gray-300 transition">
+                       class="bg-red-500 text-white px-4 py-2 rounded hover:bg-gray-300 transition">
                         Load More
                     </a>
                 </div>

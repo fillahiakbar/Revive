@@ -1,17 +1,14 @@
 <x-app-layout>
-    <!-- Hero Section -->
-
-
 
 <div class="relative text-white h-screen flex items-center justify-between overflow-hidden">
-    <!-- Phoenix image positioned on the left side only -->
-    <div class="absolute left-0 top-0 w-[80%]  h-screen z-0">
-        <img src="{{ asset('/img/about.png') }}" alt="Phoenix Background" class="w-full h-full object-cover object-left-top">
-    </div>
+    <!-- Phoenix image positioned in the left corner -->
+    <div class="absolute left-0 top-0 w-[75%] h-[150%] z-0 overflow-hidden">
+    <img src="{{ asset('/img/about.png') }}" alt="Phoenix Background" class="w-full h-full object-cover object-left scale-110 -translate-x-4">
+</div>
     
     <!-- Content positioned on the right side with dark background -->
-    <div class="relative z-10 w-[40%] h-screen flex items-center justify-center ml-auto px-12">
-        <div class="text-right">
+    <div class="relative z-10 w-full h-screen flex items-center justify-center px-12">
+        <div class="text-right ml-auto max-w-2xl">
             <h1 class="text-7xl font-extrabold mb-6">عن الفريق</h1>
             <p class="text-3xl font-medium">نترجم الذكريات... ونخلّدها</p>
         </div>
@@ -71,7 +68,7 @@
                                         أن نكون الجسر الذي يصل بين الماضي والحاضر، بين اليابان والعالم العربي، بين المجهول والعاشق الباحث عن شيءٍ مُختلف.
                                     </p>
                                     <p>
-                                        نُؤمن أنَّ في كُلِّ أنمي منسي كنزٌ دفين، وأنَّ وظيفتنا اكتشافه وترميمه وتقديمه في أبهى صورة.
+                                        نُؤمن أنَّ في كُلِّ أنمي منسي كنزٌ دفين، وأنَّ وظيفتنا اكتشافه وترميمه وتقديمه في أبهى صورة.
                                     </p>
                                 </div>
                             </div>
@@ -100,7 +97,7 @@
                                         <li>إحياء اﻷعمال الكلاسيكية التي لم يُنصفها الزمن.</li>
                                         <li>الحفاظ على جوهر العمل وأصالته دون تحريفٍ أو اجتزاء.</li>
                                         <li>إعادة تقديم العمل بجودةٍ بصريةٍ ولغويةٍ تعكس الاحترام للفن وللمُشاهد.</li>
-                                        <li>أرشفةٌ ذكيةٌ تُسهِّل الوصول وتخلد هذه الأعمال للأجيال القادمة.</li>
+                                        <li>أرشفةٌ ذكيةٌ تُسهِّل الوصول وتخلد هذه الأعمال للأجيال القادمة.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -126,7 +123,7 @@
                             <div class="flex items-start justify-between ml-20 mb-4">
                                 <div class="space-y-6 text-2xl leading-relaxed pr-10">
                                     <p>
-                                        في الظلِّ نعمل، لا نبحث عن شهرة بل عن أثر. نحن مُترجمون ومُحرِّرون ومُدقِّقون، عُشَّاقٌ قبل أن نكون مُتطوِّعين. يجمعنا شغفٌ واحد: ألا يُنسى أيُّ عملٍ يستحقُّ أن يُروى.
+                                        في الظلِّ نعمل، لا نبحث عن شهرة بل عن أثر. نحن مُترجمون ومُحرِّرون ومُدقِّقون، عُشَّاقٌ قبل أن نكون مُتطوِّعين. يجمعنا شغفٌ واحد: ألا يُنسى أيُّ عملٍ يستحقُّ أن يُروى.
                                     </p>
                                     <p></p>
                                 </div>

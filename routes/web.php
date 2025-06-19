@@ -26,7 +26,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/genres', [GenreController::class, 'genres'])->name('anime.genres');
     Route::get('/anime/genre/{genre_id}', [AnimeGenreController::class, 'byGenre'])->name('anime.by-genre');
-    Route::get('/advenced-search', [AnimeGenreController::class, 'genreMulti'])->name('anime.genre.multi');
+    Route::get('/advanced-search', [AnimeGenreController::class, 'genreMulti'])->name('anime.genre.multi');
     Route::get('/ongoing', [AnimeOngoingController::class, 'index'])->name('anime.ongoing');
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
 });

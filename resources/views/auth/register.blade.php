@@ -19,7 +19,7 @@
                     <x-label for="name" value="الاسم الكامل:" class="block text-white text-right mb-1" />
                     <div class="relative">
                         <input id="name" name="name" type="text" :value="old('name')" required autofocus autocomplete="name"
-                            class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
+                            class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
                             placeholder="أدخل اسمك الكامل" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-user"></i>
@@ -32,7 +32,7 @@
                     <x-label for="email" value="البريد الإلكتروني:" class="block text-white text-right mb-1" />
                     <div class="relative">
                         <input id="email" name="email" type="email" :value="old('email')" required autocomplete="username"
-                            class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600  text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
+                            class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600  text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
                             placeholder="عنوان بريدك الإلكتروني" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-envelope"></i>
@@ -45,7 +45,7 @@
                     <x-label for="password" value="كلمة المرور:" class="block text-white text-right mb-1" />
                     <div class="relative">
                         <input id="password" name="password" type="password" required autocomplete="new-password"
-                            class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
+                            class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
                             placeholder="كلمة المرور الخاصة بك" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-lock"></i>
@@ -61,7 +61,7 @@
                     <x-label for="password_confirmation" value="تأكيد كلمة المرور:" class="block text-white text-right mb-1" />
                     <div class="relative">
                         <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"
-                            class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
+                            class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-right"
                             placeholder="أعد كتابة كلمة المرور" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-lock"></i>
