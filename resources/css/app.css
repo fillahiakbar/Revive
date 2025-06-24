@@ -12,6 +12,10 @@
 .badge-special { background-color: #ec4899; }
 .badge-music { background-color: #eab308; }
 .badge-unknown { background-color: #6b7280; }
+.badge-bd { background-color: #197412; }
+
+
+
 
 [x-cloak] {
     display: none;

@@ -13,7 +13,7 @@
 <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
     <input type="text" name="q" value="{{ $query }}"
            class="w-full bg-white/20 text-white rounded px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-           placeholder="Example: One Piece">
+           placeholder="مثال:">
 </div>
 
 

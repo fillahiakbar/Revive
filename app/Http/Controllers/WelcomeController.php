@@ -2,53 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\AnimeLink;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
+use App\Models\Slider;
 
 class WelcomeController extends Controller
 {
     public function index()
     {
-        // Base API dari config .env
-        $baseApiUrl = rtrim(config('services.jikan.url'), '/');
+        $animeLinks = AnimeLink::all();
+        $latestReleases = [];
+        $mostVisited = [];
+        $currentWorks = [];
+        $sliders = Slider::where('is_active', true)->orderBy('order')->get();
 
-        // 1. Ambil data untuk banner (anime pertama — contoh Naruto)
-        $bannerResponse = Http::get($baseApiUrl . '/anime/1');
-        if ($bannerResponse->failed()) {
-            abort(500, 'Gagal mengambil data banner dari Jikan API');
+        foreach ($animeLinks as $anime) {
+            $apiResponse = Http::get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+
+            if ($apiResponse->ok() && isset($apiResponse['data'])) {
+                $api = $apiResponse['data'];
+
+                $latestReleases[] = [
+                    'mal_id' => $anime->mal_id,
+                    'title' => $anime->title,
+                    'score' => $api['score'] ?? null,
+                    'type' => $api['type'] ?? '-',
+                    'episodes' => $api['episodes'] ?? null,
+                    'synopsis' => $api['synopsis'] ?? '-',
+                    'images' => $api['images'],
+                    'genres' => $api['genres'] ?? [],
+                ];
+
+                // Tambahkan ke currentWorks jika airing
+                if ($api['airing'] ?? false) {
+                    $currentWorks[] = end($latestReleases);
+                }
+
+                // Tambahkan ke mostVisited secara dummy (contoh)
+                $mostVisited[] = end($latestReleases);
+            }
         }
-        $anime = $bannerResponse->json('data');
 
-        // 2. Ambil data top anime untuk section "الأكثر زيارة"
-        $topAnimeResponse = Http::get($baseApiUrl . '/top/anime');
-        $mostVisited = $topAnimeResponse->successful()
-            ? array_slice($topAnimeResponse->json('data'), 0, 5)
-            : [];
-
-        // 3. Ambil data terbaru untuk section "أحدث الإصدارات"
-        $latestAnimeResponse = Http::get($baseApiUrl . '/seasons/now');
-        $latestReleases = $latestAnimeResponse->successful()
-            ? array_slice($latestAnimeResponse->json('data'), 0, 5)
-            : [];
-
-        // 4. Ambil data untuk section "الأعمال الحالية"
-        $currentAnimeResponse = Http::get($baseApiUrl . '/top/anime');
-        $currentWorks = $currentAnimeResponse->successful()
-            ? array_slice($currentAnimeResponse->json('data'), 0, 4)
-            : [];
-
-        // Kirim data ke view
-        return view('welcome', compact(
-            'anime',
-            'mostVisited',
-            'latestReleases',
-            'currentWorks'
-        ));
+        return view('welcome', [
+            'latestReleases' => $latestReleases,
+            'mostVisited' => $mostVisited,
+            'currentWorks' => $currentWorks,
+            'sliders' => $sliders,
+        ]);
     }
 
-        public function about()
-    {
-        return view('about');
-    }
+
+
+
+    public function about()
+{
+    return view('about');
+}
 }

@@ -5,116 +5,93 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
+use App\Models\AnimeLink; // pastikan model AnimeLink sesuai
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class AnimeListController extends Controller
 {
-    public function list(Request $request)
+     public function list(Request $request)
     {
         $letter = strtoupper($request->query('letter', 'A'));
         $page = $request->query('page', 1);
-        $baseUrl = rtrim(config('services.jikan.url', 'https://api.jikan.moe/v4'), '/');
+        $perPage = 24;
 
-        // Ambil lebih banyak data dari API untuk memastikan setelah filter masih ada 24 item
-        $maxPages = 20;
-        $allAnimes = collect();
-        
-        for ($apiPage = 1; $apiPage <= $maxPages; $apiPage++) {
-            $query = match ($letter) {
-                'ALL' => '',
-                '0-9' => '1',
-                default => $letter
-            };
+        // Ambil semua data dari tabel anime_links
+        $query = AnimeLink::with('types');
 
-            $response = Http::get("{$baseUrl}/anime", [
-                'q' => $query,
-                'page' => $apiPage,
-                'limit' => 25,
-                'order_by' => 'title',
-                'sort' => 'asc',
-                'sfw' => true
-            ]);
-
-            if (!$response->successful()) {
-                break;
+        // Filter berdasarkan huruf
+        if ($letter !== 'ALL') {
+            if ($letter === '0-9') {
+                $query->whereRaw("LEFT(title, 1) REGEXP '^[0-9]'");
+            } else {
+                $query->whereRaw("LEFT(title, 1) = ?", [$letter]);
             }
+        }
 
-            $data = $response->json();
-            $animeData = $data['data'] ?? [];
+        // Urutkan berdasarkan title A-Z
+        $query->orderBy('title', 'asc');
 
-            if (empty($animeData)) {
-                break;
-            }
+        // Ambil total data
+        $total = $query->count();
 
-            // Filter: aman, bukan hentai, studio Jepang
-            $filtered = collect($animeData)->filter(function ($anime) {
-                return $this->isAnimeAppropriate($anime);
+        // Ambil hasil untuk halaman tertentu
+        $animes = $query->skip(($page - 1) * $perPage)
+                        ->take($perPage)
+                        ->get();
+
+        // Ambil data API Jikan untuk melengkapi gambar & title
+        $enhanced = $animes->map(function ($anime) {
+            $malId = $anime->mal_id;
+
+            $jikan = cache()->remember("jikan_mal_{$malId}", 3600, function () use ($malId) {
+                $res = Http::get("https://api.jikan.moe/v4/anime/{$malId}");
+                return $res->successful() ? $res->json('data') : null;
             });
 
-            $allAnimes = $allAnimes->merge($filtered);
+            return [
+                'mal_id'    => $anime->mal_id,
+                'title'     => $jikan['title'] ?? $anime->title,
+                'images'    => $jikan['images'] ?? [],
+                'types' => $anime->types->pluck('name')->toArray(),
+                'episodes'  => $anime->episodes,
+                'duration'  => $anime->duration,
+                // Tambahkan field tambahan dari DB jika ada
+            ];
+        });
 
-            // Rate limiting
-            usleep(250000); // 0.25 detik delay
-        }
-
-        // Remove duplicates berdasarkan title
-        $uniqueAnimes = $allAnimes->unique(function ($anime) {
-            return strtolower(trim($anime['title']));
-        })->values();
-
-        // Manual pagination
-        $perPage = 24;
-        $currentPage = $page;
-        $offset = ($currentPage - 1) * $perPage;
-        
-        $paginatedAnimes = $uniqueAnimes->slice($offset, $perPage)->values();
-        $total = $uniqueAnimes->count();
-
-        // Jika data kurang dari 24 pada halaman pertama, coba ambil lebih banyak
-        if ($paginatedAnimes->count() < 24 && $currentPage == 1 && $total < 24) {
-            $this->addFallbackAnimes($uniqueAnimes, $baseUrl);
-            $paginatedAnimes = $uniqueAnimes->slice($offset, $perPage)->values();
-            $total = $uniqueAnimes->count();
-        }
-
-        // Create pagination instance
-        $animes = new LengthAwarePaginator(
-            $paginatedAnimes,
+        // Buat pagination
+        $paginatedAnimes = new LengthAwarePaginator(
+            $enhanced,
             $total,
             $perPage,
-            $currentPage,
+            $page,
             [
                 'path' => request()->url(),
                 'query' => request()->query()
             ]
         );
 
-        return view('anime.list', compact('animes', 'letter'));
+        return view('anime.list', [
+            'animes' => $paginatedAnimes,
+            'letter' => $letter
+        ]);
     }
 
     private function isAnimeAppropriate($anime): bool
-{
-    $rating = strtolower($anime['rating'] ?? '');
-    $unsafeRatings = ['rx', 'r+'];
-
-    foreach ($unsafeRatings as $unsafeRating) {
-        if (str_contains($rating, $unsafeRating)) {
-            return false;
+    {
+        $rating = strtolower($anime['rating'] ?? '');
+        $unsafeRatings = ['rx', 'r+'];
+        foreach ($unsafeRatings as $r) {
+            if (str_contains($rating, $r)) return false;
         }
+
+        $genres = collect($anime['genres'] ?? [])->pluck('name')->map(fn($g) => strtolower($g));
+        $explicitGenres = ['hentai', 'ecchi', 'erotica'];
+        if ($genres->intersect($explicitGenres)->isNotEmpty()) return false;
+
+        $hasJapaneseStudio = collect($anime['studios'] ?? [])->pluck('name')->filter()->isNotEmpty();
+        return $hasJapaneseStudio;
     }
 
-    $genres = collect($anime['genres'] ?? [])->pluck('name')->map(fn($g) => strtolower($g));
-    $explicitGenres = ['hentai', 'ecchi', 'erotica'];
-
-    if ($genres->intersect($explicitGenres)->isNotEmpty()) {
-        return false;
-    }
-
-    $hasJapaneseStudio = collect($anime['studios'] ?? [])->pluck('name')->filter()->isNotEmpty();
-
-    return $hasJapaneseStudio;
-}
 
 }

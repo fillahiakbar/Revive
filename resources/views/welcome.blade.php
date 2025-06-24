@@ -1,62 +1,118 @@
 <x-app-layout>
     <div class="text-white font-cairo relative z-10">
 {{-- 🎬 Hero Banner Section --}}
+{{-- 🎬 Hero Banner Section --}}
+@if($sliders->isNotEmpty())
 <section class="relative w-full h-[800px] overflow-hidden">
-  <div class="absolute left-0 top-0 w-[80%] h-full z-0">
-    <div id="anime-background" class="w-full h-full bg-cover bg-center transition-all duration-700"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to right, transparent 0%, transparent 60%, rgba(27, 27, 27, 0.3) 70%, rgba(27, 27, 27, 0.8) 100%);"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to bottom, transparent 0%, rgba(27, 27, 27, 0.2) 60%, rgba(27, 27, 27, 0.7) 100%);"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to top right, rgba(27, 27, 27, 0.3) 0%, transparent 50%, rgba(27, 27, 27, 0.5) 100%);"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to bottom right, transparent 0%, rgba(27, 27, 27, 0.1) 40%, rgba(27, 27, 27, 0.8) 100%);"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to top left, transparent 0%, rgba(27, 27, 27, 0.1) 70%, rgba(27, 27, 27, 0.8) 100%);"></div>
-    <div class="absolute inset-0" style="background: linear-gradient(to right, transparent, rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.8));"></div>    
-</div>
-
-<div class="absolute right-0 top-0 w-[20%] h-full z-0" style="background-color: #1B1B1B;"></div>
-
-<div class="relative z-10 h-full flex items-center justify-start px-4 md:px-8 lg:px-20">
-    <div class="w-full md:w-[45%] lg:w-[40%] max-w-2xl space-y-6 text-right">
-        <span class="inline-block text-sm text-white/80 font-medium" id="anime-rank">#1 اختيارات</span>
-        <h1 class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-2xl" id="anime-title">Title 1</h1>
-        <div class="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm font-medium items-center text-white justify-start">
-            <span class="px-2 md:px-3 py-1 rounded-lg flex items-center gap-1" style="background-color: rgba(27, 27, 27, 0.5);">
-                <img src="/img/icon/play.png" alt="Type" class="w-4 h-4" />
-                <span id="anime-type">TV</span>
-            </span>
-            <span class="px-2 md:px-3 py-1 rounded-lg flex items-center gap-1" style="background-color: rgba(27, 27, 27, 0.5);">
-                <img src="/img/icon/time.png" alt="Duration" class="w-4 h-4" />
-                <span id="anime-duration">24m</span>
-            </span>
-            <span class="px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1" style="background-color: rgba(27, 27, 27, 0.5);">
-                <img src="/img/icon/date.png" alt="Year" class="w-4 h-4" />
-                <span id="anime-year">2024</span>
-            </span>
-            <span class="bg-red-600 px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1">HD</span>
-            <span class="bg-blue-600 px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1">
-                <img src="/img/icon/eps.png" alt="Type" class="w-4 h-4" />
-                <span id="anime-episodes">12 Eps</span>
-            </span>
-        </div>
-        <p class="text-xs md:text-sm leading-relaxed text-white/90 max-w-lg" id="anime-synopsis">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    @foreach ($sliders as $index => $slide)
+    <div class="absolute left-0 top-0 w-full h-full z-0 transition-opacity duration-700 @if($index === 0) opacity-100 @else opacity-0 @endif" data-slide
+        data-title="{{ $slide->title }}"
+        data-type="{{ $slide->type }}"
+        data-duration="{{ $slide->duration }}"
+        data-year="{{ $slide->year }}"
+        data-quality="{{ $slide->quality }}"
+        data-episodes="{{ $slide->episodes }}"
+        data-description="{{ $slide->description }}">
+        
+        <div class="w-full h-full bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $slide->image) }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/80"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70"></div>
     </div>
-</div>
+    @endforeach
 
-<div class="absolute bottom-20 pb-24 right-20 flex gap-2 z-20">
-    <button id="next-bg" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
-        <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
-        </svg>
-    </button>
-    <button id="prev-bg" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
-        <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
-        </svg>
-    </button>
-</div>
+    {{-- Konten Slider Dinamis --}}
+    <div class="relative z-10 h-full flex items-center justify-start px-4 md:px-8 lg:px-20">
+        <div class="w-full md:w-[45%] lg:w-[40%] max-w-2xl space-y-6 text-right">
+            <span class="inline-block text-sm text-white/80 font-medium">#1 اختيارات</span>
+            <h1 id="slide-title" class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-2xl">
+                {{ $sliders->first()->title }}
+            </h1>
+            <div class="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm font-medium items-center text-white justify-start">
+                <span class="px-2 md:px-3 py-1 rounded-lg flex items-center gap-1 bg-black/40">
+                    <img src="/img/icon/play.png" alt="Type" class="w-4 h-4" />
+                    <span id="slide-type">{{ $sliders->first()->type ?? 'TV' }}</span>
+                </span>
+                <span class="px-2 md:px-3 py-1 rounded-lg flex items-center gap-1 bg-black/40">
+                    <img src="/img/icon/time.png" alt="Duration" class="w-4 h-4" />
+                    <span id="slide-duration">{{ $sliders->first()->duration ?? '24m' }}</span>
+                </span>
+                <span class="px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1 bg-black/40">
+                    <img src="/img/icon/date.png" alt="Year" class="w-4 h-4" />
+                    <span id="slide-year">{{ $sliders->first()->year ?? '2024' }}</span>
+                </span>
+                <span id="slide-quality" class="bg-red-600 px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1">
+                    {{ $sliders->first()->quality ?? 'HD' }}
+                </span>
+                <span class="bg-blue-600 px-2 md:px-3 py-1 rounded-lg shadow-lg flex items-center gap-1">
+                    <img src="/img/icon/eps.png" alt="Episodes" class="w-4 h-4" />
+                    <span id="slide-episodes">{{ $sliders->first()->episodes ?? '12 Eps' }}</span>
+                </span>
+            </div>
+            <p id="slide-description" class="text-xs md:text-sm leading-relaxed text-white/90 max-w-lg">
+                {{ $sliders->first()->description }}
+            </p>
+        </div>
+    </div>
 
-    {{-- Bottom gradient for smooth transition --}}
+    {{-- Tombol Navigasi Slider --}}
+    <div class="absolute bottom-20 pb-24 right-20 flex gap-2 z-20">
+        <button id="prev-slide" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
+            </svg>
+        </button>
+        <button id="next-slide" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+            </svg>
+        </button>
+    </div>
+
     <div class="absolute bottom-0 left-0 right-0 h-16 z-5" style="background: linear-gradient(to bottom, transparent, rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.8));"></div>
 </section>
+
+{{-- Script dinamis ganti konten slider --}}
+<script>
+    const slides = document.querySelectorAll('[data-slide]');
+    const title = document.getElementById('slide-title');
+    const type = document.getElementById('slide-type');
+    const duration = document.getElementById('slide-duration');
+    const year = document.getElementById('slide-year');
+    const quality = document.getElementById('slide-quality');
+    const episodes = document.getElementById('slide-episodes');
+    const description = document.getElementById('slide-description');
+
+    let currentIndex = 0;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.style.opacity = i === index ? '1' : '0';
+        });
+
+        const slide = slides[index];
+        title.textContent = slide.getAttribute('data-title');
+        type.textContent = slide.getAttribute('data-type');
+        duration.textContent = slide.getAttribute('data-duration');
+        year.textContent = slide.getAttribute('data-year');
+        quality.textContent = slide.getAttribute('data-quality');
+        episodes.textContent = slide.getAttribute('data-episodes');
+        description.textContent = slide.getAttribute('data-description');
+    }
+
+    document.getElementById('next-slide').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % slides.length;
+        showSlide(currentIndex);
+    });
+
+    document.getElementById('prev-slide').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        showSlide(currentIndex);
+    });
+</script>
+@endif
+
+
+
 {{-- 🌀 Separator Section with Gradient --}}
 <div class="flex justify-center -mt-24 z-15 relative">
     <img src="{{ asset('/img/rectanggle.png') }}" alt="Logo" class="">
@@ -82,15 +138,6 @@
                                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                                  alt="{{ $anime['title'] }}">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                            
-                            {{-- Play icon overlay --}}
-                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="bg-blue-600/80 rounded-full p-3 backdrop-blur-sm">
-                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                                    </svg>
-                                </div>
-                            </div>
                         </div>
                         
                         {{-- Anime Info --}}
@@ -105,13 +152,13 @@
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0">
                                     {{-- IMDB Rating --}}
                                     <div>
-                                        <div class="bg-yellow-600 border border-yellow-400 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] uppercase tracking-wide">IMDB</div>
+                                        <div class="bg-yellow-600 border border-yellow-400 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] tracking-wide">IMDb</div>
                                         <div class="text-white font-bold text-center text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
 
                                     {{-- MAL Rating --}}
                                     <div>
-                                        <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
+                                        <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                 </div>
@@ -245,11 +292,11 @@
     
     {{-- Content Container --}}
     <div class="relative z-30 pb-8">
-        {{-- Header Section --}}
-        <div class="flex justify-start items-centerpb-4 mb-6">
-            <h2 class="text-md md:text-2xl font-bold border-r-4 text-black">الأعمال الحالية</h2>
-            <span class="text-sm md:text-base text-black/80 px-3 py-1 rounded-ful">اقتراحاتنا</span>
-        </div>
+ {{-- Header Section --}}
+<div class="flex justify-start items-center pb-4 mb-6">
+    <h2 class="text-md md:text-2xl font-bold border-r-4 border-black pr-4 text-black">الأعمال الحالية</h2>
+    <span class="text-sm md:text-base text-black/80 px-3 py-1 rounded-full">اقتراحاتنا</span>
+</div>
 
         {{-- Anime List Only --}}
         <div class="space-y-3">

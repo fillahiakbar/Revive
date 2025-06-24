@@ -1,4 +1,3 @@
-<!-- list.blade.php -->
 <x-app-layout>
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
@@ -12,21 +11,18 @@
             {{-- Navigation A-Z + 0-9 + الكل --}}
             <div class="px-4 py-6 rounded shadow mb-10 text-black">
                 <div class="flex flex-wrap justify-center items-center gap-2 text-sm font-bold">
-                    {{-- ALL --}}
                     <a href="{{ route('anime.list', ['letter' => 'ALL']) }}"
                        class="h-8 px-3 rounded-md flex items-center justify-center transition
                        {{ $letter === 'ALL' ? 'bg-red-500 text-black' : 'bg-gray-200 hover:bg-red-400 hover:text-black' }}">
                         الكل
                     </a>
 
-                    {{-- 0-9 --}}
                     <a href="{{ route('anime.list', ['letter' => '0-9']) }}"
                        class="h-8 px-3 rounded-md flex items-center justify-center transition
                        {{ $letter === '0-9' ? 'bg-red-500 text-black' : 'bg-gray-200 hover:bg-red-400 hover:text-black' }}">
                         0-9
                     </a>
 
-                    {{-- A-Z --}}
                     @foreach(range('Z', 'A') as $char)
                         <a href="{{ route('anime.list', ['letter' => $char]) }}"
                            class="w-8 h-8 rounded-md flex items-center justify-center transition
@@ -37,13 +33,6 @@
                 </div>
             </div>
 
-            {{-- Info Pagination --}}
-            @if($animes->total() > 0)
-                <div class="text-white text-sm mb-4 text-center lg:text-right">
-                    Showing {{ $animes->firstItem() }} to {{ $animes->lastItem() }} of {{ $animes->total() }} results
-                    (Page {{ $animes->currentPage() }} of {{ $animes->lastPage() }})
-                </div>
-            @endif
 
             {{-- Anime Grid --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
@@ -52,15 +41,15 @@
                        class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
                         {{-- Badge --}}
-                        <div class="absolute left-1 z-10 flex flex-col gap-1">
-                            <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5 rounded text-white font-medium">
-                                {{ $anime['type'] ?? 'Unknown' }}
-                            </span>
-                        </div>
+                        @foreach ($anime['types'] ?? [] as $type)
+    <span class="badge-{{ strtolower($type) }} text-xs px-2 py-0.5 rounded text-white font-medium">
+        {{ $type }}
+    </span>
+@endforeach
 
                         {{-- Image with fallback --}}
                         <div class="w-full h-60 bg-gray-800 flex items-center justify-center">
-                            @if(isset($anime['images']['jpg']['image_url']) && $anime['images']['jpg']['image_url'])
+                            @if(isset($anime['images']['jpg']['image_url']))
                                 <img src="{{ $anime['images']['jpg']['image_url'] }}"
                                      alt="{{ $anime['title'] }}"
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -89,20 +78,12 @@
                             <h3 class="font-bold truncate" title="{{ $anime['title'] }}">
                                 {{ $anime['title'] ?? 'Unknown Title' }}
                             </h3>
-                            <p class="text-gray-400">
-                                @php
-                                    preg_match('/\d+/', $anime['duration'] ?? '', $matches);
-                                    $durationMinutes = $matches[0] ?? 'N/A';
-                                @endphp
-                                {{ $durationMinutes }}m
-                            </p>
-                            @if(isset($anime['episodes']) && $anime['episodes'])
+                            @if(!empty($anime['episodes']))
                                 <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
                             @endif
                         </div>
                     </a>
                 @empty
-                    {{-- No Result --}}
                     <div class="col-span-full text-center text-gray-500 py-20">
                         <div class="text-6xl mb-4">📺</div>
                         <h3 class="text-xl font-bold mb-2">No Anime Found</h3>
@@ -123,21 +104,6 @@
                         </div>
                     @endfor
                 @endif
-            </div>
-
-            {{-- Loading Spinner --}}
-            <div id="loading" class="hidden text-center py-8">
-                <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                         fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
-                              5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 
-                              3 7.938l3-2.647z"/>
-                    </svg>
-                    Loading...
-                </div>
             </div>
 
             {{-- Pagination --}}

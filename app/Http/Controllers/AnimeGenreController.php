@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use App\Models\AnimeLink;
 
 class AnimeGenreController extends Controller
 {
@@ -68,78 +69,72 @@ class AnimeGenreController extends Controller
 }
 
  public function genreMulti(Request $request)
-    {
-        $baseUrl = rtrim(config('services.jikan.url', 'https://api.jikan.moe/v4'), '/');
+{
+    $searchQuery = $request->query('q');
+    $types = $request->query('types', []);
+    $genreIds = $request->query('genres', []);
+    $sort = $request->query('sort', 'title_asc');
+    $status = $request->query('status');
+    $page = $request->query('page', 1);
 
-        // Ambil semua filter dari form
-        $searchQuery = $request->query('q');
-        $status = $request->query('status');
-        $types = $request->query('types', []);
-        $sort = $request->query('sort', 'title_asc');
-        $genreIds = $request->query('genres', []);
-if (!is_array($genreIds)) {
-    $genreIds = explode(',', $genreIds); // handle dari ?genres=1,2,3
-}
-        $page = $request->query('page', 1);
+    $query = AnimeLink::query();
 
-        // Query dasar ke Jikan API
-        $queryParams = [
-            'page' => $page,
-            'limit' => 24,
-            'sfw' => true,
-        ];
-
-        // Apply filters
-        if ($searchQuery) {
-            $queryParams['q'] = $searchQuery;
-        }
-
-        if ($status === 'airing') {
-            $queryParams['status'] = 'airing';
-        } elseif ($status === 'complete') {
-            $queryParams['status'] = 'complete';
-        }
-
-        // Apply sort
-        $this->applySortParams($queryParams, $sort);
-
-        // Apply genres - filter out hentai/ecchi genres
-        if (!empty($genreIds)) {
-            $safeGenreIds = $this->filterSafeGenres($genreIds);
-            if (!empty($safeGenreIds)) {
-                $queryParams['genres'] = implode(',', $safeGenreIds);
-            }
-        }
-
-        // Apply types
-        if (!empty($types)) {
-            $queryParams['type'] = $types[0];
-        }
-
-        $response = Http::get("{$baseUrl}/anime", $queryParams);
-        $animeData = $response->successful() ? $response->json('data') : [];
-
-        // Filter tambahan untuk keamanan
-        $filtered = collect($animeData)->filter(function ($anime) {
-            return $this->isAnimeAppropriate($anime);
-        })->unique('mal_id')->values();
-
-        // Handle JSON request
-        if ($request->wantsJson()) {
-            return response()->json($filtered);
-        }
-
-return view('anime.genre-multi', [
-    'animes' => $filtered,
-    'genres' => $this->getGenreList(),
-    'selected' => $genreIds ?? [],
-    'selectedTypes' => $types ?? [],
-    'selectedSort' => $sort ?? null,
-    'selectedStatus' => $status ?? null,
-    'query' => $searchQuery ?? '',
-    'hasMorePages' => $response->json('pagination')['has_next_page'] ?? false
-]);
+    if ($searchQuery) {
+        $query->where('title', 'like', '%' . $searchQuery . '%');
     }
+
+    if (!empty($types)) {
+        $query->whereIn('type', $types);
+    }
+
+    // Data dari database (title & type)
+    $animeLinks = $query->with('types')->paginate(24);
+
+
+    // Gabungkan dengan gambar dari API
+    $animes = $animeLinks->getCollection()->map(function ($anime) {
+        $image = null;
+        try {
+            $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+            if ($response->successful()) {
+                $image = $response->json('data.images.jpg.image_url');
+            }
+        } catch (\Exception $e) {
+            \Log::warning("Jikan API gagal untuk {$anime->mal_id}: " . $e->getMessage());
+        }
+
+        return [
+            'mal_id' => $anime->mal_id,
+            'title' => $anime->title,
+            'types' => $anime->types->pluck('name')->toArray(),
+            'image' => $image,
+        ];
+    });
+
+    // Replace collection di paginator agar pagination tetap bisa digunakan
+    $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $animes,
+        $animeLinks->total(),
+        $animeLinks->perPage(),
+        $animeLinks->currentPage(),
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    $animes = AnimeLink::with('types')
+    ->when($searchQuery, fn($q) => $q->where('title', 'like', "%{$searchQuery}%"))
+    ->paginate(24);
+
+    return view('anime.genre-multi', [
+        'animes' => $paginated,
+        'genres' => $this->getGenreList(), // dari API
+        'selected' => $genreIds ?? [],
+        'selectedTypes' => $types ?? [],
+        'selectedSort' => $sort ?? null,
+        'selectedStatus' => $status ?? null,
+        'query' => $searchQuery ?? '',
+        'hasMorePages' => $paginated->hasMorePages(),
+    ]);
+}
 
     private function applySortParams(array &$queryParams, string $sort): void
 {

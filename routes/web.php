@@ -9,6 +9,7 @@ use App\Http\Controllers\AnimeListController;
 use App\Http\Controllers\AnimeGenreController;
 use App\Http\Controllers\AnimeController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\RssController;
 use App\Http\Controllers\AnimeOngoingController;
 
 // Landing redirect ke user
@@ -23,12 +24,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/list', [AnimeListController::class, 'list'])->name('anime.list');
     Route::get('/anime/{id}', [AnimeDetailController::class, 'show'])->name('anime.show');
+    Route::get('/genres/{slug}', [GenreController::class, 'show'])->name('genre.show');
 
     Route::get('/genres', [GenreController::class, 'genres'])->name('anime.genres');
     Route::get('/anime/genre/{genre_id}', [AnimeGenreController::class, 'byGenre'])->name('anime.by-genre');
     Route::get('/advanced-search', [AnimeGenreController::class, 'genreMulti'])->name('anime.genre.multi');
     Route::get('/ongoing', [AnimeOngoingController::class, 'index'])->name('anime.ongoing');
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
+
+    Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
 });
 
 
