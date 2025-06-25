@@ -1,5 +1,5 @@
 <x-guest-layout>
- <div class="min-h-screen flex justify-center px-4 py-6">
+    <div class="min-h-screen flex justify-center px-4 py-6">
         <div class="w-[500px] px-6 sm:px-10 py-10 rounded-xl">
 
             {{-- Logo & Heading --}}
@@ -25,9 +25,15 @@
                 <div>
                     <x-label for="email" value="عنوان البريد الإلكتروني:" class="block text-right text-white mb-1" />
                     <div class="relative">
-                        <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username"
-                            class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400"
-                            placeholder="عنوان بريدك الإلكتروني" />
+                        <input id="email" 
+                               type="email" 
+                               name="email" 
+                               :value="old('email')" 
+                               required 
+                               autofocus 
+                               autocomplete="username"
+                               class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400"
+                               placeholder="عنوان بريدك الإلكتروني" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-envelope"></i>
                         </span>
@@ -38,9 +44,13 @@
                 <div>
                     <x-label for="password" value="كلمة المرور:" class="block text-right text-white mb-1" />
                     <div class="relative">
-                        <input id="password" type="password" name="password" required autocomplete="current-password"
-    class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400 selection:bg-red-500 selection:text-white"
-    placeholder="كلمة المرور الخاصة بك" />
+                        <input id="password" 
+                               type="password" 
+                               name="password" 
+                               required 
+                               autocomplete="current-password"
+                               class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400 selection:bg-red-500 selection:text-white"
+                               placeholder="كلمة المرور الخاصة بك" />
 
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
                             <i class="fas fa-lock"></i>
@@ -67,7 +77,7 @@
                 {{-- Submit --}}
                 <div>
                     <button type="submit"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-lg transition">
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-lg transition">
                         تسجيل الدخول
                     </button>
                 </div>
@@ -77,10 +87,10 @@
             <div class="mt-6 text-center text-sm text-white">
                 <span>أليس لديك حساب؟</span>
                 @if (isPublicRegistrationEnabled())
-    <a href="{{ route('register') }}" class="text-blue-600 hover:underline">
-        سجّل الآن
-    </a>
-@endif
+                    <a href="{{ route('register') }}" class="text-blue-600 hover:underline">
+                        سجّل الآن
+                    </a>
+                @endif
             </div>
         </div>
     </div>
