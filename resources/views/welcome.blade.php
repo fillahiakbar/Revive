@@ -185,7 +185,7 @@
                             <p class="text-sm text-white/70 line-clamp-2 leading-relaxed">
                                 الإصدار: {{ Str::limit($anime['batch_names'], 150, '...') }}
                             </p>
-                        </div>e
+                        </div>
                     </div>
                 </a>
                 {{-- ✨ Line Separator - Metode 1 --}}

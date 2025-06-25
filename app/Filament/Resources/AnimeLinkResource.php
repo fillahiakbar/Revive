@@ -123,7 +123,7 @@ class AnimeLinkResource extends Resource
         return $table
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('title')->label('العنوان')->searchable(),
-                \Filament\Tables\Columns\TextColumn::make('types.name')->label('النوع')->limit(30),
+                \Filament\Tables\Columns\TextColumn::make('types.name')->label('Type')->limit(30),
                 \Filament\Tables\Columns\TextColumn::make('season')->label('الموسم'),
                 \Filament\Tables\Columns\TextColumn::make('year')->label('السنة'),
             ])

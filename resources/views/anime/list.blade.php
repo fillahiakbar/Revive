@@ -39,12 +39,14 @@
         <a href="{{ route('anime.show', $anime['mal_id']) }}"
            class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
-            {{-- Badge --}}
-            @foreach ($anime['types'] ?? [] as $type)
-                <span class="badge-{{ strtolower($type) }} text-xs px-2 py-0.5 rounded text-white font-medium absolute left-1 top-1 z-10">
-                    {{ $type }}
-                </span>
-            @endforeach
+           {{-- Container badge --}}
+<div class="flex flex-wrap gap-2 mt-2">
+    @foreach ($anime['types'] as $type)
+        <span class="bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded">
+            {{ $type }}
+        </span>
+    @endforeach
+</div>
 
             {{-- Poster --}}
             <div class="w-full bg-gray-800 flex items-center justify-center">
