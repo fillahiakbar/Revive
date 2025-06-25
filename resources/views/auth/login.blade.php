@@ -84,7 +84,7 @@
             </form>
 
             {{-- Register --}}
-            <div class="mt-6 text-center text-sm text-white">
+            <div class="mt-6 text-center text-sm">
                 <span>أليس لديك حساب؟</span>
                 @if (isPublicRegistrationEnabled())
                     <a href="/register" class="text-blue-600 hover:underline">
