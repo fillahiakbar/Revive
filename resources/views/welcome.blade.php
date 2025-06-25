@@ -1,11 +1,11 @@
 <x-app-layout>
     <div class="text-white font-cairo relative z-10">
-{{-- 🎬 Hero Banner Section --}}
+
 {{-- 🎬 Hero Banner Section --}}
 @if($sliders->isNotEmpty())
 <section class="relative w-full h-[800px] overflow-hidden">
     @foreach ($sliders as $index => $slide)
-    <div class="absolute left-0 top-0 w-full h-full z-0 transition-opacity duration-700 @if($index === 0) opacity-100 @else opacity-0 @endif" data-slide
+    <div class="absolute left-0 top-0 w-full h-full z-0 transition-opacity duration-700 @if($index === 0) opacity-100 @else @endif" data-slide
         data-title="{{ $slide->title }}"
         data-type="{{ $slide->type }}"
         data-duration="{{ $slide->duration }}"
@@ -23,7 +23,7 @@
     {{-- Konten Slider Dinamis --}}
     <div class="relative z-10 h-full flex items-center justify-start px-4 md:px-8 lg:px-20">
         <div class="w-full md:w-[45%] lg:w-[40%] max-w-2xl space-y-6 text-right">
-            <span class="inline-block text-sm text-white/80 font-medium">#1 اختيارات</span>
+            <span class="inline-block text-sm text-white/80 font-medium"> {{ $sliders->first()->choice }}</span>
             <h1 id="slide-title" class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-2xl">
                 {{ $sliders->first()->title }}
             </h1>
@@ -114,7 +114,7 @@
 
 
 {{-- 🌀 Separator Section with Gradient --}}
-<div class="flex justify-center -mt-24 z-15 relative">
+<div class="flex justify-center -mt-20 z-15 relative">
     <img src="{{ asset('/img/rectanggle.png') }}" alt="Logo" class="">
 </div>
 
