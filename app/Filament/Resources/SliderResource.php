@@ -23,54 +23,54 @@ class SliderResource extends Resource
     protected static ?string $model = Slider::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
-    protected static ?string $navigationGroup = 'Konten Website';
-    protected static ?string $navigationLabel = 'Slider Beranda';
-    protected static ?string $pluralLabel = 'Slider';
+    protected static ?string $navigationGroup = 'محتوى الموقع';
+    protected static ?string $navigationLabel = 'الشرائح الرئيسية';
+    protected static ?string $pluralLabel = 'الشرائح';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 FileUpload::make('image')
-                    ->label('Gambar')
+                    ->label('الصورة')
                     ->directory('sliders')
                     ->image()
                     ->required(),
 
                 TextInput::make('title')
-                    ->label('Judul')
+                    ->label('العنوان')
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Deskripsi'),
+                    ->label('الوصف'),
 
                 TextInput::make('type')
-                    ->label('Tipe')
-                    ->default('TV'),
+                    ->label('النوع')
+                    ->default('مسلسل'),
 
                 TextInput::make('duration')
-                    ->label('Durasi')
-                    ->default('24m'),
+                    ->label('المدة')
+                    ->default('24 دقيقة'),
 
                 TextInput::make('year')
-                    ->label('Tahun')
+                    ->label('السنة')
                     ->default(date('Y')),
 
                 TextInput::make('quality')
-                    ->label('Kualitas')
+                    ->label('الجودة')
                     ->default('HD'),
 
                 TextInput::make('episodes')
-                    ->label('Episode')
-                    ->default('12 Eps'),
+                    ->label('عدد الحلقات')
+                    ->default('12 حلقة'),
 
                 TextInput::make('order')
-                    ->label('Urutan')
+                    ->label('الترتيب')
                     ->numeric()
                     ->default(0),
 
                 Toggle::make('is_active')
-                    ->label('Tampilkan?')
+                    ->label('هل تريد عرضه؟')
                     ->default(true),
             ]);
     }
@@ -80,30 +80,30 @@ class SliderResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image')
-                    ->label('Gambar')
+                    ->label('الصورة')
                     ->square()
                     ->height(60),
 
                 TextColumn::make('title')
-                    ->label('Judul')
+                    ->label('العنوان')
                     ->searchable()
                     ->limit(30),
 
                 TextColumn::make('type')
-                    ->label('Tipe'),
+                    ->label('النوع'),
 
                 TextColumn::make('year')
-                    ->label('Tahun'),
+                    ->label('السنة'),
 
                 TextColumn::make('episodes')
-                    ->label('Episode'),
+                    ->label('عدد الحلقات'),
 
                 TextColumn::make('order')
-                    ->label('Urutan')
+                    ->label('الترتيب')
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label('نشط')
                     ->boolean(),
             ])
             ->defaultSort('order')

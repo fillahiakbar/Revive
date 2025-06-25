@@ -20,8 +20,8 @@
                 <!-- Dropdown Menu -->
                 <div class="absolute top-full right-0 w-32 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div class="py-1">
-                        <a href="/ongoing" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">مكتمل</a>
-                        <a href="#" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">جارٍ</a>
+                        <a href="/completed" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">مكتمل</a>
+                        <a href="/ongoing" class="block px-3 py-2 text-sm text-white hover:text-red-400 transition text-right">جارٍ</a>
                     </div>
                 </div>
             </div>
@@ -94,8 +94,8 @@
     <div x-show="openMenu" x-transition class="md:hidden px-6 pb-4 space-y-3 bg-gray-900 text-white text-sm">
         <a href="/revive" class="block hover:text-red-400">الصفحة الرئيسية</a>
         <a href="/list" class="block hover:text-red-400">قائمة الأعمال</a>
-        <a href="/ongoing" class="block hover:text-red-400">مكتمل</a>
-        <a href="#" class="block hover:text-red-400">جارٍ</a>
+        <a href="/complete" class="block hover:text-red-400">مكتمل</a>
+        <a href="/ongoing" class="block hover:text-red-400">جارٍ</a>
         <a href="/advanced-search" class="block hover:text-red-400">البحث المتقدم</a>
         <a href="/about" class="block hover:text-red-400">عن الفريق</a>
 

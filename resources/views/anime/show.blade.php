@@ -18,11 +18,7 @@
                                 <h1 class="text-4xl font-bold text-right flex-1">{{ $anime['title'] }}</h1>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
                                     <div>
-                                        <div class="bg-yellow-600 border border-yellow-400 px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] uppercase tracking-wide">IMDB</div>
-                                        <div class="text-white font-bold text-center text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
-                                    </div>
-                                    <div>
-                                        <div class="bg-blue-600 border border-blue-400 px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
+                                        <div class="bg-blue-600 border border-blue-400 roundedpx-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                 </div>
@@ -111,57 +107,134 @@
             <div class="mt-8">
                 <div class="bg-white/30 backdrop-blur-lg p-6 border border-white/20">
                     <h2 class="text-2xl font-bold mb-4 text-right">قائمة الأنمي</h2>
-                    <h3 class="text-lg font-semibold mb-4 text-right">ملخص الأنمي</h3>
+                    <h3 class="text-lg font-semibold mb-4 text-right">مُلخَّص القصَّة:</h3>
                     <p class="text-white/90 leading-relaxed text-justify text-sm">
                         {{ $anime['synopsis'] ?? 'لا يوجد ملخص متاح لهذا الأنمي.' }}
                     </p>
                 </div>
             </div>
 
-           {{-- Download links --}}
-@if ($animeLink && $animeLink->batches->isNotEmpty())
-    <div class="px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10">
-        <h2 class="text-xl font-bold pr-3 text-white">روابط الحلقات</h2>
-        <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
-            @foreach ($animeLink->batches as $batch)
-                @php
-                    $validLinks = $batch->batchLinks->filter(function ($link) {
-                        return $link->url_torrent || $link->url_mega || $link->url_gdrive;
-                    });
-                @endphp
+            {{-- Download links --}}
+            @if ($animeLink && $animeLink->batches->isNotEmpty())
+                <div class="px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10">
+                    <h2 class="text-xl font-bold pr-3 text-white">روابط الحلقات</h2>
+                    <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
+                        @foreach ($animeLink->batches as $batch)
+                            @php
+                                $validLinks = $batch->batchLinks->filter(function ($link) {
+                                    return $link->url_torrent || $link->url_mega || $link->url_gdrive;
+                                });
+                            @endphp
 
-                @if ($validLinks->isNotEmpty())
-                    @foreach ($validLinks as $link)
-                        <div class="overflow-hidden shadow-md pt-3">
-                            <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
-                                {{ $batch->name }} - Episodes {{ $batch->episodes }}
-                            </div>
-                            <div class="bg-white flex flex-wrap md:flex-nowrap justify-between items-center px-3 py-2 gap-2">
-                                <div class="flex flex-wrap gap-2">
-                                    @if ($link->url_torrent)
-                                        <a href="{{ $link->url_torrent }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                            Torrent ({{ $link->resolution }}p)
-                                        </a>
-                                    @endif
-                                    @if ($link->url_mega)
-                                        <a href="{{ $link->url_mega }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                            Mega ({{ $link->resolution }}p)
-                                        </a>
-                                    @endif
-                                    @if ($link->url_gdrive)
-                                        <a href="{{ $link->url_gdrive }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                                            GDrive ({{ $link->resolution }}p)
-                                        </a>
-                                    @endif
+                            @if ($validLinks->isNotEmpty())
+                                @foreach ($validLinks as $link)
+                                    <div class="overflow-hidden shadow-md pt-3">
+                                        <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
+                                            {{ $batch->name }}
+                                        </div>
+                                        <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
+                                            <div class="flex flex-wrap gap-2">
+                                                @if ($link->url_torrent)
+                                                    <a href="{{ $link->url_torrent }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        Torrent ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_mega)
+                                                    <a href="{{ $link->url_mega }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        Mega ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_gdrive)
+                                                    <a href="{{ $link->url_gdrive }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        GDrive ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- Comments Section --}}
+            <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
+
+                <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
+
+                {{-- Flash message --}}
+                @if(session('success'))
+                    <div class="bg-green-500 text-white p-2 rounded">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                {{-- Error messages --}}
+                @if ($errors->any())
+                    <div class="bg-red-500 text-white p-2 rounded">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Add Comment Form --}}
+                @auth
+                    <form action="{{ route('comments.store', $animeLink->id) }}" method="POST" class="space-y-4 mt-6">
+                        @csrf
+                        <div>
+                            <label for="body" class="block text-sm">💬 تعليقك:</label>
+                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="أدخل تعليقك هنا..."></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                أضف تعليق
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    <p class="text-white/70 text-sm mt-2">يرجى <a href="{{ route('login') }}" class="underline">تسجيل الدخول</a> لكتابة تعليق.</p>
+                @endauth
+
+                {{-- Comment List --}}
+                @if ($animeLink && $animeLink->comments->isNotEmpty())
+                    <div class="space-y-6 mt-6">
+                        @foreach ($animeLink->comments as $comment)
+                            <div class="bg-white/10 p-4 rounded-lg border border-white/20 flex gap-4 items-start">
+                                {{-- Avatar --}}
+                                <img src="{{ $comment->user->profile_photo_url ?? asset('img/default-avatar.png') }}" 
+                                     class="w-10 h-10 rounded-full object-cover mt-1" alt="avatar">
+
+                                <div class="flex-1">
+                                    {{-- Username + Timestamp --}}
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-bold text-sm">{{ $comment->user->name }}</span>
+                                        <span class="text-xs text-white/50">{{ $comment->created_at->diffForHumans() }}</span>
+                                    </div>
+
+                                    {{-- Isi Komentar --}}
+                                    <div class="text-white text-sm">
+                                        {{ $comment->body }}
+                                    </div>
+
+                                    {{-- Aksi --}}
+                                    <div class="mt-2 flex gap-4 text-xs text-white/70">
+                                        <button class="hover:underline">👍 إعجاب</button>
+                                        <button class="hover:underline">💬 رد</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-white/70 italic mt-6">لا توجد تعليقات بعد.</p>
                 @endif
-            @endforeach
-        </div>
-    </div>
-@endif
+
+            </div>
 
         </div>
     </div>

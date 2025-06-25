@@ -150,11 +150,7 @@
                                 
                                 {{-- Ratings --}}
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0">
-                                    {{-- IMDB Rating --}}
-                                    <div>
-                                        <div class="bg-yellow-600 border border-yellow-400 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[10px] tracking-wide">IMDb</div>
-                                        <div class="text-white font-bold text-center text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
-                                    </div>
+
 
                                     {{-- MAL Rating --}}
                                     <div>
@@ -185,9 +181,9 @@
                                 @endforeach
                             </div>
                             
-                            {{-- Synopsis --}}
+                            {{-- Batch Name --}}
                             <p class="text-sm text-white/70 line-clamp-2 leading-relaxed">
-                                {{ Str::limit($anime['synopsis'], 150, '...') }}
+                                {{ Str::limit($anime['batch_names'], 150, '...') }}
                             </p>
                         </div>
                     </div>
@@ -278,101 +274,6 @@
                 </div>
             </div>
         </section>
-
-
-{{-- 🟢 Current Works Section --}}
-<section class="bg-white max-w-7xl mx-auto mt-12 md:mt-20 p-4 md:p-6 rounded-lg relative">
-    {{-- Full Background Image --}}
-    <div class="absolute inset-0">
-        <img src="{{ asset('img/banner.png') }}" 
-             alt="Banner Background" 
-             class="w-full h-full object-contain object-left">
-    </div>
-            <div class="absolute inset-0 rounded-lg" style="background: linear-gradient(to right, transparent 0%, transparent 60%, rgba(255, 255, 255, 255) 70%, rgba(255, 255, 255, 0.8) 100%);"></div>
-    
-    {{-- Content Container --}}
-    <div class="relative z-30 pb-8">
- {{-- Header Section --}}
-<div class="flex justify-start items-center pb-4 mb-6">
-    <h2 class="text-md md:text-2xl font-bold border-r-4 border-black pr-4 text-black">الأعمال الحالية</h2>
-    <span class="text-sm md:text-base text-black/80 px-3 py-1 rounded-full">اقتراحاتنا</span>
-</div>
-
-        {{-- Anime List Only --}}
-        <div class="space-y-3">
-            @foreach(collect($currentWorks)->take(4) as $index => $anime)
-                <a href="{{ route('anime.show', ['id' => $anime['mal_id']]) }}" 
-                   class="anime-item block group">
-                    <div class="flex items-center gap-4 p-3">
-                        
-                        {{-- Anime Image --}}
-                        <div class="anime-image relative w-12 h-16 overflow-hidden rounded-md flex-shrink-0">
-                            <img src="{{ $anime['images']['webp']['image_url'] }}" 
-                                 alt="{{ $anime['title'] }}" 
-                                 class="w-full h-full object-cover">
-                            
-                            {{-- Episode indicator --}}
-                            @if($anime['episodes'])
-                                <div class="absolute top-0.5 right-0.5 bg-red-500 text-black text-xs px-1 py-0.5 rounded-full font-bold">
-                                    {{ $anime['episodes'] }}
-                                </div>
-                            @endif
-                        </div>
-                        
-                        {{-- Anime Info --}}
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-sm text-black mb-1 group-hover:text-red-400 transition-colors truncate">
-                                {{ $anime['title'] }}
-                            </h3>
-                            
-                            {{-- Genres --}}
-                            <div class="flex flex-wrap gap-1 mb-2">
-                                @foreach(collect($anime['genres'])->take(2) as $genre)
-                                    <span class="genre-tag text-xs text-black/80 px-1.5 py-0.5 rounded-full">
-                                        {{ $genre['name'] }}
-                                    </span>
-                                @endforeach
-                            </div>
-                            
-                            {{-- Progress Bar --}}
-                            @php
-                                $totalEpisodes = $anime['episodes'] ?? null;
-                                $isAiring = $anime['airing'] ?? false;
-                                $progress = 0;
-                                if ($totalEpisodes && $isAiring) {
-                                    $progress = rand(10, 30);
-                                } elseif ($totalEpisodes && !$isAiring) {
-                                    $progress = 100;
-                                } else {
-                                    $progress = rand(20, 90);
-                                }
-                            @endphp
-                            <div class="w-1/6 bg-white/20 rounded-full h-1.5 mb-1 overflow-hidden">
-                                <div class="progress-bar bg-gradient-to-r from-red-500 to-red-600 h-full rounded-full relative overflow-hidden" 
-                                     style="width: {{ $progress }}%;">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent progress-pulse"></div>
-                                </div>
-                            </div>
-                            
-                            {{-- Progress Percentage --}}
-                            <div class="text-xs font-bold text-black/90">
-                                {{ $progress }}%
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            @endforeach
-            
-            {{-- Show message if not enough anime --}}
-            @if(count($currentWorks) < 1)
-                <div class="text-center py-8 text-white/60">
-                    <p class="text-sm">لا توجد أنمي إضافية لعرضها</p>
-                </div>
-            @endif
-        </div>
-    </div>
-</section>
-
 
     </div>
 </x-app-layout>

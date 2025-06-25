@@ -20,17 +20,17 @@ class AnimeLinkResource extends Resource
 {
     protected static ?string $model = AnimeLink::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationLabel = 'Anime Links';
-    protected static ?string $pluralModelLabel = 'Anime Links';
+    protected static ?string $navigationLabel = 'روابط الأنمي';
+    protected static ?string $pluralModelLabel = 'روابط الأنمي';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Anime Information')
+                Section::make('معلومات الأنمي')
                     ->schema([
                         TextInput::make('mal_id')
-                            ->label('MyAnimeList ID')
+                            ->label('معرّف MyAnimeList')
                             ->required()
                             ->numeric()
                             ->reactive()
@@ -50,44 +50,50 @@ class AnimeLinkResource extends Resource
                                 }
                             }),
 
-                        TextInput::make('title')->required()->maxLength(255),
-                        TextInput::make('poster')->label('Poster URL')->maxLength(512),
-                        Textarea::make('synopsis')->rows(4),
+                        TextInput::make('title')->label('العنوان')->required()->maxLength(255),
+                        TextInput::make('poster')->label('رابط الصورة')->maxLength(512),
+                        Textarea::make('synopsis')->label('الملخص')->rows(4),
+
                         Select::make('anime_types')
-                            ->label('Type')
+                            ->label('النوع')
                             ->relationship('types', 'name')
                             ->multiple()
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
-                                TextInput::make('name')->required(),
+                                TextInput::make('name')->label('الاسم')->required(),
+                                TextInput::make('color')
+                                    ->label('اللون (Hex)')
+                                    ->required()
+                                    ->helperText('مثال: #FF0000'),
                             ])
                             ->required(),
-                        TextInput::make('season')->maxLength(50),
-                        TextInput::make('year')->maxLength(4),
+
+                        TextInput::make('season')->label('الموسم')->maxLength(50),
+                        TextInput::make('year')->label('السنة')->maxLength(4),
                     ]),
 
                 Repeater::make('batches')
                     ->relationship()
-                    ->label('Batch Episodes')
+                    ->label('حزم الحلقات')
                     ->schema([
                         Hidden::make('anime_link_id')
                             ->default(fn (\Filament\Forms\Get $get) => $get('../../id')),
 
-                        TextInput::make('name')->label('Name')->required(),
+                        TextInput::make('name')->label('الاسم')->required(),
                         Textarea::make('episodes')
-                            ->label('Episode List (comma separated)')
+                            ->label('قائمة الحلقات (مفصولة بفواصل)')
                             ->required()
                             ->rows(3)
                             ->maxLength(65535)
-                            ->helperText('Example: 1,2,3 or 1-12'),
+                            ->helperText('مثال: 1,2,3 أو 1-12'),
 
                         Repeater::make('batchLinks')
                             ->relationship()
-                            ->label('Download Links')
+                            ->label('روابط التحميل')
                             ->schema([
                                 Select::make('resolution')
-                                    ->label('Resolution')
+                                    ->label('الدقة')
                                     ->options([
                                         '360' => '360p',
                                         '480' => '480p',
@@ -97,15 +103,15 @@ class AnimeLinkResource extends Resource
                                     ->required(),
 
                                 Textarea::make('url_torrent')
-                                    ->label('Torrent URLs')
+                                    ->label('روابط التورنت')
                                     ->rows(1),
 
                                 Textarea::make('url_mega')
-                                    ->label('Mega URLs')
+                                    ->label('روابط ميجا')
                                     ->rows(1),
 
                                 Textarea::make('url_gdrive')
-                                    ->label('GDrive URLs')
+                                    ->label('روابط Google Drive')
                                     ->rows(1),
                             ]),
                     ]),
@@ -116,10 +122,10 @@ class AnimeLinkResource extends Resource
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('title')->searchable(),
-                \Filament\Tables\Columns\TextColumn::make('types.name')->label('Type')->limit(30),
-                \Filament\Tables\Columns\TextColumn::make('season'),
-                \Filament\Tables\Columns\TextColumn::make('year'),
+                \Filament\Tables\Columns\TextColumn::make('title')->label('العنوان')->searchable(),
+                \Filament\Tables\Columns\TextColumn::make('types.name')->label('النوع')->limit(30),
+                \Filament\Tables\Columns\TextColumn::make('season')->label('الموسم'),
+                \Filament\Tables\Columns\TextColumn::make('year')->label('السنة'),
             ])
             ->actions([
                 \Filament\Tables\Actions\EditAction::make(),
@@ -156,12 +162,12 @@ class AnimeLinkResource extends Resource
     }
 
     public static function afterSave(Form $form, $record): void
-{
-    $record->load('batches.batchLinks');
+    {
+        $record->load('batches.batchLinks');
 
-    $rssXml = view('rss.feed', ['anime' => $record])->render();
+        $rssXml = view('rss.feed', ['anime' => $record])->render();
 
-    \Illuminate\Support\Facades\File::ensureDirectoryExists(public_path('rss'));
-    \Illuminate\Support\Facades\File::put(public_path('rss/' . $record->slug . '.xml'), $rssXml);
-}
+        File::ensureDirectoryExists(public_path('rss'));
+        File::put(public_path('rss/' . $record->slug . '.xml'), $rssXml);
+    }
 }

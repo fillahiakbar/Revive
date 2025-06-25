@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use App\Models\AnimeLink;   
 
 class AnimeController extends Controller
 {
@@ -18,65 +19,62 @@ class AnimeController extends Controller
         return view('home');
     }
 
-    public function search(Request $request)
-    {
-        try {
-            $query = $request->get('q', '');
-            $page = $request->get('page', 1);
-            
-            if (empty($query)) {
-                return view('anime.search', [
-                    'animeList' => collect([]),
-                    'query' => $query,
-                    'pagination' => []
-                ]);
-            }
+public function search(Request $request)
+{
+    $query = $request->get('q', '');
 
-            $response = Http::timeout(30)
-                ->retry(3, 1000)
-                ->get($this->jikanApiUrl . 'anime', [
-                    'q' => $query,
-                    'page' => $page,
-                    'limit' => 25,
-                    'sfw' => true
-                ]);
-
-            if (!$response->successful()) {
-                Log::error('Failed to search anime from Jikan API', [
-                    'query' => $query,
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                
-                return view('anime.search', [
-                    'animeList' => collect([]),
-                    'query' => $query,
-                    'error' => 'Failed to search anime. Please try again later.'
-                ]);
-            }
-
-            $data = $response->json();
-            $animeList = collect($data['data'] ?? [])->filter(function($anime) {
-                return $this->isAnimeAppropriate($anime);
-            });
-            $pagination = $data['pagination'] ?? [];
-
-            return view('anime.search', compact('animeList', 'query', 'pagination'));
-
-        } catch (\Exception $e) {
-            Log::error('Error in search method', [
-                'query' => $request->get('q', ''),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return view('anime.search', [
-                'animeList' => collect([]),
-                'query' => $request->get('q', ''),
-                'error' => 'An error occurred while searching anime.'
-            ]);
-        }
+    if (empty($query)) {
+        return view('anime.search', [
+            'animeList' => collect([]),
+            'query' => $query,
+            'pagination' => [],
+        ]);
     }
+
+    try {
+        // Ambil anime dari database lokal yang judulnya cocok
+        $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])
+            ->where('title', 'like', '%' . $query . '%')
+            ->get();
+
+        $result = [];
+
+        foreach ($localAnimes as $anime) {
+            if (!$anime->mal_id) continue;
+
+            $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+
+            if ($api->successful()) {
+                $data = $api->json('data');
+
+                $result[] = array_merge($data, [
+                    'local_title' => $anime->title,
+                    'type' => $anime->types->first()->name ?? null,
+                    'batches' => $anime->batches ?? [],
+                    'episodes' => $anime->episodes,
+                ]);
+            }
+        }
+
+        return view('anime.search', [
+            'animeList' => collect($result),
+            'query' => $query,
+            'pagination' => [], // jika nanti ingin ditambahkan
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Search Error', [
+            'query' => $query,
+            'message' => $e->getMessage(),
+        ]);
+
+        return view('anime.search', [
+            'animeList' => collect([]),
+            'query' => $query,
+            'error' => 'Terjadi kesalahan saat pencarian. Silakan coba lagi.',
+        ]);
+    }
+}
 
     private function isAnimeAppropriate(array $anime): bool
 {

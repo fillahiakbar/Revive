@@ -3,22 +3,23 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Fortify;
+use Illuminate\Support\Facades\View;
+use App\Models\SocialMedia;
 
-class AppServiceProvider extends ServiceProvider
+
+class FortifyCustomProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+   public function register(): void
+{
+    $this->app->singleton(LoginResponse::class, RedirectUserAfterLogin::class);
+    $this->app->singleton(RegisterResponse::class, RedirectUserAfterRegister::class);
+}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+           View::composer('*', function ($view) {
+            $view->with('socialMedias', SocialMedia::where('is_active', true)->get());
+        });
     }
 }

@@ -1,3 +1,4 @@
+@props(['socialMedias'])
 <footer class="text-white relative mt-10">
 
     {{-- Overlay content --}}
@@ -5,23 +6,24 @@
 
         {{-- Link List (kanan dalam RTL) --}}
         <div class="space-y-2 text-sm text-right md:order-1 pt-10">
-            <p><a href="#" class="hover:text-red-500">الشروط والأحكام</a></p>
-            <p><a href="#" class="hover:text-red-500">سياسة الخصوصية</a></p>
-            <p><a href="#" class="hover:text-red-500">سياسة ملفات تعريف الارتباط</a></p>
+            <p><a href="/terms" class="hover:text-red-500">الشروط والأحكام</a></p>
+            <p><a href="/privacy" class="hover:text-red-500">سياسة الخصوصية</a></p>
+            <p><a href="/cookies" class="hover:text-red-500">سياسة ملفات تعريف الارتباط</a></p>
         </div>
 
         {{-- Logo & Center Text --}}
         <div class="flex flex-col items-center space-y-2 md:order-2">
             <img src="{{ asset('img/logo.png') }}" alt="logo" class="h-20">
-            <p class="text-sm">جميع الحقوق محفوظة ⌊ REVIVE </p>
+            <p class="text-sm">جميع الحقوق محفوظة لفريق REVIVE </p>
         </div>
 
-{{-- Social Icons (sekarang di kiri) --}}
+{{-- Social Icons (dinamis dari DB) --}}
 <div class="flex space-x-6 rtl:space-x-reverse text-4xl md:order-3 pt-20">
-    <a href="#" class="hover:text-red-500"><i class="fab fa-telegram-plane"></i></a>
-    <a href="#" class="hover:text-red-500"><i class="fab fa-instagram"></i></a>
-    <a href="#" class="hover:text-red-500"><i class="fab fa-x-twitter"></i></a>
-    <a href="#" class="hover:text-red-500"><i class="fab fa-discord"></i></a>
+    @foreach ($socialMedias as $media)
+        <a href="{{ $media->url }}" class="hover:text-red-500" target="_blank" title="{{ $media->platform }}">
+            <i class="fab fa-{{ getSocialIcon($media->platform) }}"></i>
+        </a>
+    @endforeach
 </div>
 
     </div>

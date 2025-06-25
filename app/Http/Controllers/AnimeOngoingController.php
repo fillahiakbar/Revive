@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\AnimeLink;
 use Illuminate\Support\Facades\Http;
@@ -13,40 +12,43 @@ class AnimeOngoingController extends Controller
 
     public function index(Request $request)
     {
-        // Ambil semua anime dari database lokal
+        // Ambil semua anime dari database
         $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])->get();
 
         $ongoingAnimes = [];
 
-        // Loop setiap anime untuk cek status dari API
         foreach ($localAnimes as $anime) {
             $malId = $anime->mal_id;
             if (!$malId) continue;
 
-            // Ambil detail dari API berdasarkan MAL ID
-            $api = Http::get($this->jikanApiUrl . $malId);
+            // Ambil data API dari cache atau langsung
+            $apiData = cache()->remember("jikan_mal_{$malId}", 3600, function () use ($malId) {
+                $res = Http::get("https://api.jikan.moe/v4/anime/{$malId}");
+                return $res->successful() ? $res->json('data') : null;
+            });
 
-            if ($api->successful()) {
-                $data = $api->json('data');
+            if (!$apiData) continue;
 
-                // Jika status anime dari API adalah airing, masukkan ke hasil
-                if ($data['status'] === 'Currently Airing') {
-                    $ongoingAnimes[] = array_merge(
-                        $data,
-                        [
-                            'type' => $anime->types->first()->name ?? null,
-                            'local_title' => $anime->title,
-                            'batches' => $anime->batches ?? [],
-                            // Bisa tambahkan field lokal lain dari database jika perlu
-                        ]
-                    );
-                }
-            }
+            // Filter hanya anime yang masih airing
+            if (($apiData['status'] ?? '') !== 'Currently Airing') continue;
+
+            // Gabungkan data API dan lokal
+            $ongoingAnimes[] = [
+                'mal_id'        => $anime->mal_id,
+                'local_title'   => $anime->title,
+                'title'         => $apiData['title'] ?? $anime->title,
+                'images'        => $apiData['images'] ?? [],
+                'duration'      => $apiData['duration'] ?? null,
+                'score'         => $apiData['score'] ?? null,
+                'type'          => $anime->types->first()->name ?? null,
+                'episodes'      => $anime->episodes,
+                'batches'       => $anime->batches ?? [],
+            ];
         }
 
         return view('anime.ongoing', [
             'animes' => $ongoingAnimes,
-            'pagination' => [] // pagination opsional, karena data dari database
+            'pagination' => []
         ]);
     }
 }

@@ -45,4 +45,9 @@ public function generateRssFile()
     File::put($path, $rssXml);
 }
     
+
+public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
 }

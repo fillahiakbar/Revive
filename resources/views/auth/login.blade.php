@@ -76,7 +76,11 @@
             {{-- Register --}}
             <div class="mt-6 text-center text-sm text-white">
                 <span>أليس لديك حساب؟</span>
-                <a href="{{ route('register') }}" class="text-blue-500 hover:underline">سجّل الآن</a>
+                @if (isPublicRegistrationEnabled())
+    <a href="{{ route('register') }}" class="text-blue-600 hover:underline">
+        سجّل الآن
+    </a>
+@endif
             </div>
         </div>
     </div>

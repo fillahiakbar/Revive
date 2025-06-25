@@ -129,6 +129,18 @@ return [
 
 
 
-    
+    /*
+    |--------------------------------------------------------------------------
+    | Public Registration Toggle
+    |--------------------------------------------------------------------------
+    |
+    | This value controls whether public registration (e.g. /register route)
+    | is enabled or disabled. You can update it via .env or a settings panel.
+    |
+    */
+
+    'features' => [
+    'allow_public_registration' => env('ALLOW_PUBLIC_REGISTRATION', true),
+],
 
 ];

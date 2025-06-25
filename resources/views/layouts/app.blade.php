@@ -50,7 +50,7 @@
         </div>
 
         <!-- Footer -->
-        <x-footer />
+        <x-footer :socialMedias="$socialMedias" />
 
         @stack('modals')
         @livewireScripts
