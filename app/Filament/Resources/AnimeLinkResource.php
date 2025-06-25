@@ -52,7 +52,21 @@ class AnimeLinkResource extends Resource
 
                         TextInput::make('title')->label('العنوان')->required()->maxLength(255),
                         TextInput::make('poster')->label('رابط الصورة')->maxLength(512),
-                        Textarea::make('synopsis')->label('الملخص')->rows(4),
+                        \Filament\Forms\Components\RichEditor::make('synopsis')
+    ->label('الملخص')
+    ->toolbarButtons([
+        'bold',
+        'italic',
+        'strike',
+        'underline',
+        'h2',
+        'h3',
+        'bulletList',
+        'orderedList',
+        'blockquote',
+        'link',
+    ])
+    ->columnSpan('full'),
 
                         Select::make('anime_types')
                             ->label('النوع')

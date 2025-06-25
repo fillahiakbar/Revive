@@ -8,14 +8,14 @@ class Comment extends Model
 {
     protected $fillable = ['anime_link_id','user_id', 'body']; // <-- penting untuk mass assignment
 
-    public function animeLink()
-    {
-        return $this->belongsTo(AnimeLink::class);
-    }
-
-    public function user()  
-    {
+    public function user()
+{
     return $this->belongsTo(User::class);
-    }
+}
+
+public function animeLink()
+{
+    return $this->belongsTo(AnimeLink::class);
+}
 
 }

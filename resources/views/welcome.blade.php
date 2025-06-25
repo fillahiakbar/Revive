@@ -69,6 +69,8 @@
     </div>
 
     <div class="absolute bottom-0 left-0 right-0 h-16 z-5" style="background: linear-gradient(to bottom, transparent, rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.8));"></div>
+
+
 </section>
 
 {{-- Script dinamis ganti konten slider --}}
@@ -110,6 +112,9 @@
     });
 </script>
 @endif
+
+
+
 
         {{-- 📦 Main Content Section --}}
         <section class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 md:-mt-16 rounded-lg">
