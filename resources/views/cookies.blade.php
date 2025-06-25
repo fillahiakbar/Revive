@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="pt-4">
         <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0  mt-24">
-            <div class="w-full sm:max-w-3xl mt-6 p-6 shadow-md overflow-hidden sm:rounded-lg prose">
+            <div class="w-full sm:max-w-3xl mt-24 p-6 shadow-md overflow-hidden sm:rounded-lg prose">
                 <h1 class="mb-6">سياسة الكوكيز</h1>
                 <hr class="mb-6">
 

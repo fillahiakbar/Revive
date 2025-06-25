@@ -10,11 +10,13 @@ class AnimeDetailController extends Controller
     public function show($id)
     {
         // Ambil data AnimeLink berdasarkan mal_id, termasuk relasi types dan batches.batchLinks
-        $animeLink = AnimeLink::where('mal_id', $id)
+    $animeLink = AnimeLink::where('mal_id', $id)
     ->with([
         'types',
-        'batches' => fn ($q) => $q->has('batchLinks'), // hanya ambil batch yang punya link
-        'batches.batchLinks'
+        'batches' => fn ($q) => $q->has('batchLinks'),
+        'batches.batchLinks',
+        'comments' => fn ($q) => $q->latest(), 
+        'comments.user',
     ])
     ->first();
 

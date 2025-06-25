@@ -18,14 +18,14 @@
                                 <h1 class="text-4xl font-bold text-right flex-1">{{ $anime['title'] }}</h1>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
                                     <div>
-                                        <div class="bg-blue-600 border border-blue-400 roundedpx-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
+                                        <div class="bg-blue-600 border border-blue-400 px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            @if(isset($anime['title_japanese']))
-                                <p class="text-white/80 mb-4 text-right">{{ $anime['title'] }} < {{ $anime['title_japanese'] }}</p>
+                            @if(isset($anime['title_english']))
+                                <p class="text-white/80 mb-4 text-right">{{ $anime['title_english'] }}</p>
                             @endif
                         </div>
 
@@ -127,9 +127,11 @@
 
                             @if ($validLinks->isNotEmpty())
                                 @foreach ($validLinks as $link)
+                                Episodes {{ $batch->episodes }}
                                     <div class="overflow-hidden shadow-md pt-3">
                                         <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
-                                            {{ $batch->name }}
+                                            {{ $batch->name }} 
+                                            <!-- - Episodes {{ $batch->episodes }} -->
                                         </div>
                                         <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
                                             <div class="flex flex-wrap gap-2">
@@ -187,7 +189,7 @@
                         @csrf
                         <div>
                             <label for="body" class="block text-sm">💬 تعليقك:</label>
-                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="أدخل تعليقك هنا..."></textarea>
+                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="اكتب تعليقك هنا…"></textarea>
                         </div>
                         <div>
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">

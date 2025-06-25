@@ -1,10 +1,10 @@
 <x-app-layout>
     <div class="pt-4 ">
         <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0 mt-24">
-            <div class="w-full sm:max-w-2xl mt-6 p-6 shadow-md overflow-hidden sm:rounded-lg prose">
+            <div class="w-full mt-24 sm:max-w-2xl p-6 shadow-md overflow-hidden sm:rounded-lg prose">
                 <h1 class="mb-10">الشروط والأحكام (نموذج عام)</h1>
                 <hr class="mb-6">
-                
+
                 <p class="mb-4"><strong>1. التعريفات</strong><br>
                     الموقع/الخدمة: المنصة الرقمية التي تتصفحها حالياً.<br>
                     الإدارة/نحن: مالكو الموقع أو مُشغِّلوه.<br>

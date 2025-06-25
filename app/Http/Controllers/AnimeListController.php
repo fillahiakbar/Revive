@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\AnimeLink;
+use App\Models\AnimeLink; 
 
 class AnimeListController extends Controller
 {
     public function list(Request $request)
     {
-        $letter = strtoupper($request->query('letter', 'A'));
+        $letter = strtoupper($request->query('letter', 'ALL'));
         $page = (int) $request->query('page', 1);
         $perPage = 24;
 
