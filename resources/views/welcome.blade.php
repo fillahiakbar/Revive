@@ -111,14 +111,6 @@
 </script>
 @endif
 
-
-
-{{-- 🌀 Separator Section with Gradient --}}
-<div class="flex justify-center -mt-20 z-15 relative">
-    <img src="{{ asset('/img/rectanggle.png') }}" alt="Logo" class="">
-</div>
-
-
         {{-- 📦 Main Content Section --}}
         <section class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 md:-mt-16 rounded-lg">
 {{-- Latest Releases --}}
