@@ -106,7 +106,6 @@
             {{-- Synopsis --}}
             <div class="mt-8">
                 <div class="bg-white/30 backdrop-blur-lg p-6 border border-white/20">
-                    <h2 class="text-2xl font-bold mb-4 text-right">قائمة الأنمي</h2>
                     <h3 class="text-lg font-semibold mb-4 text-right">مُلخَّص القصَّة:</h3>
                     <p class="text-white/90 leading-relaxed text-justify text-sm">
                         {{ $anime['synopsis'] ?? 'لا يوجد ملخص متاح لهذا الأنمي.' }}

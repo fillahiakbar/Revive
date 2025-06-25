@@ -35,6 +35,7 @@ class SliderResource extends Resource
                     ->label('الصورة')
                     ->directory('sliders')
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg'])
                     ->required(),
 
                 TextInput::make('title')

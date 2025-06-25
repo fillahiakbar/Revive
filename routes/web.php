@@ -13,6 +13,7 @@ use App\Http\Controllers\RssController;
 use App\Http\Controllers\AnimeOngoingController;
 use App\Http\Controllers\AnimeCompletedController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Auth\RegisterController;
 
 
 // Landing redirect ke user
@@ -41,10 +42,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
+    
 
-    Route::get('/register', function () {
-    abort_if(!isPublicRegistrationEnabled(), 403);
-    return view('auth.register');
-})->name('register');
+
 });
 

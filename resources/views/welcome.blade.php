@@ -56,14 +56,14 @@
 
     {{-- Tombol Navigasi Slider --}}
     <div class="absolute bottom-20 pb-24 right-20 flex gap-2 z-20">
-        <button id="prev-slide" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
-            <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
-            </svg>
-        </button>
         <button id="next-slide" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+            </svg>
+        </button>
+        <button id="prev-slide" class="bg-white/20 hover:bg-white/30 p-2 md:p-3 rounded-full backdrop-blur-sm transition-all duration-300">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
             </svg>
         </button>
     </div>
@@ -145,7 +145,7 @@
                             {{-- Title and Rating in same row --}}
                             <div class="flex items-center justify-between gap-4">
                                 <h3 class="font-bold text-lg md:text-xl text-white group-hover:text-blue-400 transition-colors duration-300 truncate">
-                                    اسم الأنمي: {{ $anime['title'] }}
+                                    {{ $anime['title'] }}
                                 </h3>
                                 
                                 {{-- Ratings --}}
@@ -183,9 +183,9 @@
                             
                             {{-- Batch Name --}}
                             <p class="text-sm text-white/70 line-clamp-2 leading-relaxed">
-                                {{ Str::limit($anime['batch_names'], 150, '...') }}
+                                الإصدار: {{ Str::limit($anime['batch_names'], 150, '...') }}
                             </p>
-                        </div>
+                        </div>e
                     </div>
                 </a>
                 {{-- ✨ Line Separator - Metode 1 --}}
