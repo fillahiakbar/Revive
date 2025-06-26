@@ -43,10 +43,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
     
-    Route::post('/admin/login', function () {
-    return 'POST login route fallback hit';
-});
-
 
 });
 
