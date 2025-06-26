@@ -57,7 +57,12 @@ class AnimeListController extends Controller
                 'images'        => $apiData['images'] ?? [],
                 'duration'      => $apiData['duration'] ?? null,
                 'score'         => $apiData['score'] ?? null,
-                'types'         => $anime->types->pluck('name')->toArray(),
+                'types' => $anime->types->map(function ($type) {
+    return [
+        'name' => $type->name,
+        'color' => $type->color ?? '#6b7280', // fallback abu-abu jika null
+    ];
+}),
                 'episodes'      => $anime->episodes,
             ];
         })->filter(); // hilangkan null/unsafe

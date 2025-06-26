@@ -51,11 +51,21 @@
                        class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
                         {{-- Badge --}}
-                        <div class="absolute left-1 z-10 flex flex-col gap-1">
-                            <span class="badge-{{ strtolower($anime['type'] ?? 'unknown') }} text-xs px-2 py-0.5 rounded text-white font-medium">
-                                {{ $anime['type'] ?? 'Unknown' }}
-                            </span>
-                        </div>
+<div class="absolute left-1 z-10 flex flex-wrap gap-1">
+    @foreach (($anime['types'] ?? []) as $type)
+        @php
+            $label = $type['name'];
+            $color = $type['color'] ?? '#6b7280';
+        @endphp
+        <span
+            class="text-xs px-2 py-0.5 rounded font-medium"
+            style="background-color: {{ $color }}; color: white;"
+        >
+            {{ $label }}
+        </span>
+    @endforeach
+</div>
+
 
                         {{-- Poster --}}
                         <div class="w-full bg-gray-800 flex items-center justify-center">

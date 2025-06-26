@@ -32,7 +32,7 @@ class WelcomeController extends Controller
                     'type' => $api['type'] ?? '-',
                     'episodes' => $api['episodes'] ?? null,
                     'synopsis' => $firstBatch?->name ?? '-',
-                    'batch_names' => $anime->batches->pluck('name')->implode(', '),
+                    'latest_batch_name' => $anime->batches->sortByDesc('created_at')->first()?->name,
                     'images' => $api['images'],
                     'genres' => $api['genres'] ?? [],
                     'created_at' => optional($firstBatch)->created_at, // penting untuk sorting

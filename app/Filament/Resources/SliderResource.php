@@ -44,6 +44,12 @@ class SliderResource extends Resource
                 TextInput::make('title')
                     ->label('العنوان')
                     ->maxLength(255),
+                
+                TextInput::make('mal_id')
+                    ->label('MyAnimeList ID')
+                    ->numeric()
+                    ->required()
+                    ->helperText('أدخل معرف الأنمي من MyAnimeList'),
 
                 Textarea::make('description')
                     ->label('الوصف'),

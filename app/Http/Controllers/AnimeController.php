@@ -50,7 +50,12 @@ class AnimeController extends Controller
                     $result[] = array_merge($data, [
                         'local_title' => $anime->title,
                         'title_english' => $data['title_english'] ?? null,
-                        'type' => $anime->types->first()->name ?? null,
+                        'types' => $anime->types->map(function ($type) {
+    return [
+        'name' => $type->name,
+        'color' => $type->color ?? '#6b7280',
+    ];
+}),
                         'batches' => $anime->batches ?? [],
                         'episodes' => $anime->episodes,
                     ]);

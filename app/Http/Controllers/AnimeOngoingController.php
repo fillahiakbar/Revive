@@ -40,7 +40,10 @@ class AnimeOngoingController extends Controller
                 'images'        => $apiData['images'] ?? [],
                 'duration'      => $apiData['duration'] ?? null,
                 'score'         => $apiData['score'] ?? null,
-                'type'          => $anime->types->first()->name ?? null,
+                'types' => $anime->types->map(fn($type) => [
+    'name' => $type->name,
+    'color' => $type->color ?? '#6b7280',
+]),
                 'episodes'      => $anime->episodes,
                 'batches'       => $anime->batches ?? [],
             ];

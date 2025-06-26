@@ -33,7 +33,10 @@ class AnimeCompletedController extends Controller
                     $completedAnimes[] = array_merge(
                         $data,
                         [
-                            'type' => $anime->types->first()->name ?? null,
+                            'types' => $anime->types->map(fn($type) => [
+    'name' => $type->name,
+    'color' => $type->color ?? '#6b7280',
+]),
                             'local_title' => $anime->title,
                             'batches' => $anime->batches ?? [],
                             // Tambahkan kolom lokal lainnya kalau perlu
