@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class AnimeLink extends Model
 {
-    protected $fillable = ['mal_id', 'title', 'poster', 'synopsis', 'season', 'year'];
+    protected $fillable = ['mal_id', 'title', 'poster', 'synopsis', 'season', 'year', 'type'];
 
     public function types()
     {
@@ -48,6 +48,7 @@ public function generateRssFile()
 
 public function comments()
 {
-    return $this->hasMany(Comment::class);
+    return $this->hasMany(Comment::class)->latest();
 }
+
 }

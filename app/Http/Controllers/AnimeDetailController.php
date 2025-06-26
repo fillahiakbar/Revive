@@ -9,62 +9,66 @@ class AnimeDetailController extends Controller
 {
     public function show($id)
     {
-        // Ambil data AnimeLink berdasarkan mal_id, termasuk relasi types dan batches.batchLinks
-    $animeLink = AnimeLink::where('mal_id', $id)
-    ->with([
-        'types',
-        'batches' => fn ($q) => $q->has('batchLinks'),
-        'batches.batchLinks',
-        'comments' => fn ($q) => $q->latest(), 
-        'comments.user',
-    ])
-    ->first();
+        // Ambil data dari database berdasarkan mal_id
+        $animeLink = AnimeLink::where('mal_id', $id)
+            ->with([
+                'types',
+                'batches' => fn ($q) => $q->has('batchLinks'),
+                'batches.batchLinks',
+                'comments' => fn ($q) => $q->latest(),
+                'comments.user',
+            ])
+            ->first();
 
         $downloadLinks = collect();
         $animeData = [];
         $fromDatabase = false;
 
-        // Fetch data dari Jikan API
-        $apiData = [];
+        // Ambil data dari API Jikan
         $apiResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/full");
 
-        if ($apiResponse->successful()) {
-            $data = $apiResponse['data'];
-            $apiData = [
-                'title' => $data['title'] ?? null,
-                'title_japanese' => $data['title_japanese'] ?? null,
-                'poster' => $data['images']['jpg']['large_image_url'] ?? null,
-                'synopsis' => $data['synopsis'] ?? null,
-                'season' => $data['season'] ?? null,
-                'year' => $data['year'] ?? null,
-                'type' => $data['type'] ?? null,
-                'status' => $data['status'] ?? null,
-                'studios' => $data['studios'] ?? [],
-                'genres' => collect($data['genres'] ?? [])->pluck('name')->toArray(),
-                'episodes' => $data['episodes'] ?? null,
-                'duration' => $data['duration'] ?? null,
-                'aired' => $data['aired'] ?? [],
-                'score' => $data['score'] ?? null,
-            ];
-        } else {
+        if (!$apiResponse->successful()) {
             abort(404, 'Anime not found via API');
         }
 
-        // Jika anime ditemukan di database lokal
+        $data = $apiResponse['data'] ?? [];
+
+        // Siapkan data dari API sebagai default
+        $apiData = [
+            'mal_id' => $data['mal_id'] ?? $id,
+            'title' => $data['title'] ?? null,
+            'title_english' => $data['title_english'] ?? null,
+            'title_japanese' => $data['title_japanese'] ?? null,
+            'poster' => $data['images']['jpg']['large_image_url'] ?? null,
+            'synopsis' => $data['synopsis'] ?? null,
+            'season' => $data['season'] ?? null,
+            'year' => $data['year'] ?? null,
+            'type' => $data['type'] ?? null,
+            'status' => $data['status'] ?? null,
+            'studios' => $data['studios'] ?? [],
+            'genres' => collect($data['genres'] ?? [])->pluck('name')->toArray(),
+            'episodes' => $data['episodes'] ?? null,
+            'duration' => $data['duration'] ?? null,
+            'aired' => $data['aired'] ?? [],
+            'score' => $data['score'] ?? null,
+        ];
+
+        // Jika data tersedia di database, gunakan sebagai prioritas
         if ($animeLink) {
-            // Force refresh untuk relasi batches dan batchLinks agar data selalu terbaru
-            $animeLink = $animeLink->fresh(['types', 'batches.batchLinks']);
+            $animeLink->loadMissing(['types', 'batches.batchLinks']);
             $fromDatabase = true;
 
-            // Gunakan data lokal jika ada, fallback ke API
             $animeData = [
+                'mal_id' => $apiData['mal_id'],
                 'title' => $animeLink->title ?? $apiData['title'],
+                'title_english' => $apiData['title_english'],
                 'title_japanese' => $apiData['title_japanese'],
                 'poster' => $animeLink->poster ?? $apiData['poster'],
                 'synopsis' => $animeLink->synopsis ?? $apiData['synopsis'],
                 'season' => $animeLink->season ?? $apiData['season'],
                 'year' => $animeLink->year ?? $apiData['year'],
-                'types' => $animeLink->types->pluck('name')->toArray() ?: [$apiData['type']],
+                'types' => $animeLink->types->pluck('name')->toArray(),
+                'type' => $animeLink->type ?? $apiData['type'], // ✅ Perbaikan di sini
                 'status' => $apiData['status'],
                 'studios' => $apiData['studios'],
                 'genres' => $apiData['genres'],
@@ -74,14 +78,13 @@ class AnimeDetailController extends Controller
                 'score' => $apiData['score'],
             ];
 
-            // FlatMap semua batchLinks
             $downloadLinks = $animeLink->batches->flatMap->batchLinks;
         } else {
-            // Jika tidak ditemukan di database, gunakan full dari API
+            // Tidak ada di database, gunakan API sepenuhnya
             $animeData = $apiData;
         }
 
-        // Ambil rekomendasi dari API
+        // Ambil rekomendasi anime dari Jikan
         $recommendations = [];
         $recResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/recommendations");
 
@@ -96,11 +99,12 @@ class AnimeDetailController extends Controller
                     ];
                 }
 
-                if (count($recommendations) >= 12) break;
+                if (count($recommendations) >= 12) {
+                    break;
+                }
             }
         }
 
-        // Render view dengan semua data
         return view('anime.show', [
             'animeLink' => $animeLink,
             'anime' => $animeData,

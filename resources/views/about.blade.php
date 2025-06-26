@@ -141,14 +141,14 @@
         <div class="bg-white/30 backdrop-blur-lg p-10 border border-white/20 text-center">
             <!-- Judul Kontak -->
             <h2 class="text-4xl font-bold mb-10 rtl:text-center text-white">تواصل معنا</h2>
-
-            <!-- Ikon Media Sosial -->
-            <div class="flex justify-center items-center gap-10 text-4xl rtl:flex-row-reverse">
-                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-discord"></i></a>
-                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-x-twitter"></i></a>
-                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="hover:text-red-500 transition"><i class="fab fa-telegram-plane"></i></a>
-            </div>
+            {{-- Social Icons (dinamis dari DB) --}}
+<div class="flex justify-center items-center gap-10 text-4xl rtl:flex-row-reverse">
+    @foreach ($socialMedias as $media)
+        <a href="{{ $media->url }}" class="hover:text-red-500" target="_blank" title="{{ $media->platform }}">
+            <i class="fab fa-{{ getSocialIcon($media->platform) }}"></i>
+        </a>
+    @endforeach
+</div>
         </div>
     </div>
 </div>

@@ -40,10 +40,18 @@
            class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
            {{-- Container badge --}}
-<div class="flex flex-wrap gap-2 mt-2">
+<div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
     @foreach ($anime['types'] as $type)
-        <span class="bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded">
-            {{ $type }}
+        @php
+            $color = $type['color'] ?? '#6b7280';
+            $label = $type['name'] ?? $type;
+        @endphp
+        <span
+            class="text-xs font-medium px-2 py-1 rounded"
+            style="background-color: {{ $color }}; color: white;"
+            title="{{ $label }}"
+        >
+            {{ $label }}
         </span>
     @endforeach
 </div>

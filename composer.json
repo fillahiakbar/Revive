@@ -66,11 +66,14 @@
             "@php artisan test"
         ]
     },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
-    },
+"extra": {
+    "laravel": {
+        "dont-discover": [],
+        "providers": [
+            "App\\Providers\\TiptapEditorServiceProvider"
+        ]
+    }
+},
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

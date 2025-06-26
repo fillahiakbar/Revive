@@ -5,16 +5,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
 
 
-.badge-tv { background-color: #3b82f6; }
-.badge-movie { background-color: #ef4444; }
-.badge-ova { background-color: #8b5cf6; }
-.badge-ona { background-color: #f97316; }
-.badge-special { background-color: #ec4899; }
-.badge-music { background-color: #eab308; }
-.badge-unknown { background-color: #6b7280; }
-.badge-bd { background-color: #197412; }
-
-
 
 
 [x-cloak] {

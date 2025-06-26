@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    protected $fillable = ['anime_link_id','user_id', 'body']; // <-- penting untuk mass assignment
-
+    protected $fillable = ['anime_link_id','user_id', 'body']; 
     public function user()
 {
     return $this->belongsTo(User::class);

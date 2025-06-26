@@ -1,0 +1,7 @@
+.tiptap p,
+.tiptap ul,
+.tiptap ol,
+.tiptap blockquote {
+    text-align: justify;
+    line-height: 1.6;
+}

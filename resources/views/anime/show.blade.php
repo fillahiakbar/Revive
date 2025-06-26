@@ -15,18 +15,21 @@
                     <div class="bg-white/20 backdrop-blur-lg p-8 mx-8 my-6 shadow-2xl">
                         <div class="mb-8">
                             <div class="flex items-start justify-between mb-4">
-                                <h1 class="text-4xl font-bold text-right flex-1">{{ $anime['title'] }}</h1>
+                                <div class="flex-1 text-right">
+                                    <h1 class="text-4xl font-bold">{{ $anime['title'] }}</h1>
+                                    @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
+                                        <p class="text-sm text-white/70 mt-1">{{ $anime['title_english'] }}</p>
+                                    @endif
+                                </div>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
-                                    <div>
+                                    <a href="https://myanimelist.net/anime/{{ $anime['mal_id'] ?? '' }}" target="_blank" class="block">
                                         <div class="bg-blue-600 border border-blue-400 px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
-                                        <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
-                                    </div>
+                                        <div class="text-white text-center font-bold text-sm">
+                                            {{ $anime['score'] ?? 'N/A' }}
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
-
-                            @if(isset($anime['title_english']))
-                                <p class="text-white/80 mb-4 text-right">{{ $anime['title_english'] }}</p>
-                            @endif
                         </div>
 
                         {{-- Info boxes --}}
@@ -76,7 +79,7 @@
                                 <div class="grid gap-3 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">نوع الأنمي:</span>
-                                        <span class="font-semibold">{{ $anime['types'][0] ?? 'Unknown' }}</span>
+                                    <span class="font-semibold">{{ $anime['type'] ?? 'Unknown' }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">عدد الحلقات:</span>
@@ -108,8 +111,8 @@
                 <div class="bg-white/30 backdrop-blur-lg p-6 border border-white/20">
                     <h3 class="text-lg font-semibold mb-4 text-right">مُلخَّص القصَّة:</h3>
                     <p class="text-white/90 leading-relaxed text-justify text-sm">
-    {!! $anime['synopsis'] ?? 'لا يوجد ملخص متاح لهذا الأنمي.' !!}
-</p>
+                        {!! $anime['synopsis'] ?? 'لا يوجد ملخص متاح لهذا الأنمي.' !!}
+                    </p>
                 </div>
             </div>
 
@@ -120,18 +123,14 @@
                     <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
                         @foreach ($animeLink->batches as $batch)
                             @php
-                                $validLinks = $batch->batchLinks->filter(function ($link) {
-                                    return $link->url_torrent || $link->url_mega || $link->url_gdrive;
-                                });
+                                $validLinks = $batch->batchLinks->filter(fn ($link) => $link->url_torrent || $link->url_mega || $link->url_gdrive);
                             @endphp
 
                             @if ($validLinks->isNotEmpty())
                                 @foreach ($validLinks as $link)
-                                Episodes {{ $batch->episodes }}
                                     <div class="overflow-hidden shadow-md pt-3">
                                         <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
-                                            {{ $batch->name }} 
-                                            <!-- - Episodes {{ $batch->episodes }} -->
+                                            {{ $batch->name }}
                                         </div>
                                         <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
                                             <div class="flex flex-wrap gap-2">
@@ -162,14 +161,11 @@
 
             {{-- Comments Section --}}
             <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
-
                 <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
 
                 {{-- Flash message --}}
                 @if(session('success'))
-                    <div class="bg-green-500 text-white p-2 rounded">
-                        {{ session('success') }}
-                    </div>
+                    <div class="bg-green-500 text-white p-2 rounded">{{ session('success') }}</div>
                 @endif
 
                 {{-- Error messages --}}
@@ -189,9 +185,9 @@
                         @csrf
                         <div>
                             <label for="body" class="block text-sm">💬 تعليقك:</label>
-                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="اكتب تعليقك هنا…"></textarea>
+                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="اكتب تعليقك هنا..."></textarea>
                         </div>
-                        <div>
+                        <div>   
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 أضف تعليق
                             </button>
@@ -205,24 +201,23 @@
                 @if ($animeLink && $animeLink->comments->isNotEmpty())
                     <div class="space-y-6 mt-6">
                         @foreach ($animeLink->comments as $comment)
+                            @php
+                                $avatar = $comment->user && $comment->user->profile_photo_url
+                                    ? $comment->user->profile_photo_url
+                                    : asset('img/default-avatar.png');
+                            @endphp
+
                             <div class="bg-white/10 p-4 rounded-lg border border-white/20 flex gap-4 items-start">
-                                {{-- Avatar --}}
-                                <img src="{{ $comment->user->profile_photo_url ?? asset('img/default-avatar.png') }}" 
-                                     class="w-10 h-10 rounded-full object-cover mt-1" alt="avatar">
+                                <img src="{{ $avatar }}"
+                                     alt="{{ $comment->user->name ?? 'User' }}"
+                                     class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover mt-1">
 
                                 <div class="flex-1">
-                                    {{-- Username + Timestamp --}}
                                     <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-sm">{{ $comment->user->name }}</span>
+                                        <span class="font-bold text-sm">{{ $comment->user->name ?? 'مستخدم' }}</span>
                                         <span class="text-xs text-white/50">{{ $comment->created_at->diffForHumans() }}</span>
                                     </div>
-
-                                    {{-- Isi Komentar --}}
-                                    <div class="text-white text-sm">
-                                        {{ $comment->body }}
-                                    </div>
-
-                                    {{-- Aksi --}}
+                                    <div class="text-white text-sm">{{ $comment->body }}</div>
                                     <div class="mt-2 flex gap-4 text-xs text-white/70">
                                         <button class="hover:underline">👍 إعجاب</button>
                                         <button class="hover:underline">💬 رد</button>
@@ -234,7 +229,6 @@
                 @else
                     <p class="text-white/70 italic mt-6">لا توجد تعليقات بعد.</p>
                 @endif
-
             </div>
 
         </div>

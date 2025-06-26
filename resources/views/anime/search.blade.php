@@ -93,6 +93,9 @@
                             <h3 class="font-bold truncate" title="{{ $anime['local_title'] }}">
                                 {{ $anime['local_title'] ?? $anime['title'] }}
                             </h3>
+                            @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
+                                <p class="text-gray-400 truncate">{{ $anime['title_english'] }}</p>
+                            @endif
 
                             {{-- Duration --}}
                             <p class="text-gray-400">
@@ -121,7 +124,7 @@
                         <h3 class="text-xl font-bold mb-2 text-gray-300">لم يتم العثور على نتائج</h3>
                         <p class="text-gray-400 mb-4">لم نتمكن من العثور على أي أنمي يطابق بحثك "{{ $query }}"</p>
                         <div class="text-sm text-gray-500">
-                            <p>جرب:</p>
+                            <p>جرّب:</p>
                             <ul class="list-disc list-inside mt-2 space-y-1">
                                 <li>التحقق من الإملاء</li>
                                 <li>استخدام كلمات مختلفة</li>

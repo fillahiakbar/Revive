@@ -19,78 +19,102 @@ class AnimeController extends Controller
         return view('home');
     }
 
-public function search(Request $request)
-{
-    $query = $request->get('q', '');
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
 
-    if (empty($query)) {
-        return view('anime.search', [
-            'animeList' => collect([]),
-            'query' => $query,
-            'pagination' => [],
-        ]);
+        if (empty($query)) {
+            return view('anime.search', [
+                'animeList' => collect([]),
+                'query' => $query,
+                'pagination' => [],
+            ]);
+        }
+
+        try {
+            $result = [];
+
+            // Ambil anime dari database lokal yang judulnya cocok
+            $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])
+                ->where('title', 'like', '%' . $query . '%')
+                ->get();
+
+            foreach ($localAnimes as $anime) {
+                if (!$anime->mal_id) continue;
+
+                $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+
+                if ($api->successful()) {
+                    $data = $api->json('data');
+
+                    $result[] = array_merge($data, [
+                        'local_title' => $anime->title,
+                        'title_english' => $data['title_english'] ?? null,
+                        'type' => $anime->types->first()->name ?? null,
+                        'batches' => $anime->batches ?? [],
+                        'episodes' => $anime->episodes,
+                    ]);
+                }
+            }
+
+            // Fallback ke pencarian API jika tidak ada dari lokal
+            if (empty($result)) {
+                $apiSearch = Http::get("https://api.jikan.moe/v4/anime", [
+                    'q' => $query,
+                    'limit' => 10
+                ]);
+
+                if ($apiSearch->successful()) {
+                    foreach ($apiSearch['data'] as $anime) {
+                        $result[] = [
+                            'mal_id' => $anime['mal_id'],
+                            'title' => $anime['title'],
+                            'title_english' => $anime['title_english'] ?? null,
+                            'images' => $anime['images'],
+                            'score' => $anime['score'] ?? null,
+                            'duration' => $anime['duration'] ?? null,
+                            'type' => $anime['type'] ?? null,
+                            'local_title' => $anime['title'],
+                        ];
+                    }
+                }
+            }
+
+            return view('anime.search', [
+                'animeList' => collect($result),
+                'query' => $query,
+                'pagination' => [],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Search Error', [
+                'query' => $query,
+                'message' => $e->getMessage(),
+            ]);
+
+            return view('anime.search', [
+                'animeList' => collect([]),
+                'query' => $query,
+                'error' => 'Terjadi kesalahan saat pencarian. Silakan coba lagi.',
+            ]);
+        }
     }
 
-    try {
-        // Ambil anime dari database lokal yang judulnya cocok
-        $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])
-            ->where('title', 'like', '%' . $query . '%')
-            ->get();
+    private function isAnimeAppropriate(array $anime): bool
+    {
+        $explicitGenres = ['Hentai', 'Ecchi'];
+        if (!isset($anime['genres'])) {
+            return true;
+        }
 
-        $result = [];
-
-        foreach ($localAnimes as $anime) {
-            if (!$anime->mal_id) continue;
-
-            $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
-
-            if ($api->successful()) {
-                $data = $api->json('data');
-
-                $result[] = array_merge($data, [
-                    'local_title' => $anime->title,
-                    'type' => $anime->types->first()->name ?? null,
-                    'batches' => $anime->batches ?? [],
-                    'episodes' => $anime->episodes,
-                ]);
+        foreach ($anime['genres'] as $genre) {
+            if (in_array($genre['name'], $explicitGenres)) {
+                return false;
             }
         }
 
-        return view('anime.search', [
-            'animeList' => collect($result),
-            'query' => $query,
-            'pagination' => [], // jika nanti ingin ditambahkan
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Search Error', [
-            'query' => $query,
-            'message' => $e->getMessage(),
-        ]);
-
-        return view('anime.search', [
-            'animeList' => collect([]),
-            'query' => $query,
-            'error' => 'Terjadi kesalahan saat pencarian. Silakan coba lagi.',
-        ]);
-    }
-}
-
-    private function isAnimeAppropriate(array $anime): bool
-{
-    $explicitGenres = ['Hentai', 'Ecchi'];
-    if (!isset($anime['genres'])) {
         return true;
     }
-
-    foreach ($anime['genres'] as $genre) {
-        if (in_array($genre['name'], $explicitGenres)) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
     private function addFallbackAnimes(Collection &$uniqueAnimes, string $baseUrl): void
     {
@@ -171,8 +195,4 @@ public function search(Request $request)
             return $firstChar === strtoupper($letter);
         });
     }
-
-
-
-    
 }
