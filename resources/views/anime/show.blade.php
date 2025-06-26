@@ -166,7 +166,7 @@
                 </div>
             @endif
 
-            {{-- Comments Section --}}
+            
             <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
                 <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
 
@@ -186,13 +186,13 @@
                     </div>
                 @endif
 
-                {{-- Add Comment Form --}}
                 @auth
                     <form action="{{ route('comments.store', $animeLink->id) }}" method="POST" class="space-y-4 mt-6">
                         @csrf
                         <div>
                             <label for="body" class="block text-sm">💬 تعليقك:</label>
-                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="اكتب تعليقك هنا..."></textarea>
+                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="تم إضافة التعليق بنجاح
+"></textarea>
                         </div>
                         <div>   
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">

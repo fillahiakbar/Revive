@@ -1,30 +1,5 @@
 <x-app-layout>
     <div class="text-white font-cairo relative z-10" dir="rtl">
-
-    {{-- 🎮 Hero Banner Section --}}
-    @if($sliders->isNotEmpty())
-<section class="relative w-full h-[800px] overflow-hidden">
-
-    {{-- Slides --}}
-    @foreach ($sliders as $index => $slide)
-    <div class="absolute left-0 top-0 w-full h-full z-0 transition-opacity duration-700 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
-        data-slide
-        data-choice="{{ $slide->choice }}"
-        data-title="{{ $slide->title }}"
-        data-type="{{ $slide->type }}"
-        data-duration="{{ $slide->duration }}"
-        data-year="{{ $slide->year }}"
-        data-quality="{{ $slide->quality }}"
-        data-episodes="{{ $slide->episodes }}"
-        data-description="{{ $slide->description }}"
-        data-link="{{ route('anime.show', ['id' => $slide->mal_id]) }}"
-    >
-        <div class="w-full h-full bg-contain bg-left bg-no-repeat"
-             style="background-image: url('{{ asset('storage/' . $slide->image) }}');"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/80"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70"></div>
-    </div>
-    @endforeach
         {{-- Hero Banner Section --}}
         @if($sliders->isNotEmpty())
             <section class="relative w-full h-[800px] overflow-hidden">
@@ -151,7 +126,7 @@
             </script>
         @endif
 
-        {{-- Main Content Section --}}
+        {{-- 📦 Main Content Section --}}
         <section class="w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 bg-no-repeat" style="background-image: url('{{ asset('img/layerbottom.png') }}');">
             {{-- Latest Releases --}}
             <div class="lg:col-span-3 order-1 lg:order-1 mt-24 mr-10">
@@ -217,7 +192,7 @@
                                     </div>
                                 </div>
                             </a>
-                            {{-- Line Separator --}}
+                            {{-- ✨ Line Separator --}}
                             @if (!$loop->last)
                                 <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent opacity-50"></div>
                             @endif
