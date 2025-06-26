@@ -13,7 +13,7 @@ use App\Http\Controllers\RssController;
 use App\Http\Controllers\AnimeOngoingController;
 use App\Http\Controllers\AnimeCompletedController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\Auth\RegisterController;
+use Filament\Facades\Filament;
 
 
 // Landing redirect ke user
@@ -42,11 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
-    
-    Route::post('/admin/login', function () {
-    return 'POST login route fallback hit';
 });
 
-
-});
-
+Route::post('/admin/login', function () {
+    return Filament::getPanel('admin')
+        ->getAuthHandler()
+        ->login();
+})->name('filament.admin.auth.login.store');
