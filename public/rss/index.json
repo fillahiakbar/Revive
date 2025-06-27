@@ -1,0 +1,10 @@
+{
+    "solo-leveling-batch-1-10.xml": {
+        "anime_name": "Solo Leveling",
+        "batch_name": "Solo Leveling Batch 1-10",
+        "link": "http:\/\/127.0.0.1:8000\/anime\/52299",
+        "poster": "custom-rss\/01JYS58Z5JXGJHTZMEC55A6RZH.jpg",
+        "created_at": "2025-06-27T16:59:30.980232Z",
+        "rss_url": "http:\/\/127.0.0.1:8000\/rss\/solo-leveling-batch-1-10.xml"
+    }
+}

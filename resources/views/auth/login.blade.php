@@ -95,6 +95,15 @@
         </div>
     </div>
 
+    {{-- Social Icons (dinamis dari DB) --}}
+<div class="flex space-x-6 rtl:space-x-reverse text-4xl md:order-3 pt-20">
+    @foreach ($socialMedias as $media)
+        <a href="{{ $media->url }}" class="hover:text-red-500" target="_blank" title="{{ $media->platform }}">
+            <i class="fab fa-{{ getSocialIcon($media->platform) }}"></i>
+        </a>
+    @endforeach
+</div>
+
     {{-- Toggle Password Script --}}
     <script>
         function togglePassword() {

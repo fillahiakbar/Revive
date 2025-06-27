@@ -21,6 +21,8 @@ Route::get('/', function () {
     return redirect()->route('revive');
 });
 
+Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/revive', [WelcomeController::class, 'index'])->name('revive');
     Route::get('/about', [WelcomeController::class, 'about'])->name('about');
@@ -41,8 +43,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
 
-    Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
 });
+
+
+
+
 
 Route::post('/admin/login', function () {
     return Filament::getPanel('admin')

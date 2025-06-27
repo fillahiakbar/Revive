@@ -9,11 +9,11 @@
         "php": "^8.2",
         "filament/filament": "^3.3",
         "filament/spatie-laravel-settings-plugin": "^3.3",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "^11.0",
         "laravel/jetstream": "^5.3",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "livewire/livewire": "^3.6",
+        "livewire/livewire": "3.5.12",
         "spatie/laravel-settings": "^3.4"
     },
     "require-dev": {
@@ -84,11 +84,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/saade/filament-laravel-settings"
-        }
-    ]
+    "prefer-stable": true
 }
