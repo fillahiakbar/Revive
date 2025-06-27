@@ -1,52 +1,47 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const slides = document.querySelectorAll('[data-slide]');
-    const totalSlides = slides.length;
+// /public/js/slider.js
+class HeroSlider {
+    constructor() {
+        this.slides = document.querySelectorAll('[data-slide]');
+        this.index = 0;
+        this.init();
+    }
 
-    const nextButton = document.getElementById('next-slide');
-    const prevButton = document.getElementById('prev-slide');
+    init() {
+        if (!this.slides.length) return;
 
-    let currentIndex = 0;
-    let interval;
+        this.updateContent();
+        document.getElementById('next-slide')?.addEventListener('click', () => this.next());
+        document.getElementById('prev-slide')?.addEventListener('click', () => this.prev());
+    }
 
-    function showSlide(index) {
-        slides.forEach((slide, i) => {
-            slide.classList.toggle('opacity-100', i === index);
-            slide.classList.toggle('opacity-0', i !== index);
+    updateContent() {
+        this.slides.forEach((slide, i) => {
+            slide.style.opacity = i === this.index ? '1' : '0';
         });
+
+        const current = this.slides[this.index];
+        if (!current) return;
+
+        document.getElementById('slide-title').textContent = current.dataset.title || '';
+        document.getElementById('slide-choice').textContent = current.dataset.choice || '';
+        document.getElementById('slide-type').textContent = current.dataset.type || '';
+        document.getElementById('slide-duration').textContent = current.dataset.duration || '';
+        document.getElementById('slide-year').textContent = current.dataset.year || '';
+        document.getElementById('slide-quality').textContent = current.dataset.quality || '';
+        document.getElementById('slide-episodes').textContent = current.dataset.episodes || '';
+        document.getElementById('slide-description').textContent = current.dataset.description || '';
+        document.getElementById('hero-link')?.setAttribute('href', current.dataset.link || '#');
     }
 
-    function nextSlide() {
-        currentIndex = (currentIndex + 1) % totalSlides;
-        showSlide(currentIndex);
+    next() {
+        this.index = (this.index + 1) % this.slides.length;
+        this.updateContent();
     }
 
-    function prevSlide() {
-        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-        showSlide(currentIndex);
+    prev() {
+        this.index = (this.index - 1 + this.slides.length) % this.slides.length;
+        this.updateContent();
     }
+}
 
-    function startAutoSlide() {
-        interval = setInterval(nextSlide, 8000); // setiap 8 detik
-    }
-
-    function stopAutoSlide() {
-        clearInterval(interval);
-    }
-
-    // Button event
-    nextButton?.addEventListener('click', () => {
-        stopAutoSlide();
-        nextSlide();
-        startAutoSlide();
-    });
-
-    prevButton?.addEventListener('click', () => {
-        stopAutoSlide();
-        prevSlide();
-        startAutoSlide();
-    });
-
-    // Inisialisasi
-    showSlide(currentIndex);
-    startAutoSlide();
-});
+document.addEventListener('DOMContentLoaded', () => new HeroSlider());

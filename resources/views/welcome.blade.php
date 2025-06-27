@@ -127,7 +127,7 @@
         @endif
 
         {{-- 📦 Main Content Section --}}
-        <section class="w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 bg-no-repeat" style="background-image: url('{{ asset('img/layerbottom.png') }}');">
+        <section class="w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 pt-2 relative z-10 bg-no-repeat bg-top" style="background-image: url('{{ asset('img/layerbottom.png') }}');">
             {{-- Latest Releases --}}
             <div class="lg:col-span-3 order-1 lg:order-1 mt-24 mr-10">
                 <h2 class="text-lg md:text-xl font-bold mb-6 pl-2 text-white">أحدث الإصدارات</h2>
