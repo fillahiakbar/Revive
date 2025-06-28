@@ -15,9 +15,11 @@ use Filament\Forms\Components\{
 };
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+
 
 class AnimeLinkResource extends Resource
 {
@@ -73,8 +75,18 @@ class AnimeLinkResource extends Resource
                 RichEditor::make('synopsis')
                     ->label('الملخص')
                     ->toolbarButtons([
-                        'bold', 'italic', 'strike', 'underline',
-                        'h2', 'h3', 'bulletList', 'orderedList', 'blockquote', 'link',
+                        'attachFiles',
+                        'blockquote',
+                        'bold',
+                        'bulletList',
+                        'codeBlock',
+                        'h1', 'h2', 'h3',
+                        'italic',
+                        'link',
+                        'orderedList',
+                        'redo', 'undo',
+                        'strike', 'underline',
+                        'align-left', 'align-center', 'align-right', 'align-justify',
                     ])
                     ->extraInputAttributes([
                         'style' => 'min-height: 200px; text-align: justify; line-height: 1.6;',
@@ -87,17 +99,6 @@ class AnimeLinkResource extends Resource
                     ->multiple()
                     ->searchable()
                     ->preload()
-                    ->createOptionForm([
-                        TextInput::make('name')->label('الاسم')->required(),
-                        TextInput::make('color')
-                            ->label('اللون (Hex)')
-                            ->required()
-                            ->regex('/^#([A-Fa-f0-9]{6})$/')
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                $set('color', strtoupper($state));
-                            })
-                            ->helperText('مثال: #FF0000'),
-                    ])
                     ->required(),
 
                 TextInput::make('season')
@@ -175,22 +176,28 @@ class AnimeLinkResource extends Resource
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('العنوان')
                     ->searchable(),
 
-                \Filament\Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('النوع الرسمي'),
 
-                \Filament\Tables\Columns\TextColumn::make('types.name')
+                TextColumn::make('types.name')
                     ->label('النوع')
                     ->limit(30),
 
-                \Filament\Tables\Columns\TextColumn::make('season')
+                TextColumn::make('season')
                     ->label('الموسم'),
 
-                \Filament\Tables\Columns\TextColumn::make('year')
+                TextColumn::make('year')
                     ->label('السنة'),
+
+                TextColumn::make('synopsis')
+                    ->label('الملخص')
+                    ->html()
+                    ->formatStateUsing(fn ($state) => "<div style='text-align: justify;'>{$state}</div>")
+                    ->limit(200),
             ])
             ->actions([
                 \Filament\Tables\Actions\EditAction::make(),

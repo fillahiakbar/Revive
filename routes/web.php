@@ -16,6 +16,32 @@ use App\Http\Controllers\AnimeOngoingController;
 use App\Http\Controllers\AnimeCompletedController;
 use App\Http\Controllers\CommentController;
 use Filament\Facades\Filament;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
+
+
+
+
+
+
+// ===============================
+// ROUTES UNTUK FORGET PASSWORD
+// ===============================
+
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.update');
+});
+
 
 // ===============================
 // ROUTES UNTUK VERIFIKASI EMAIL
