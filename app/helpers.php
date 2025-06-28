@@ -20,12 +20,11 @@ if (!function_exists('getSocialIcon')) {
 
 
 if (!function_exists('isPublicRegistrationEnabled')) {
-    function isPublicRegistrationEnabled()
+    function isPublicRegistrationEnabled(): bool
     {
-        try {
-            return app(\App\Settings\GeneralSettings::class)->allow_registration;
-        } catch (\Exception $e) {
-            return true; // Default value jika error
-        }
+        return filter_var(
+            Setting::get('public_registration_enabled', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
     }
 }

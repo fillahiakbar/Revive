@@ -11,7 +11,7 @@ class WelcomeController extends Controller
 {
     public function index()
     {
-        $animeLinks = AnimeLink::with('batches')->get();
+        $animeLinks = AnimeLink::with(['batches'])->get();
         $latestReleases = [];
         $mostVisited = [];
         $currentWorks = [];
@@ -19,36 +19,43 @@ class WelcomeController extends Controller
         $socialMedias = SocialMedia::where('is_active', true)->get();
 
         foreach ($animeLinks as $anime) {
+            // Ambil data dari Jikan API
             $apiResponse = Http::get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
-            $firstBatch = $anime->batches->first(); // assuming hasMany
-
-            if ($apiResponse->ok() && isset($apiResponse['data'])) {
-                $api = $apiResponse['data'];
-
-                $latestReleases[] = [
-                    'mal_id' => $anime->mal_id,
-                    'title' => $anime->title,
-                    'score' => $api['score'] ?? null,
-                    'type' => $api['type'] ?? '-',
-                    'episodes' => $api['episodes'] ?? null,
-                    'synopsis' => $firstBatch?->name ?? '-',
-                    'latest_batch_name' => $anime->batches->sortByDesc('created_at')->first()?->name,
-                    'images' => $api['images'],
-                    'genres' => $api['genres'] ?? [],
-                    'created_at' => optional($firstBatch)->created_at, // penting untuk sorting
-                ];
-
-                if ($api['airing'] ?? false) {
-                    $currentWorks[] = end($latestReleases);
-                }
-
-                $mostVisited[] = end($latestReleases);
+            if (!$apiResponse->ok() || !isset($apiResponse['data'])) {
+                continue;
             }
+
+            $api = $apiResponse['data'];
+            $batches = $anime->batches->sortByDesc('created_at');
+
+            foreach ($batches as $batch) {
+                $latestReleases[] = [
+                    'mal_id'             => $anime->mal_id,
+                    'title'              => $anime->title,
+                    'score'              => $api['score'] ?? null,
+                    'type'               => $api['type'] ?? '-',
+                    'episodes'           => $api['episodes'] ?? null,
+                    'synopsis'           => $batch->name ?? '-',
+                    'latest_batch_name'  => $batch->name ?? '-',
+                    'images'             => $api['images'] ?? [],
+                    'genres'             => $api['genres'] ?? [],
+                    'created_at'         => $batch->created_at,
+                ];
+            }
+
+            // Tambahkan ke current works jika sedang tayang
+            if ($api['airing'] ?? false) {
+                $currentWorks[] = end($latestReleases);
+            }
+
+            // Tambahkan ke most visited (sementara)
+            $mostVisited[] = end($latestReleases);
         }
 
-        // Sort berdasarkan tanggal upload batch terbaru
+        // Urutkan berdasarkan tanggal batch terbaru (ambil 5 saja)
         $latestReleases = collect($latestReleases)
             ->sortByDesc('created_at')
+            ->take(5)
             ->values()
             ->all();
 

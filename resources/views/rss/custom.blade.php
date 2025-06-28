@@ -9,9 +9,11 @@
         <title>{{ $animeName }} - {{ $batchName }}</title>
         <link>{{ $link }}</link>
         <description><![CDATA[
-            <img src="{{ asset('storage/' . $poster) }}" alt="poster" /><br>
-            Anime: <strong>{{ $animeName }}</strong><br>
-            Batch: <strong>{{ $batchName }}</strong>
+            <a href="{{ $link }}">
+                <img src="{{ asset('storage/' . $poster) }}" alt="{{ $animeName }}" width="600" /><br>
+            </a>
+            <strong>{{ $animeName }}</strong> - <em>{{ $batchName }}</em><br>
+            <a href="{{ $link }}">{{ $link }}</a>
         ]]></description>
         <pubDate>{{ now()->format(DateTime::RSS) }}</pubDate>
     </item>

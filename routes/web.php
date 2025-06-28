@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\AdminController;
@@ -15,15 +17,40 @@ use App\Http\Controllers\AnimeCompletedController;
 use App\Http\Controllers\CommentController;
 use Filament\Facades\Filament;
 
+// ===============================
+// ROUTES UNTUK VERIFIKASI EMAIL
+// ===============================
+
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect('/revive');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function () {
+    Auth::user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Link verifikasi telah dikirim!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+// ===============================
+// ROUTES UTAMA APLIKASI
+// ===============================
 
 // Landing redirect ke user
 Route::get('/', function () {
     return redirect()->route('revive');
 });
 
+// RSS
 Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
 
-Route::middleware(['auth'])->group(function () {
+// Route hanya untuk user yang login dan email terverifikasi
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/revive', [WelcomeController::class, 'index'])->name('revive');
     Route::get('/about', [WelcomeController::class, 'about'])->name('about');
     Route::get('/terms', [WelcomeController::class, 'terms'])->name('terms');
@@ -42,12 +69,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
-
 });
 
-
-
-
+// ===============================
+// ROUTE LOGIN ADMIN FILAMENT
+// ===============================
 
 Route::post('/admin/login', function () {
     return Filament::getPanel('admin')

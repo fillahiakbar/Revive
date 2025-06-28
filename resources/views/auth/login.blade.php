@@ -84,25 +84,29 @@
             </form>
 
             {{-- Register --}}
-            <div class="mt-6 text-center text-sm">
-                <span>أليس لديك حساب؟</span>
-                @if (isPublicRegistrationEnabled())
-                    <a href="/register" class="text-blue-600 hover:underline">
-                        سجّل الآن
-                    </a>
-                @endif
-            </div>
-        </div>
-    </div>
+@if (isPublicRegistrationEnabled())
+    <a href="{{ route('register') }}" class="text-primary-600 hover:underline">
+        تسجيل حساب جديد
+    </a>
+@else
+<p class="text-red-600 text-sm mt-2 text-center drop-shadow-lg">
+    🚫التسجيل مغلق الآن، تفقّد حساباتنا على منصّات التواصل الاجتماعي لمزيد من المعلومات
+</p>
+@endif
 
-    {{-- Social Icons (dinamis dari DB) --}}
-<div class="flex space-x-6 rtl:space-x-reverse text-4xl md:order-3 pt-20">
+{{-- Ikon Media Sosial --}}
+<div class="flex justify-center flex-wrap gap-2 text-white text-3xl mt-6">
     @foreach ($socialMedias as $media)
-        <a href="{{ $media->url }}" class="hover:text-red-500" target="_blank" title="{{ $media->platform }}">
+        <a href="{{ $media->url }}" class="hover:text-red-500 transition" target="_blank" title="{{ $media->platform }}">
             <i class="fab fa-{{ getSocialIcon($media->platform) }}"></i>
         </a>
     @endforeach
 </div>
+        </div>
+    </div>
+
+
+    
 
     {{-- Toggle Password Script --}}
     <script>
