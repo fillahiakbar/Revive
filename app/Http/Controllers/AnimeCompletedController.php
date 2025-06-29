@@ -33,6 +33,7 @@ class AnimeCompletedController extends Controller
                     $completedAnimes[] = array_merge(
                         $data,
                         [
+                            'title_english' => $data['title_english'] ?? null,
                             'types' => $anime->types->map(fn($type) => [
     'name' => $type->name,
     'color' => $type->color ?? '#6b7280',

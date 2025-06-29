@@ -88,10 +88,17 @@
 
             {{-- Detail --}}
             <div class="p-2 text-xs">
-                {{-- Judul (mengutamakan judul lokal dari DB) --}}
-                <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
-                    {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
-                </h3>
+                {{-- Judul Lokal/Utama --}}
+<h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
+    {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
+</h3>
+
+{{-- Judul English --}}
+@if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
+    <p class="text-gray-400 text-[11px] truncate" title="{{ $anime['title_english'] }}">
+        {{ $anime['title_english'] }}
+    </p>
+@endif
 
                 {{-- Duration dari API --}}
                 <p class="text-gray-400">

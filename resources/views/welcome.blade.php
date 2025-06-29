@@ -150,15 +150,25 @@
                         <div class="flex-1 relative z-10 min-w-0 space-y-3 order-2">
                             {{-- Title + Score --}}
                             <div class="flex items-center justify-between gap-4">
-                                <h3 class="font-bold text-lg md:text-xl text-white group-hover:text-blue-400 transition-colors duration-300 truncate">
-                                    {{ $anime['title'] }}
-                                </h3>
+<h2 class="font-bold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 truncate">
+    {{ $anime['title'] }}
+</h2>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0">
                                     <div>
                                         <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                     </div>
                                 </div>
+                            </div>
+
+                            {{-- Title English --}}
+                            <div class="flex flex-wrap gap-2 text-sm text-white/80">
+                              @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
+    <p class="text-md text-white/60 truncate">
+        {{ $anime['title_english'] }}
+            </p>
+@endif
+
                             </div>
 
                             {{-- Meta --}}
@@ -213,7 +223,7 @@
                     <div class="bg-white/5 backdrop-blur-md rounded-lg border-white/10">
                         <div class="space-y-5 z-10 rounded-xl p-6 relative ">
                             <div class="rounded-lg">
-                                @foreach (array_slice($mostVisited, 0, 5) as $index => $anime)
+                                @foreach ($mostVisited->take(5) as $index => $anime)
                                     <a href="{{ route('anime.show', ['id' => $anime['mal_id']]) }}" class="block duration-300 rounded-lg group">
                                         <div class="flex items-center p-3 gap-4 relative overflow-hidden bg-gradient-to-r transition-all duration-300">
                                             {{-- Purple line accent --}}

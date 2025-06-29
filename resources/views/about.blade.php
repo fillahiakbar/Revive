@@ -2,8 +2,8 @@
 
 <div class="relative text-white h-screen flex items-center justify-between overflow-hidden">
     <!-- Phoenix image positioned in the left corner -->
-    <div class="absolute left-0 top-0 w-[75%] h-[150%] z-0 overflow-hidden">
-    <img src="{{ asset('/img/about.png') }}" alt="Phoenix Background" class="w-full h-full object-cover object-left scale-110 -translate-x-4">
+    <div class="absolute left-0 top-0 w-[55%] h-[100%] z-0 overflow-hidden mt-24">
+    <img src="{{ asset('/img/about2.png') }}" alt="Phoenix Background" class="w-full h-full object-cover object-left">
 </div>
     
     <!-- Content positioned on the right side with dark background -->

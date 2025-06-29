@@ -50,6 +50,7 @@ class AnimeListController extends Controller
                 'mal_id'      => $anime->mal_id,
                 'local_title' => $anime->title,
                 'title'       => $apiData['title'] ?? $anime->title,
+                'title_english' => $apiData['title_english'] ?? null,
                 'images'      => $apiData['images'] ?? [],
                 'duration'    => $apiData['duration'] ?? null,
                 'score'       => $apiData['score'] ?? null,

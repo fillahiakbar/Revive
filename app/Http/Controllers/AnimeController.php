@@ -34,7 +34,7 @@ class AnimeController extends Controller
         try {
             $result = [];
 
-            // Ambil anime dari database lokal yang judulnya cocok
+            // Cari hanya di database berdasarkan title
             $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])
                 ->where('title', 'like', '%' . $query . '%')
                 ->get();
@@ -42,47 +42,41 @@ class AnimeController extends Controller
             foreach ($localAnimes as $anime) {
                 if (!$anime->mal_id) continue;
 
-                $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+                // Ambil hanya title_english dan score dari API
+                $titleEnglish = null;
+                $score = null;
 
-                if ($api->successful()) {
-                    $data = $api->json('data');
-
-                    $result[] = array_merge($data, [
-                        'local_title' => $anime->title,
-                        'title_english' => $data['title_english'] ?? null,
-                        'types' => $anime->types->map(function ($type) {
-    return [
-        'name' => $type->name,
-        'color' => $type->color ?? '#6b7280',
-    ];
-}),
-                        'batches' => $anime->batches ?? [],
-                        'episodes' => $anime->episodes,
-                    ]);
-                }
-            }
-
-            // Fallback ke pencarian API jika tidak ada dari lokal
-            if (empty($result)) {
-                $apiSearch = Http::get("https://api.jikan.moe/v4/anime", [
-                    'q' => $query,
-                    'limit' => 10
-                ]);
-
-                if ($apiSearch->successful()) {
-                    foreach ($apiSearch['data'] as $anime) {
-                        $result[] = [
-                            'mal_id' => $anime['mal_id'],
-                            'title' => $anime['title'],
-                            'title_english' => $anime['title_english'] ?? null,
-                            'images' => $anime['images'],
-                            'score' => $anime['score'] ?? null,
-                            'duration' => $anime['duration'] ?? null,
-                            'type' => $anime['type'] ?? null,
-                            'local_title' => $anime['title'],
-                        ];
+                try {
+                    $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+                    if ($api->successful()) {
+                        $data = $api->json('data');
+                        $titleEnglish = $data['title_english'] ?? null;
+                        $score = $data['score'] ?? null;
                     }
+                } catch (\Exception $e) {
+                    Log::warning('API gagal untuk mal_id: ' . $anime->mal_id);
                 }
+
+                $result[] = [
+                    'mal_id' => $anime->mal_id,
+                    'local_title' => $anime->title,
+                    'title_english' => $titleEnglish,
+                    'score' => $score,
+                    'images' => [
+                        'jpg' => [
+                            'large_image_url' => $anime->image_url ?? null,
+                        ]
+                    ],
+                    'types' => $anime->types->map(function ($type) {
+                        return [
+                            'name' => $type->name,
+                            'color' => $type->color ?? '#6b7280',
+                        ];
+                    }),
+                    'batches' => $anime->batches ?? [],
+                    'episodes' => $anime->episodes,
+                    'duration' => $anime->duration ?? null,
+                ];
             }
 
             return view('anime.search', [
@@ -90,7 +84,6 @@ class AnimeController extends Controller
                 'query' => $query,
                 'pagination' => [],
             ]);
-
         } catch (\Exception $e) {
             Log::error('Search Error', [
                 'query' => $query,

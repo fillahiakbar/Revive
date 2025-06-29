@@ -101,8 +101,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ROUTE LOGIN ADMIN FILAMENT
 // ===============================
 
-Route::post('/admin/login', function () {
-    return Filament::getPanel('admin')
-        ->getAuthHandler()
-        ->login();
-})->name('filament.admin.auth.login.store');
+
+
+// Redirect admin/login ke custom login path
+// Custom login URL (tampilkan login Filament)
+Route::get('/admin', function () {
+    abort(403, 'Access to /admin is not allowed.');
+});
+
+// Blok akses ke /admin/login
+Route::get('/admin/login', function () {
+    abort(403, 'Access denied.');
+});

@@ -74,15 +74,12 @@
                                     </div>
                                 </div>
                             </div>
-                            
 
-                            
-                            
                             <div class="bg-white/90 text-black p-4">
                                 <div class="grid gap-3 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">نوع الأنمي:</span>
-                                    <span class="font-semibold">{{ $anime['type'] ?? 'Unknown' }}</span>
+                                        <span class="font-semibold">{{ $anime['type'] ?? 'Unknown' }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">عدد الحلقات:</span>
@@ -126,39 +123,52 @@
                     <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
                         @foreach ($animeLink->batches as $batch)
                             @php
-                                $validLinks = $batch->batchLinks->filter(fn ($link) => $link->url_torrent || $link->url_mega || $link->url_gdrive);
+                                $validLinks = $batch->batchLinks->filter(fn ($link) =>
+                                    $link->url_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard
+                                );
                             @endphp
 
                             @if ($validLinks->isNotEmpty())
                                 @foreach ($validLinks as $link)
                                     <div class="overflow-hidden shadow-md pt-3">
-    <span class="font-semibold block text-white text-sm mb-1 px-3">
-        Episode - {{ $batch->episodes ?? 'غير معروف' }}
-    </span>
-    <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
-        {{ $batch->name }} 
-    </div>
-    <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
-        <div class="flex flex-wrap gap-2">
-            @if ($link->url_torrent)
-                <a href="{{ $link->url_torrent }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                    Torrent ({{ $link->resolution }}p)
-                </a>
-            @endif
-            @if ($link->url_mega)
-                <a href="{{ $link->url_mega }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                    Mega ({{ $link->resolution }}p)
-                </a>
-            @endif
-            @if ($link->url_gdrive)
-                <a href="{{ $link->url_gdrive }}" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
-                    GDrive ({{ $link->resolution }}p)
-                </a>
-            @endif
-        </div>
-    </div>
-</div>
+                                        <span class="font-semibold block text-white text-sm mb-1 px-3">
+                                            Episode - {{ $batch->episodes ?? 'غير معروف' }}
+                                        </span>
+                                        <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
+                                            {{ $batch->name }} 
+                                        </div>
+                                        <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
+                                            <div class="flex flex-wrap gap-2">
+                                               @if ($link->url_torrent)
+    <a href="{{ $link->url_torrent }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+        Torrent ({{ $link->resolution }}p)
+    </a>
+@endif
+@if ($link->url_mega)
+    <a href="{{ $link->url_mega }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+        Mega ({{ $link->resolution }}p)
+    </a>
+@endif
+@if ($link->url_gdrive)
+    <a href="{{ $link->url_gdrive }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+        GDrive ({{ $link->resolution }}p)
+    </a>
+@endif
+@if ($link->url_megaHard)
+    <a href="{{ $link->url_megaHard }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+        ({{ $link->resolution }}p) (هاردسب | Hardsub) Mega
+    </a>
+@endif
+@if ($link->url_gdriveHard)
+    <a href="{{ $link->url_gdriveHard }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+        ({{ $link->resolution }}p) (هاردسب | Hardsub) GDrive
+    </a>
+@endif
 
+
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
                             @endif
                         @endforeach
@@ -166,7 +176,7 @@
                 </div>
             @endif
 
-            
+            {{-- Comments --}}
             <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
                 <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
 

@@ -70,16 +70,27 @@
 
             {{-- Detail --}}
             <div class="p-2 text-xs">
-                <h3 class="font-bold truncate" title="{{ $anime['title'] }}">
-                    {{ $anime['title'] ?? 'Unknown Title' }}
-                </h3>
-                <p class="text-gray-400">
-                    {{ $anime['duration'] ?? 'N/A' }}
-                </p>
-                @if(isset($anime['episodes']))
-                    <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
-                @endif
-            </div>
+    <h3 class="font-bold truncate" title="{{ $anime['title'] }}">
+        {{ $anime['title'] ?? 'Unknown Title' }}
+    </h3>
+
+    @if(!empty($anime['title_english']))
+        <p class="text-gray-400 truncate">{{ $anime['title_english'] }}</p>
+    @endif
+
+    <p class="text-gray-400">
+        {{ $anime['duration'] ?? 'N/A' }}
+    </p>
+
+    @if(isset($anime['episodes']))
+        <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
+    @endif
+
+    @if(isset($anime['score']))
+        <p class="text-yellow-400 text-xs">Score: {{ $anime['score'] }}</p>
+    @endif
+</div>
+
         </a>
     @empty
         {{-- No Result --}}

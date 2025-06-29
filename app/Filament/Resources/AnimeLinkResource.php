@@ -169,7 +169,16 @@ class AnimeLinkResource extends Resource
                 Textarea::make('url_gdrive')
                     ->label('روابط Google Drive')
                     ->rows(1),
-            ]);
+                    
+                                    
+                Textarea::make('url_megaHard')
+                    ->label('روابط ميجا Hardsub')
+                    ->rows(1),
+
+                Textarea::make('url_gdriveHard')
+                    ->label('روابط Google Drive Hardsub')
+                    ->rows(1),
+                    ]);
     }
 
     public static function table(Table $table): Table
