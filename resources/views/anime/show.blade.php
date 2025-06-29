@@ -176,77 +176,126 @@
                 </div>
             @endif
 
-            {{-- Comments --}}
-            <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
-                <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
+            {{-- Comments Section --}}
+<div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
+    <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
 
-                {{-- Flash message --}}
-                @if(session('success'))
-                    <div class="bg-green-500 text-white p-2 rounded">{{ session('success') }}</div>
-                @endif
+    {{-- Flash Message --}}
+    @if(session('success'))
+        <div class="bg-green-500 text-white p-2 rounded">{{ session('success') }}</div>
+    @endif
 
-                {{-- Error messages --}}
-                @if ($errors->any())
-                    <div class="bg-red-500 text-white p-2 rounded">
-                        <ul class="list-disc list-inside">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+    {{-- Validation Errors --}}
+    @if ($errors->any())
+        <div class="bg-red-500 text-white p-2 rounded">
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-                @auth
-                    <form action="{{ route('comments.store', $animeLink->id) }}" method="POST" class="space-y-4 mt-6">
-                        @csrf
-                        <div>
-                            <label for="body" class="block text-sm">💬 تعليقك:</label>
-                            <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="تم إضافة التعليق بنجاح
-"></textarea>
-                        </div>
-                        <div>   
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                أضف تعليق
-                            </button>
-                        </div>
-                    </form>
-                @else
-                    <p class="text-white/70 text-sm mt-2">يرجى <a href="{{ route('login') }}" class="underline">تسجيل الدخول</a> لكتابة تعليق.</p>
-                @endauth
-
-                {{-- Comment List --}}
-                @if ($animeLink && $animeLink->comments->isNotEmpty())
-                    <div class="space-y-6 mt-6">
-                        @foreach ($animeLink->comments as $comment)
-                            @php
-                                $avatar = $comment->user && $comment->user->profile_photo_url
-                                    ? $comment->user->profile_photo_url
-                                    : asset('img/default-avatar.png');
-                            @endphp
-
-                            <div class="bg-white/10 p-4 rounded-lg border border-white/20 flex gap-4 items-start">
-                                <img src="{{ $avatar }}"
-                                     alt="{{ $comment->user->name ?? 'User' }}"
-                                     class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover mt-1">
-
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-sm">{{ $comment->user->name ?? 'مستخدم' }}</span>
-                                        <span class="text-xs text-white/50">{{ $comment->created_at->diffForHumans() }}</span>
-                                    </div>
-                                    <div class="text-white text-sm">{{ $comment->body }}</div>
-                                    <div class="mt-2 flex gap-4 text-xs text-white/70">
-                                        <button class="hover:underline">👍 إعجاب</button>
-                                        <button class="hover:underline">💬 رد</button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <p class="text-white/70 italic mt-6">لا توجد تعليقات بعد.</p>
-                @endif
+    {{-- Comment Form --}}
+    @auth
+        <form action="{{ route('comments.store', $animeLink->id) }}" method="POST" class="space-y-4 mt-6">
+            @csrf
+            <div>
+                <label for="body" class="block text-sm">💬 تعليقك:</label>
+                <textarea id="body" name="body" class="w-full p-3 rounded bg-white/80 text-black" rows="4" required placeholder="اكتب تعليقك هنا..."></textarea>
             </div>
+            <div>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    أضف تعليق
+                </button>
+            </div>
+        </form>
+    @else
+        <p class="text-white/70 text-sm mt-2">
+            يرجى <a href="{{ route('login') }}" class="underline">تسجيل الدخول</a> لكتابة تعليق.
+        </p>
+    @endauth
+
+    {{-- Comments List --}}
+    @if ($animeLink && $animeLink->comments->isNotEmpty())
+        <div class="space-y-6 mt-6">
+            @foreach ($animeLink->comments->whereNull('parent_id') as $comment)
+                @php
+                    $avatar = $comment->user && $comment->user->profile_photo_url
+                        ? $comment->user->profile_photo_url
+                        : asset('img/default-avatar.png');
+                @endphp
+
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 flex gap-4 items-start">
+                    <img src="{{ $avatar }}"
+                         alt="{{ $comment->user->name ?? 'User' }}"
+                         class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover mt-1">
+
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm">{{ $comment->user->name ?? 'مستخدم' }}</span>
+                            <span class="text-xs text-white/50">{{ $comment->created_at->diffForHumans() }}</span>
+                        </div>
+                        <div class="text-white text-sm mb-2">{{ $comment->body }}</div>
+
+                        <div class="flex gap-4 text-xs text-white/70">
+                            {{-- Like button --}}
+                            <form action="{{ route('comments.like', $comment->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="hover:underline">👍 إعجاب ({{ $comment->likes ?? 0 }})</button>
+                            </form>
+
+                            {{-- Reply trigger --}}
+                            <button type="button" data-toggle-reply="reply-form-{{ $comment->id }}" class="hover:underline">💬 رد</button>
+                        </div>
+
+                        {{-- Replies --}}
+                        @if ($comment->replies->isNotEmpty())
+                            <div class="mt-4 space-y-2 ml-6 border-l border-white/10 pl-4">
+                                @foreach ($comment->replies as $reply)
+                                    <div class="bg-white/5 p-3 rounded-md">
+                                        <div class="flex justify-between items-center text-xs text-white/60">
+                                            <span>{{ $reply->user->name ?? 'مستخدم' }}</span>
+                                            <span>{{ $reply->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <div class="text-white text-sm mt-1">{{ $reply->body }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Reply Form --}}
+                        @auth
+                            <form id="reply-form-{{ $comment->id }}" action="{{ route('comments.reply', $comment->id) }}" method="POST" class="space-y-2 mt-3 hidden">
+                                @csrf
+                                <textarea name="body" class="w-full p-2 rounded bg-white/80 text-black text-sm" rows="2" placeholder="رد على هذا التعليق..." required></textarea>
+                                <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded">أرسل الرد</button>
+                            </form>
+                        @endauth
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <p class="text-white/70 italic mt-6">لا توجد تعليقات بعد.</p>
+    @endif
+</div>
+
+{{-- Toggle Reply Form Script --}}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('[data-toggle-reply]').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-toggle-reply');
+                const form = document.getElementById(targetId);
+                if (form) {
+                    form.classList.toggle('hidden');
+                }
+            });
+        });
+    });
+</script>
+
 
         </div>
     </div>

@@ -83,6 +83,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cookies', [WelcomeController::class, 'cookies'])->name('cookies');
     Route::get('/privacy', [WelcomeController::class, 'privacy'])->name('privacy');
 
+
+    // routes/web.php
+    Route::post('/comments/{id}/like', [CommentController::class, 'like'])->name('comments.like');
+    Route::post('/comments/{id}/reply', [CommentController::class, 'reply'])->name('comments.reply');
+
+
     Route::get('/list', [AnimeListController::class, 'list'])->name('anime.list');
     Route::get('/anime/{id}', [AnimeDetailController::class, 'show'])->name('anime.show');
     Route::get('/genres/{slug}', [GenreController::class, 'show'])->name('genre.show');
