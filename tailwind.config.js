@@ -8,6 +8,12 @@ export default {
   presets: [],
   darkMode: 'media', // or 'class'
   theme: {
+    extend: {
+    colors: {
+      imdb: '#F6C700',
+      mal: '#2E52A2',
+    },
+  },
     accentColor: ({ theme }) => ({
       ...theme('colors'),
       auto: 'auto',

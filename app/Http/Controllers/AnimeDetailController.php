@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\AnimeLink;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AnimeDetailController extends Controller
 {
-    public function show($id)
+    public function show($mal_id)
     {
         // Ambil data dari database berdasarkan mal_id
-        $animeLink = AnimeLink::where('mal_id', $id)
+        $animeLink = AnimeLink::where('mal_id', $mal_id)
             ->with([
                 'types',
                 'batches' => fn ($q) => $q->has('batchLinks'),
@@ -25,7 +26,7 @@ class AnimeDetailController extends Controller
         $fromDatabase = false;
 
         // Ambil data dari API Jikan
-        $apiResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/full");
+        $apiResponse = Http::get("https://api.jikan.moe/v4/anime/{$mal_id}/full");
 
         if (!$apiResponse->successful()) {
             abort(404, 'Anime not found via API');
@@ -33,9 +34,26 @@ class AnimeDetailController extends Controller
 
         $data = $apiResponse['data'] ?? [];
 
+        // Ambil skor IMDb dari OMDb
+        $omdbScore = null;
+        $imdbId = null;
+        try {
+            $omdbResponse = Http::timeout(10)->get(config('services.omdb.url'), [
+                'apikey' => config('services.omdb.key'),
+                't'      => $data['title'] ?? null,
+            ]);
+
+            if ($omdbResponse->ok() && isset($omdbResponse['imdbRating'])) {
+                $omdbScore = $omdbResponse['imdbRating'] ?? null;
+                $imdbId = $omdbResponse['imdbID'] ?? null; 
+            }
+        } catch (\Exception $e) {
+            Log::error("OMDb API failed for anime ID $mal_id: " . $e->getMessage());
+        }
+
         // Siapkan data dari API sebagai default
         $apiData = [
-            'mal_id' => $data['mal_id'] ?? $id,
+            'mal_id' => $data['mal_id'] ?? $mal_id,
             'title' => $data['title'] ?? null,
             'title_english' => $data['title_english'] ?? null,
             'title_japanese' => $data['title_japanese'] ?? null,
@@ -51,9 +69,11 @@ class AnimeDetailController extends Controller
             'duration' => $data['duration'] ?? null,
             'aired' => $data['aired'] ?? [],
             'score' => $data['score'] ?? null,
+            'imdb_score' => $omdbScore,
+            'imdb_id' => $imdbId,
         ];
 
-        // Jika data tersedia di database, gunakan sebagai prioritas
+        // Jika data tersedia di database, gunakan sebagian dari DB
         if ($animeLink) {
             $animeLink->loadMissing(['types', 'batches.batchLinks']);
             $fromDatabase = true;
@@ -68,7 +88,7 @@ class AnimeDetailController extends Controller
                 'season' => $animeLink->season ?? $apiData['season'],
                 'year' => $animeLink->year ?? $apiData['year'],
                 'types' => $animeLink->types->pluck('name')->toArray(),
-                'type' => $animeLink->type ?? $apiData['type'], // ✅ Perbaikan di sini
+                'type' => $animeLink->type ?? $apiData['type'],
                 'status' => $apiData['status'],
                 'studios' => $apiData['studios'],
                 'genres' => $apiData['genres'],
@@ -76,17 +96,18 @@ class AnimeDetailController extends Controller
                 'duration' => $apiData['duration'],
                 'aired' => $apiData['aired'],
                 'score' => $apiData['score'],
+                'imdb_score' => $omdbScore,
+                'imdb_id' => $omdbResponse['imdbID'] ?? null,
             ];
 
             $downloadLinks = $animeLink->batches->flatMap->batchLinks;
         } else {
-            // Tidak ada di database, gunakan API sepenuhnya
             $animeData = $apiData;
         }
 
-        // Ambil rekomendasi anime dari Jikan
+        // Ambil rekomendasi anime
         $recommendations = [];
-        $recResponse = Http::get("https://api.jikan.moe/v4/anime/{$id}/recommendations");
+        $recResponse = Http::get("https://api.jikan.moe/v4/anime/{$mal_id}/recommendations");
 
         if ($recResponse->successful()) {
             foreach ($recResponse['data'] as $item) {

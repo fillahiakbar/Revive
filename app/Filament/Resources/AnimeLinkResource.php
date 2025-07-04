@@ -20,7 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
-
 class AnimeLinkResource extends Resource
 {
     protected static ?string $model = AnimeLink::class;
@@ -52,13 +51,27 @@ class AnimeLinkResource extends Resource
                         if ($response->successful()) {
                             $data = $response->json('data');
 
-                            if ($data) {
-                                $set('title', $data['title']);
+                            if (is_array($data)) {
+                                $set('title', $data['title'] ?? '');
+                                $set('title_english', $data['title_english'] ?? '');
                                 $set('poster', $data['images']['jpg']['image_url'] ?? '');
-                                $set('synopsis', $data['synopsis']);
+                                $set('synopsis', $data['synopsis'] ?? '');
                                 $set('season', $data['season'] ?? null);
                                 $set('year', $data['year'] ?? null);
                                 $set('type', $data['type'] ?? '');
+
+                                $genres = collect($data['genres'] ?? [])->pluck('name')->implode(', ');
+                                $set('genres', $genres);
+
+                                // Ambil imdb_id dari OMDb
+                                $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
+                                    'apikey' => config('services.omdb.key'),
+                                    't' => $data['title'] ?? '',
+                                ]);
+
+                                if ($omdb->ok()) {
+                                    $set('imdb_id', $omdb->json('imdbID') ?? null);
+                                }
                             }
                         }
                     }),
@@ -71,6 +84,17 @@ class AnimeLinkResource extends Resource
                 TextInput::make('poster')
                     ->label('رابط الصورة')
                     ->maxLength(512),
+
+                TextInput::make('title_english')
+                    ->label('العنوان بالإنجليزية')
+                    ->maxLength(255),
+
+                TextInput::make('genres')
+                    ->label('الأنواع (Genres)')
+                    ->readOnly()
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->maxLength(255),
 
                 RichEditor::make('synopsis')
                     ->label('الملخص')
@@ -115,6 +139,11 @@ class AnimeLinkResource extends Resource
                     ->disabled()
                     ->dehydrated(true)
                     ->maxLength(50),
+
+                TextInput::make('imdb_id')
+                    ->label('معرّف IMDb')
+                    ->readOnly()
+                    ->maxLength(20),
             ]);
     }
 
@@ -169,8 +198,7 @@ class AnimeLinkResource extends Resource
                 Textarea::make('url_gdrive')
                     ->label('روابط Google Drive')
                     ->rows(1),
-                    
-                                    
+
                 Textarea::make('url_megaHard')
                     ->label('روابط ميجا Hardsub')
                     ->rows(1),
@@ -178,30 +206,18 @@ class AnimeLinkResource extends Resource
                 Textarea::make('url_gdriveHard')
                     ->label('روابط Google Drive Hardsub')
                     ->rows(1),
-                    ]);
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('title')
-                    ->label('العنوان')
-                    ->searchable(),
-
-                TextColumn::make('type')
-                    ->label('النوع الرسمي'),
-
-                TextColumn::make('types.name')
-                    ->label('النوع')
-                    ->limit(30),
-
-                TextColumn::make('season')
-                    ->label('الموسم'),
-
-                TextColumn::make('year')
-                    ->label('السنة'),
-
+                TextColumn::make('title')->label('العنوان')->searchable(),
+                TextColumn::make('type')->label('النوع الرسمي'),
+                TextColumn::make('types.name')->label('النوع')->limit(30),
+                TextColumn::make('season')->label('الموسم'),
+                TextColumn::make('year')->label('السنة'),
                 TextColumn::make('synopsis')
                     ->label('الملخص')
                     ->html()

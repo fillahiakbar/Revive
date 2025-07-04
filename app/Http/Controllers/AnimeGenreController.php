@@ -127,12 +127,17 @@ class AnimeGenreController extends Controller
                 'mal_id' => $anime->mal_id,
                 'title' => $anime->title,
                 'local_title' => $anime->title,
-                'types' => $anime->types->pluck('name')->toArray(),
                 'episodes' => $data['episodes'] ?? null,
                 'duration' => $data['duration'] ?? null,
                 'score' => $data['score'] ?? null,
                 'images' => $data['images'] ?? null,
                 'image' => $data['images']['jpg']['image_url'] ?? null,
+                'types' => $anime->types->map(function ($type) {
+    return [
+        'name' => $type->name,
+        'color' => $type->color ?? '#6b7280', // default Tailwind gray-500
+    ];
+}),
             ];
         });
 

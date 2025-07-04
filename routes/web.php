@@ -90,7 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('/list', [AnimeListController::class, 'list'])->name('anime.list');
-    Route::get('/anime/{id}', [AnimeDetailController::class, 'show'])->name('anime.show');
+    Route::get('/anime/mal/{mal_id}', [AnimeDetailController::class, 'show'])->name('anime.show');
     Route::get('/genres/{slug}', [GenreController::class, 'show'])->name('genre.show');
 
     Route::get('/genres', [GenreController::class, 'genres'])->name('anime.genres');
@@ -101,6 +101,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/search', [AnimeController::class, 'search'])->name('anime.search');
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::get('/autocomplete', [AnimeController::class, 'autocomplete'])->name('anime.autocomplete');
+
+;
+
+
+    
 });
 
 // ===============================

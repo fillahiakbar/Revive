@@ -27,7 +27,7 @@ class Comment extends Model
     // Komentar ini milik anime link tertentu
     public function animeLink()
     {
-        return $this->belongsTo(AnimeLink::class);
+        return $this->belongsTo(AnimeLink::class, 'anime_link_id');
     }
 
     // Balasan terhadap komentar ini
@@ -41,4 +41,5 @@ class Comment extends Model
     {
         return $this->belongsTo(Comment::class, 'parent_id');
     }
+    
 }

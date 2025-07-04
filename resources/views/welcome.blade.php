@@ -15,7 +15,7 @@
                         data-quality="{{ $slide->quality }}"
                         data-episodes="{{ $slide->episodes }}"
                         data-description="{{ $slide->description }}"
-                        data-link="{{ route('anime.show', ['id' => $slide->mal_id]) }}"
+                        data-link="{{ route('anime.show', ['mal_id' => $slide->mal_id]) }}"
                     >
                         <div class="w-full h-full bg-contain bg-left bg-no-repeat"
                             style="background-image: url('{{ asset('storage/' . $slide->image) }}');"></div>
@@ -25,7 +25,7 @@
                 @endforeach
 
                 {{-- Dynamic Content + Link --}}
-                <a id="hero-link" href="{{ route('anime.show', ['id' => $sliders->first()->mal_id]) }}">
+                <a id="hero-link" href="{{ route('anime.show', ['mal_id' => $sliders->first()->mal_id]) }}">
                     <div class="relative z-10 h-full flex items-center justify-start px-4 md:px-8 lg:px-20"
                         style="background-image: url('{{ asset('img/overlayer.png') }}');">
                         <div class="w-full md:w-[45%] lg:w-[40%] max-w-2xl space-y-6 text-right">
@@ -136,7 +136,7 @@
     <div class="bg-white/5 bg-opacity-30 backdrop-blur-lg rounded-xl p-6 border border-white/10 shadow-2xl">
         <div class="grid grid-cols-1 gap-4 md:gap-6">
             @foreach ($latestReleases as $anime)
-                <a href="{{ route('anime.show', ['id' => $anime['mal_id']]) }}" class="block hover:bg-gray-700 hover:bg-opacity-50 transition-all duration-300 rounded-lg group">
+                <a href="{{ route('anime.show', ['mal_id' => $anime['mal_id']]) }}" class="block hover:bg-gray-700 hover:bg-opacity-50 transition-all duration-300 rounded-lg group">
                     <div class="p-4 flex items-center gap-4 relative overflow-hidden">
                         {{-- Anime Image --}}
                         <div class="relative z-10 w-20 md:w-28 h-28 md:h-40 overflow-hidden rounded-lg flex-shrink-0 shadow-lg order-1">
@@ -150,16 +150,20 @@
                         <div class="flex-1 relative z-10 min-w-0 space-y-3 order-2">
                             {{-- Title + Score --}}
                             <div class="flex items-center justify-between gap-4">
-<h2 class="font-bold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 truncate">
-    {{ $anime['title'] }}
-</h2>
+                                    <h2 class="font-bold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 truncate">
+                                        {{ $anime['title'] }}
+                                    </h2>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0">
-                                    <div>
-                                        <div class="bg-blue-600 border border-blue-400 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] tracking-wide">MAL</div>
-                                        <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
-                                    </div>
+                                <div>
+                                    <div class="bg-imdb rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[15px] tracking-wide">IMDb</div>
+                                    <div class="text-white text-center font-bold text-sm">{{ $anime['imdb_score'] ?? 'N/A' }}</div>
+                                </div>
+                                <div>
+                                    <div class="bg-mal rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[15px] tracking-wide">MAL</div>
+                                    <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
                                 </div>
                             </div>
+                        </div>
 
                             {{-- Title English --}}
                             <div class="flex flex-wrap gap-2 text-sm text-white/80">
@@ -224,7 +228,7 @@
                         <div class="space-y-5 z-10 rounded-xl p-6 relative ">
                             <div class="rounded-lg">
                                 @foreach ($mostVisited->take(5) as $index => $anime)
-                                    <a href="{{ route('anime.show', ['id' => $anime['mal_id']]) }}" class="block duration-300 rounded-lg group">
+                                    <a href="{{ route('anime.show', ['mal_id' => $anime['mal_id']]) }}" class="block duration-300 rounded-lg group">
                                         <div class="flex items-center p-3 gap-4 relative overflow-hidden bg-gradient-to-r transition-all duration-300">
                                             {{-- Purple line accent --}}
                                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b"></div>

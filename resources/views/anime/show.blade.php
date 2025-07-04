@@ -22,8 +22,15 @@
                                     @endif
                                 </div>
                                 <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
+                                    <a href="https://www.imdb.com/title/{{ $anime['imdb_id'] ?? '' }}" target="_blank" class="block">
+    <div class="bg-imdb rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[15px] tracking-wide">IMDb</div>
+    <div class="text-white text-center font-bold text-sm">
+        {{ $anime['imdb_score'] ?? 'N/A' }}
+    </div>
+</a>
+
                                     <a href="https://myanimelist.net/anime/{{ $anime['mal_id'] ?? '' }}" target="_blank" class="block">
-                                        <div class="bg-blue-600 border border-blue-400 px-2 py-1 text-center min-w-[50px] text-white font-bold text-[10px] uppercase tracking-wide">MAL</div>
+                                        <div class="bg-mal rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[15px] uppercase tracking-wide">MAL</div>
                                         <div class="text-white text-center font-bold text-sm">
                                             {{ $anime['score'] ?? 'N/A' }}
                                         </div>

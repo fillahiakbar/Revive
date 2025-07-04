@@ -1,7 +1,35 @@
-<!-- Jetstream Navigation Layout -->
 <script src="//unpkg.com/alpinejs" defer></script>
 
-<div class="relative z-50" dir="rtl" x-data="{ openMenu: false, showInput: false, searchQuery: '' }">
+<div class="relative z-50" dir="rtl"
+     x-data="{
+        openMenu: false,
+        showInput: false,
+        searchQuery: '',
+        searchResults: [],
+        isLoading: false,
+
+        async fetchResults() {
+            if (this.searchQuery.trim().length < 2) {
+                this.searchResults = [];
+                return;
+            }
+
+            this.isLoading = true;
+
+            try {
+                const response = await fetch(`/autocomplete?q=${encodeURIComponent(this.searchQuery)}`);
+                const data = await response.json();
+                this.searchResults = data;
+            } catch (error) {
+                console.error('Autocomplete fetch failed:', error);
+                this.searchResults = [];
+            } finally {
+                this.isLoading = false;
+            }
+        }
+     }">
+
+
     <!-- Header Kustom (Desktop) -->
     <div class="absolute top-0 left-0 z-30 w-full hidden md:flex items-center justify-between px-10 py-6 font-cairo text-white">
         <!-- Menu Navigasi Tengah -->
@@ -42,24 +70,49 @@
                 </button>
 
                 <!-- Search Form -->
-                <form x-show="showInput" 
-                      action="{{ route('anime.search') }}" 
-                      method="GET" 
-                      @submit="if(!searchQuery.trim()) { $event.preventDefault(); alert('Please enter a search term'); }"
-                      x-transition:enter="transition ease-out duration-200"
-                      x-transition:enter-start="opacity-0 transform scale-95 -translate-x-4"
-                      x-transition:enter-end="opacity-100 transform scale-100 translate-x-0"
-                      class="absolute left-12 top-0 z-10">
-                    <input x-ref="searchInput"
-                           x-model="searchQuery"
-                           type="text" 
-                           name="q"
-                           placeholder="ابحث عن عمل..."
-                           class="h-10 bg-gray-800 text-white border border-gray-600 rounded px-4 w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
-                           @keydown.escape="showInput = false; searchQuery = ''"
-                           autocomplete="off" />
-                </form>
-            </div>
+<form x-show="showInput" 
+      action="#" 
+      method="GET" 
+      @submit="if(!searchQuery.trim()) { $event.preventDefault(); alert('Please enter a search term'); }"
+      x-transition:enter="transition ease-out duration-200"
+      x-transition:enter-start="opacity-0 transform scale-95 -translate-x-4"
+      x-transition:enter-end="opacity-100 transform scale-100 translate-x-0"
+      class="absolute left-12 top-0 z-10 w-72">
+
+    <!-- Input -->
+    <input x-ref="searchInput"
+           x-model="searchQuery"
+           @input.debounce.100ms="fetchResults"
+           type="text" 
+           name="q"
+           placeholder="ابحث عن عمل..."
+           class="h-10 bg-white text-black border border-gray-600 rounded px-4 w-full focus:outline-none focus:ring-2 focus:ring-red-500"
+           @keydown.escape="showInput = false; searchQuery = ''; searchResults = []"
+           autocomplete="off" />
+
+    <!-- ✅ Loading Spinner -->
+<div x-show="isLoading"
+     class="mt-4 flex items-center justify-center">
+    <i class="fas fa-spinner fa-lg animate-spin mr-2"></i>
+</div>
+
+    <!-- Autocomplete Results -->
+    <div x-show="searchResults.length > 0"
+         class="absolute mt-1 left-0 w-full bg-white/30 backdrop-blur-md border border-gray-300 rounded shadow-lg text-sm text-white max-h-60 overflow-y-auto z-50"
+         x-transition>
+        <template x-for="item in searchResults" :key="item.mal_id">
+            <a :href="`/anime/mal/${item.mal_id}`" class="flex items-center gap-3 px-4 py-2 hover:bg-white/50 border-b border-gray-100">
+                <img :src="item.poster" class="w-10 h-14 object-cover rounded" />
+                <div class="flex flex-col">
+                    <span class="font-semibold" x-text="item.title"></span>
+                    <span class="text-xs text-white" x-show="item.title_english && item.title_english !== item.title" x-text="item.title_english"></span>
+                </div>
+            </a>
+        </template>
+    </div>
+
+</form>
+ </div>
 
             <!-- Profile Icon -->
             @auth
@@ -100,7 +153,8 @@
         <a href="/about" class="block hover:text-red-400">عن الفريق</a>
 
         <!-- Search Input -->
-        <form action="{{ route('anime.search') }}" method="GET" @submit="if(!searchQuery.trim()) { $event.preventDefault(); alert('Please enter a search term'); }">
+        <form action="{{ route('anime.search') }}" method="GET"
+              @submit="if(!searchQuery.trim()) { $event.preventDefault(); alert('Please enter a search term'); }">
             <input x-model="searchQuery"
                    type="text"
                    name="q"

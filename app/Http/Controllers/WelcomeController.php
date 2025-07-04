@@ -23,16 +23,34 @@ class WelcomeController extends Controller
 
         foreach ($animeLinks as $anime) {
             try {
-                $response = Http::timeout(10)
-                    ->withoutVerifying() // Hanya untuk LOCAL development!
+                // Ambil data dari Jikan
+                $jikanResponse = Http::timeout(10)
+                    ->withoutVerifying()
                     ->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
 
-                if (!$response->ok() || !isset($response['data'])) {
+                if (!$jikanResponse->ok() || !isset($jikanResponse['data'])) {
                     continue;
                 }
 
-                $api = $response['data'];
+                $api = $jikanResponse['data'];
                 $batches = $anime->batches->sortByDesc('created_at');
+
+                // Ambil skor IMDb dari OMDb
+                $omdbScore = null;
+
+                try {
+                    $omdbResponse = Http::timeout(10)
+                        ->get(config('services.omdb.url'), [
+                            'apikey' => config('services.omdb.key'),
+                            't'      => $anime->title,
+                        ]);
+
+                    if ($omdbResponse->ok() && isset($omdbResponse['imdbRating'])) {
+                        $omdbScore = $omdbResponse['imdbRating'];
+                    }
+                } catch (\Exception $e) {
+                    Log::error("OMDb API request failed for title {$anime->title}: " . $e->getMessage());
+                }
 
                 foreach ($batches as $batch) {
                     $item = [
@@ -40,6 +58,7 @@ class WelcomeController extends Controller
                         'title'              => $anime->title,
                         'title_english'      => $api['title_english'] ?? null,
                         'score'              => $api['score'] ?? null,
+                        'imdb_score'         => $omdbScore,
                         'type'               => $api['type'] ?? '-',
                         'episodes'           => $api['episodes'] ?? null,
                         'synopsis'           => $batch->name ?? '-',
@@ -56,7 +75,7 @@ class WelcomeController extends Controller
                         $currentWorks->push($item);
                     }
 
-                    break; // ambil 1 batch terbaru saja per anime
+                    break; // Ambil satu batch terbaru saja
                 }
             } catch (\Illuminate\Http\Client\RequestException $e) {
                 Log::error("Jikan API request failed: " . $e->getMessage());
@@ -64,7 +83,7 @@ class WelcomeController extends Controller
             }
         }
 
-        // Urutkan & potong data latest
+        // Urutkan dan potong latest releases
         $latestReleases = $latestReleases
             ->sortByDesc('created_at')
             ->take(5)
@@ -79,8 +98,8 @@ class WelcomeController extends Controller
         ]);
     }
 
-    public function about()    { return view('about'); }
-    public function terms()    { return view('terms'); }
-    public function cookies()  { return view('cookies'); }
-    public function privacy()  { return view('privacy'); }
+    public function about()   { return view('about'); }
+    public function terms()   { return view('terms'); }
+    public function cookies() { return view('cookies'); }
+    public function privacy() { return view('privacy'); }
 }

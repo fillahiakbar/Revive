@@ -193,4 +193,32 @@ class AnimeController extends Controller
             return $firstChar === strtoupper($letter);
         });
     }
+
+public function autocomplete(Request $request)
+{
+    $search = $request->get('q', '');
+
+    if (strlen($search) < 2) {
+        return response()->json([]);
+    }
+
+    $results = AnimeLink::where(function ($q) use ($search) {
+            $q->whereRaw('LOWER(title) like ?', ['%' . strtolower($search) . '%'])
+              ->orWhereRaw('LOWER(title_english) like ?', ['%' . strtolower($search) . '%']);
+        })
+        ->orderByRaw("
+            CASE 
+                WHEN LOWER(title) LIKE ? THEN 0
+                WHEN LOWER(title) LIKE ? THEN 1
+                ELSE 2
+            END
+        ", [strtolower($search) . '%', '%' . strtolower($search) . '%'])
+        ->limit(10)
+        ->get(['mal_id', 'title', 'title_english', 'poster']);
+
+    return response()->json($results);
+}
+
+
+
 }
