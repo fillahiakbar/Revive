@@ -183,6 +183,38 @@
                 </div>
             @endif
 
+
+
+{{-- Related Anime --}}
+@if ($animeLink && $animeLink->relatedAnimes->isNotEmpty())
+    <div class="mt-12 px-4 md:px-8 lg:px-16">
+        <h2 class="text-xl font-bold text-white mb-4">أعمال ذات صلة</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[300px]">
+            @foreach ($animeLink->relatedAnimes as $related)
+                <a href="{{ route('anime.show', $related->mal_id) }}"
+                   class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group text-xs">
+
+                    {{-- Poster --}}
+                    <div class="w-full bg-gray-800">
+                        <img src="{{ $related->poster }}"
+                             alt="{{ $related->title }}"
+                             class="w-full h-30 object-cover border border-white/10 group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    </div>
+
+                    {{-- Title --}}
+                    <div class="p-2">
+                        <h3 class="font-semibold leading-tight truncate" title="{{ $related->title }}">
+                            {{ $related->title }}
+                        </h3>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+@endif
+
+
             {{-- Comments Section --}}
 <div class="mt-10 px-8 md:px-12 lg:px-16 mx-20 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
     <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>

@@ -18,6 +18,7 @@ class AnimeDetailController extends Controller
                 'batches.batchLinks',
                 'comments' => fn ($q) => $q->latest(),
                 'comments.user',
+                'relatedAnimes',
             ])
             ->first();
 

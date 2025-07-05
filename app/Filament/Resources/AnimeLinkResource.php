@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnimeLinkResource\Pages;
 use App\Models\AnimeLink;
+use App\Models\RelatedAnime;
 use Filament\Forms\Components\{
     Hidden,
     Repeater,
@@ -11,7 +12,8 @@ use Filament\Forms\Components\{
     Select,
     Textarea,
     TextInput,
-    RichEditor
+    RichEditor,
+    Image
 };
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -33,6 +35,7 @@ class AnimeLinkResource extends Resource
         return $form->schema([
             self::animeInfoSection(),
             self::batchesSection(),
+            self::relatedAnimesSection(),
         ]);
     }
 
@@ -63,7 +66,6 @@ class AnimeLinkResource extends Resource
                                 $genres = collect($data['genres'] ?? [])->pluck('name')->implode(', ');
                                 $set('genres', $genres);
 
-                                // Ambil imdb_id dari OMDb
                                 $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
                                     'apikey' => config('services.omdb.key'),
                                     't' => $data['title'] ?? '',
@@ -99,17 +101,9 @@ class AnimeLinkResource extends Resource
                 RichEditor::make('synopsis')
                     ->label('الملخص')
                     ->toolbarButtons([
-                        'attachFiles',
-                        'blockquote',
-                        'bold',
-                        'bulletList',
-                        'codeBlock',
-                        'h1', 'h2', 'h3',
-                        'italic',
-                        'link',
-                        'orderedList',
-                        'redo', 'undo',
-                        'strike', 'underline',
+                        'attachFiles', 'blockquote', 'bold', 'bulletList', 'codeBlock',
+                        'h1', 'h2', 'h3', 'italic', 'link', 'orderedList',
+                        'redo', 'undo', 'strike', 'underline',
                         'align-left', 'align-center', 'align-right', 'align-justify',
                     ])
                     ->extraInputAttributes([
@@ -187,25 +181,42 @@ class AnimeLinkResource extends Resource
                     ])
                     ->required(),
 
-                Textarea::make('url_torrent')
-                    ->label('روابط التورنت')
-                    ->rows(1),
+                Textarea::make('url_torrent')->label('روابط التورنت')->rows(1),
+                Textarea::make('url_mega')->label('روابط ميجا')->rows(1),
+                Textarea::make('url_gdrive')->label('روابط Google Drive')->rows(1),
+                Textarea::make('url_megaHard')->label('روابط ميجا Hardsub')->rows(1),
+                Textarea::make('url_gdriveHard')->label('روابط Google Drive Hardsub')->rows(1),
+            ]);
+    }
 
-                Textarea::make('url_mega')
-                    ->label('روابط ميجا')
-                    ->rows(1),
+    protected static function relatedAnimesSection(): Repeater
+    {
+        return Repeater::make('relatedAnimes')
+            ->label('الأنميات المرتبطة')
+            ->relationship()
+            ->schema([
+                TextInput::make('mal_id')
+                    ->label('معرّف MAL')
+                    ->required()
+                    ->numeric()
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $response = Http::get("https://api.jikan.moe/v4/anime/{$state}");
 
-                Textarea::make('url_gdrive')
-                    ->label('روابط Google Drive')
-                    ->rows(1),
+                        if ($response->successful()) {
+                            $data = $response->json('data');
+                            $set('title', $data['title'] ?? '');
+                            $set('poster', $data['images']['jpg']['image_url'] ?? '');
+                        }
+                    }),
 
-                Textarea::make('url_megaHard')
-                    ->label('روابط ميجا Hardsub')
-                    ->rows(1),
+                TextInput::make('title')
+                    ->label('العنوان')
+                    ->required(),
 
-                Textarea::make('url_gdriveHard')
-                    ->label('روابط Google Drive Hardsub')
-                    ->rows(1),
+                TextInput::make('poster')
+                    ->label('رابط الصورة')
+                    ->required(),
             ]);
     }
 
@@ -261,7 +272,6 @@ class AnimeLinkResource extends Resource
     protected static function generateRssFeed($record): void
     {
         $record->load('batches.batchLinks');
-
         $rssXml = view('rss.feed', ['anime' => $record])->render();
 
         File::ensureDirectoryExists(public_path('rss'));

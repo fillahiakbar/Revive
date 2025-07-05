@@ -51,4 +51,9 @@ public function comments()
     return $this->hasMany(Comment::class, 'anime_link_id');
 }
 
+public function relatedAnimes()
+{
+    return $this->hasMany(RelatedAnime::class);
+}
+
 }

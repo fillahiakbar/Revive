@@ -84,7 +84,7 @@
                         </svg>
                     </div>
                 @endif
-            </div>
+                </div>
 
             {{-- Detail --}}
             <div class="p-2 text-xs">
