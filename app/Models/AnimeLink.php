@@ -51,6 +51,11 @@ public function comments()
     return $this->hasMany(Comment::class, 'anime_link_id');
 }
 
+public function relatedGroup()
+{
+    return $this->belongsTo(\App\Models\RelateAnimeGroup::class, 'related_anime_group_id');
+}
+
 public function relatedAnimes()
 {
     return $this->hasMany(RelatedAnime::class);

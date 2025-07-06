@@ -3,21 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RelatedAnime extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'anime_link_id',
+        'relate_anime_group_id',
         'mal_id',
-        'title',
         'poster',
+        'title',
+        'title_english',
     ];
+
+    public function group()
+    {
+        return $this->belongsTo(RelateAnimeGroup::class, 'relate_anime_group_id');
+    }
 
     public function animeLink()
     {
-        return $this->belongsTo(AnimeLink::class);
+        return $this->belongsTo(AnimeLink::class, 'mal_id', 'mal_id');
     }
 }

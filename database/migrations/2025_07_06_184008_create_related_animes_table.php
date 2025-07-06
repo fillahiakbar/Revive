@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('related_animes', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('anime_link_id')->constrained()->onDelete('cascade');
+    $table->foreignId('relate_anime_group_id')->constrained()->onDelete('cascade');
     $table->unsignedBigInteger('mal_id');
+    $table->string('poster');
     $table->string('title');
-    $table->string('poster')->nullable();
+    $table->string('title_english')->nullable();
     $table->timestamps();
 });
-
     }
 
     /**

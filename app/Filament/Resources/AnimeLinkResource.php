@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnimeLinkResource\Pages;
 use App\Models\AnimeLink;
-use App\Models\RelatedAnime;
 use Filament\Forms\Components\{
     Hidden,
     Repeater,
@@ -12,8 +11,7 @@ use Filament\Forms\Components\{
     Select,
     Textarea,
     TextInput,
-    RichEditor,
-    Image
+    RichEditor
 };
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -25,7 +23,6 @@ use Illuminate\Support\Facades\Http;
 class AnimeLinkResource extends Resource
 {
     protected static ?string $model = AnimeLink::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'روابط الأنمي';
     protected static ?string $pluralModelLabel = 'روابط الأنمي';
@@ -50,66 +47,34 @@ class AnimeLinkResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         $response = Http::get("https://api.jikan.moe/v4/anime/{$state}");
-
                         if ($response->successful()) {
                             $data = $response->json('data');
+                            $set('title', $data['title'] ?? '');
+                            $set('title_english', $data['title_english'] ?? '');
+                            $set('poster', $data['images']['jpg']['image_url'] ?? '');
+                            $set('synopsis', $data['synopsis'] ?? '');
+                            $set('season', $data['season'] ?? null);
+                            $set('year', $data['year'] ?? null);
+                            $set('type', $data['type'] ?? '');
 
-                            if (is_array($data)) {
-                                $set('title', $data['title'] ?? '');
-                                $set('title_english', $data['title_english'] ?? '');
-                                $set('poster', $data['images']['jpg']['image_url'] ?? '');
-                                $set('synopsis', $data['synopsis'] ?? '');
-                                $set('season', $data['season'] ?? null);
-                                $set('year', $data['year'] ?? null);
-                                $set('type', $data['type'] ?? '');
+                            $genres = collect($data['genres'] ?? [])->pluck('name')->implode(', ');
+                            $set('genres', $genres);
 
-                                $genres = collect($data['genres'] ?? [])->pluck('name')->implode(', ');
-                                $set('genres', $genres);
-
-                                $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
-                                    'apikey' => config('services.omdb.key'),
-                                    't' => $data['title'] ?? '',
-                                ]);
-
-                                if ($omdb->ok()) {
-                                    $set('imdb_id', $omdb->json('imdbID') ?? null);
-                                }
+                            $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
+                                'apikey' => config('services.omdb.key'),
+                                't' => $data['title'] ?? '',
+                            ]);
+                            if ($omdb->ok()) {
+                                $set('imdb_id', $omdb->json('imdbID') ?? null);
                             }
                         }
                     }),
 
-                TextInput::make('title')
-                    ->label('العنوان')
-                    ->required()
-                    ->maxLength(255),
-
-                TextInput::make('poster')
-                    ->label('رابط الصورة')
-                    ->maxLength(512),
-
-                TextInput::make('title_english')
-                    ->label('العنوان بالإنجليزية')
-                    ->maxLength(255),
-
-                TextInput::make('genres')
-                    ->label('الأنواع (Genres)')
-                    ->readOnly()
-                    ->disabled()
-                    ->dehydrated(true)
-                    ->maxLength(255),
-
-                RichEditor::make('synopsis')
-                    ->label('الملخص')
-                    ->toolbarButtons([
-                        'attachFiles', 'blockquote', 'bold', 'bulletList', 'codeBlock',
-                        'h1', 'h2', 'h3', 'italic', 'link', 'orderedList',
-                        'redo', 'undo', 'strike', 'underline',
-                        'align-left', 'align-center', 'align-right', 'align-justify',
-                    ])
-                    ->extraInputAttributes([
-                        'style' => 'min-height: 200px; text-align: justify; line-height: 1.6;',
-                    ])
-                    ->columnSpan('full'),
+                TextInput::make('title')->label('العنوان')->required(),
+                TextInput::make('poster')->label('رابط الصورة'),
+                TextInput::make('title_english')->label('العنوان بالإنجليزية'),
+                TextInput::make('genres')->label('الأنواع')->readOnly()->disabled()->dehydrated(true),
+                RichEditor::make('synopsis')->label('الملخص')->columnSpan('full'),
 
                 Select::make('anime_types')
                     ->label('الوسوم (Tags)')
@@ -119,25 +84,18 @@ class AnimeLinkResource extends Resource
                     ->preload()
                     ->required(),
 
-                TextInput::make('season')
-                    ->label('الموسم')
-                    ->maxLength(50),
+                TextInput::make('season')->label('الموسم'),
+                TextInput::make('year')->label('السنة'),
+                TextInput::make('type')->label('النوع')->readOnly()->disabled()->dehydrated(true),
+                TextInput::make('imdb_id')->label('معرّف IMDb')->readOnly(),
 
-                TextInput::make('year')
-                    ->label('السنة')
-                    ->maxLength(4),
-
-                TextInput::make('type')
-                    ->label('النوع (من MyAnimeList)')
-                    ->readOnly()
-                    ->disabled()
-                    ->dehydrated(true)
-                    ->maxLength(50),
-
-                TextInput::make('imdb_id')
-                    ->label('معرّف IMDb')
-                    ->readOnly()
-                    ->maxLength(20),
+                // Tambahan: Pilih Grup terkait
+                Select::make('related_anime_group_id')
+                    ->label('المجموعة المرتبطة')
+                    ->relationship('relatedGroup', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
             ]);
     }
 
@@ -149,18 +107,8 @@ class AnimeLinkResource extends Resource
             ->schema([
                 Hidden::make('anime_link_id')
                     ->default(fn (\Filament\Forms\Get $get) => $get('../../id')),
-
-                TextInput::make('name')
-                    ->label('الاسم')
-                    ->required(),
-
-                Textarea::make('episodes')
-                    ->label('قائمة الحلقات (مفصولة بفواصل)')
-                    ->required()
-                    ->rows(3)
-                    ->maxLength(65535)
-                    ->helperText('مثال: 1,2,3 أو 1-12'),
-
+                TextInput::make('name')->label('الاسم')->required(),
+                Textarea::make('episodes')->label('قائمة الحلقات')->rows(3)->required(),
                 self::batchLinksRepeater(),
             ]);
     }
@@ -202,7 +150,6 @@ class AnimeLinkResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         $response = Http::get("https://api.jikan.moe/v4/anime/{$state}");
-
                         if ($response->successful()) {
                             $data = $response->json('data');
                             $set('title', $data['title'] ?? '');
@@ -210,13 +157,8 @@ class AnimeLinkResource extends Resource
                         }
                     }),
 
-                TextInput::make('title')
-                    ->label('العنوان')
-                    ->required(),
-
-                TextInput::make('poster')
-                    ->label('رابط الصورة')
-                    ->required(),
+                TextInput::make('title')->label('العنوان')->required(),
+                TextInput::make('poster')->label('رابط الصورة')->required(),
             ]);
     }
 
@@ -229,6 +171,7 @@ class AnimeLinkResource extends Resource
                 TextColumn::make('types.name')->label('النوع')->limit(30),
                 TextColumn::make('season')->label('الموسم'),
                 TextColumn::make('year')->label('السنة'),
+                TextColumn::make('relatedGroup.name')->label('المجموعة المرتبطة'),
                 TextColumn::make('synopsis')
                     ->label('الملخص')
                     ->html()

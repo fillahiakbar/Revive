@@ -18,7 +18,7 @@ class Admin extends Authenticatable implements FilamentUser
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         // Hanya izinkan email tertentu
-        return $this->email === 'fillahi099@gmail.com';
+        return $this->email === 'admin@gmail.com';
 
     }
 }
