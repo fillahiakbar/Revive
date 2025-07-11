@@ -33,7 +33,7 @@ class Comment extends Model
     // Balasan terhadap komentar ini
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id')->latest();
+        return $this->hasMany(Comment::class, 'parent_id')->oldest();
     }
 
     // Jika komentar ini adalah balasan, maka parent-nya:

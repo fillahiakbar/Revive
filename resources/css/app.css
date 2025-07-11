@@ -414,3 +414,53 @@ html {
     }
 }
 
+/* ============================================ */
+/* Responsive Layout Breakpoints - Custom */
+/* ============================================ */
+
+@media (min-width: 1536px) {
+    .hero-text { font-size: 3rem; }
+    .anime-title { font-size: 1.5rem; }
+    .info-badge { font-size: 1rem; }
+}
+
+@media (min-width: 1280px) and (max-width: 1535px) {
+    .hero-text { font-size: 2.5rem; }
+    .anime-title { font-size: 1.25rem; }
+    .info-badge { font-size: 0.95rem; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+    .hero-text { font-size: 2rem; }
+    .anime-title { font-size: 1.125rem; }
+    .info-badge { font-size: 0.875rem; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .hero-text { font-size: 1.75rem; }
+    .anime-title { font-size: 1rem; }
+    .info-badge { font-size: 0.8rem; }
+    .hero-slide { height: 600px; }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+    .hero-text { font-size: 1.5rem; }
+    .anime-title { font-size: 0.9rem; }
+    .info-badge { font-size: 0.75rem; }
+    .hero-slide { height: 500px; }
+    .sidebar { order: 1; }
+    .main-content { order: 2; }
+}
+
+@media (max-width: 639px) {
+    .hero-text { font-size: 1.25rem; }
+    .anime-title { font-size: 0.85rem; }
+    .info-badge { font-size: 0.7rem; }
+    .hero-slide { height: 400px; }
+    .sidebar { order: 1; }
+    .main-content { order: 2; }
+    .category-button { font-size: 0.8rem; }
+    .tab-button { font-size: 0.9rem; }
+}
+
+

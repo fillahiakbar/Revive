@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('work_in_progress', function (Blueprint $table) {
+       Schema::create('animes', function (Blueprint $table) {
     $table->id();
-    $table->unsignedBigInteger('mal_id')->unique();
+    $table->integer('mal_id')->unique();
     $table->string('title');
     $table->string('title_english')->nullable();
-    $table->string('poster');
-    $table->string('genres');
-    $table->string('background'); // diinput manual
-    $table->unsignedTinyInteger('progress')->default(0);
-    $table->timestamps();
+    $table->string('poster')->nullable();
+    $table->string('background')->nullable();
+    $table->text('genres')->nullable(); 
+    $table->integer('progress')->default(0);
+    $table->enum('type', ['work_in_progress', 'recommendation']); 
 });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('work_in_progress');
+        Schema::dropIfExists('animes');
     }
 };

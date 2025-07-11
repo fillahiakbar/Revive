@@ -7,10 +7,13 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
+use Illuminate\Support\Str;
 
 class GenerateCustomRss extends Page implements HasForms
 {
@@ -22,12 +25,17 @@ class GenerateCustomRss extends Page implements HasForms
 
     // Single RSS file name
     private string $rssFileName = 'custom-feeds.xml';
+    
+    // Base URL for your website
+    private string $baseUrl = 'https://revivesubs.com';
 
     public ?array $data = [];
 
     public function mount(): void
     {
-        $this->form->fill();
+        $this->form->fill([
+            'useAutoLink' => true, // Default to auto-generate links
+        ]);
     }
 
     public function form(Form $form): Form
@@ -36,7 +44,11 @@ class GenerateCustomRss extends Page implements HasForms
             ->schema([
                 TextInput::make('animeName')
                     ->label('Anime Name')
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn ($state, callable $set, callable $get) => 
+                        $get('useAutoLink') ? $this->generateSlug($state, $set) : null
+                    ),
 
                 TextInput::make('batchName')
                     ->label('Batch Name')
@@ -49,12 +61,57 @@ class GenerateCustomRss extends Page implements HasForms
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg'])
                     ->required(),
 
+                Toggle::make('useAutoLink')
+                    ->label('Auto Generate Link')
+                    ->default(true)
+                    ->live()
+                    ->afterStateUpdated(fn ($state, callable $set, callable $get) => 
+                        $state ? $this->generateSlug($get('animeName'), $set) : null
+                    ),
+
+                TextInput::make('animeId')
+                    ->label('MAL ID (MyAnimeList ID)')
+                    ->numeric()
+                    ->visible(fn (callable $get) => $get('useAutoLink'))
+                    ->required(fn (callable $get) => $get('useAutoLink'))
+                    ->helperText('Enter the MAL ID from MyAnimeList (e.g., 2569 for Jungle Book)')
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn ($state, callable $set, callable $get) => 
+                        $this->generateSlug($get('animeName'), $set)
+                    ),
+
                 TextInput::make('link')
-                    ->label('Link ke Website')
-                    ->required()
-                    ->url(),
+                    ->label('Custom Link')
+                    ->visible(fn (callable $get) => !$get('useAutoLink'))
+                    ->required(fn (callable $get) => !$get('useAutoLink'))
+                    ->url()
+                    ->helperText('Enter the full URL if not using auto-generated link'),
+
+                TextInput::make('generatedLink')
+                    ->label('Generated Link (Preview)')
+                    ->visible(fn (callable $get) => $get('useAutoLink'))
+                    ->disabled()
+                    ->helperText('Format: https://revivesubs.com/anime/mal/{MAL_ID}'),
             ])
-            ->statePath('data');
+            ->statePath('data')
+            ->live();
+    }
+
+    /**
+     * Generate slug and update link preview
+     */
+    private function generateSlug(?string $animeName, callable $set): void
+    {
+        if (!$animeName) {
+            $set('generatedLink', '');
+            return;
+        }
+
+        $animeId = $this->data['animeId'] ?? null;
+        if ($animeId) {
+            $generatedLink = $this->baseUrl . '/anime/mal/' . $animeId;
+            $set('generatedLink', $generatedLink);
+        }
     }
 
     protected function getHeaderActions(): array
@@ -78,6 +135,12 @@ class GenerateCustomRss extends Page implements HasForms
                 ->color('danger')
                 ->icon('heroicon-o-trash')
                 ->requiresConfirmation(),
+
+            Action::make('validateLinks')
+                ->label('Validate All Links')
+                ->action('validateAllLinks')
+                ->color('warning')
+                ->icon('heroicon-o-link'),
         ];
     }
 
@@ -86,20 +149,44 @@ class GenerateCustomRss extends Page implements HasForms
         // Validate and get form data
         $data = $this->form->getState();
 
+        // Determine the final link to use
+        $finalLink = $this->getFinalLink($data);
+
+        // Validate the link format
+        if (!$this->isValidLink($finalLink)) {
+            Notification::make()
+                ->title('Invalid Link Format')
+                ->body('Please check the link format. It should match your website structure.')
+                ->danger()
+                ->send();
+            return;
+        }
+
         // Ensure RSS directory exists
         File::ensureDirectoryExists(public_path('rss'));
 
         // Load existing feeds or create new array
         $feeds = $this->loadExistingFeeds();
 
+        // Check for duplicate links
+        $existingLinks = collect($feeds)->pluck('link')->toArray();
+        if (in_array($finalLink, $existingLinks)) {
+            Notification::make()
+                ->title('Duplicate Link Detected')
+                ->body('This link already exists in the RSS feed.')
+                ->warning()
+                ->send();
+            return;
+        }
+
         // Add new feed item
         $newFeed = [
             'anime_name' => $data['animeName'],
             'batch_name' => $data['batchName'],
             'poster' => $data['poster'],
-            'link' => $data['link'],
+            'link' => $finalLink,
             'created_at' => now(),
-            'id' => uniqid(), // Unique identifier for each item
+            'id' => uniqid(),
         ];
 
         // Add to beginning of array (newest first)
@@ -116,12 +203,87 @@ class GenerateCustomRss extends Page implements HasForms
 
         Notification::make()
             ->title('RSS Feed item berhasil ditambahkan!')
-            ->body("Ditambahkan ke: {$this->rssFileName}")
+            ->body("Link: {$finalLink}")
             ->success()
             ->send();
 
         // Reset form after successful generation
-        $this->form->fill();
+        $this->form->fill([
+            'useAutoLink' => true,
+        ]);
+    }
+
+    /**
+     * Get the final link based on user preference
+     */
+    private function getFinalLink(array $data): string
+    {
+        if ($data['useAutoLink']) {
+            return $this->baseUrl . '/anime/mal/' . $data['animeId'];
+        }
+        
+        return $data['link'];
+    }
+
+    /**
+     * Validate link format
+     */
+    private function isValidLink(string $link): bool
+    {
+        // Check if it's a valid URL
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        // Check if it matches your website domain and expected format
+        $parsedUrl = parse_url($link);
+        $expectedDomain = parse_url($this->baseUrl, PHP_URL_HOST);
+        
+        // Check domain
+        if ($parsedUrl['host'] !== $expectedDomain) {
+            return false;
+        }
+
+        // Check if it follows the expected pattern: /anime/mal/{id}
+        $path = $parsedUrl['path'] ?? '';
+        return preg_match('/^\/anime\/mal\/\d+$/', $path);
+    }
+
+    /**
+     * Validate all existing links in the feed
+     */
+    public function validateAllLinks(): void
+    {
+        $feeds = $this->loadExistingFeeds();
+        $invalidLinks = [];
+        $validCount = 0;
+
+        foreach ($feeds as $feed) {
+            if (!$this->isValidLink($feed['link'])) {
+                $invalidLinks[] = $feed['anime_name'] . ' - ' . $feed['link'];
+            } else {
+                $validCount++;
+            }
+        }
+
+        if (empty($invalidLinks)) {
+            Notification::make()
+                ->title('All Links Valid!')
+                ->body("All {$validCount} links are properly formatted.")
+                ->success()
+                ->send();
+        } else {
+            $invalidList = implode("\n", array_slice($invalidLinks, 0, 5));
+            $moreCount = count($invalidLinks) - 5;
+            
+            Notification::make()
+                ->title('Invalid Links Found')
+                ->body("Found " . count($invalidLinks) . " invalid links:\n{$invalidList}" . 
+                      ($moreCount > 0 ? "\n...and {$moreCount} more" : ""))
+                ->warning()
+                ->duration(10000)
+                ->send();
+        }
     }
 
     /**
@@ -154,9 +316,9 @@ class GenerateCustomRss extends Page implements HasForms
         </item>";
         }
 
-        $channelTitle = 'Custom Anime RSS Feed';
-        $channelDescription = 'RSS Feed untuk update anime batch terbaru';
-        $channelLink = url('/');
+        $channelTitle = 'ReviveSubs - Custom Anime RSS Feed';
+        $channelDescription = 'RSS Feed untuk update anime batch terbaru dari ReviveSubs';
+        $channelLink = $this->baseUrl;
         $lastBuildDate = now()->format('D, d M Y H:i:s T');
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -168,7 +330,7 @@ class GenerateCustomRss extends Page implements HasForms
         <atom:link href=\"" . url('rss/' . $this->rssFileName) . "\" rel=\"self\" type=\"application/rss+xml\" />
         <language>id-ID</language>
         <lastBuildDate>{$lastBuildDate}</lastBuildDate>
-        <generator>Laravel Filament Custom RSS Generator</generator>
+        <generator>ReviveSubs Custom RSS Generator</generator>
         {$rssItems}
     </channel>
 </rss>";
@@ -239,7 +401,7 @@ class GenerateCustomRss extends Page implements HasForms
         }
 
         $latestFeeds = collect($feeds)->take(5)->map(function ($feed) {
-            return "• {$feed['anime_name']} - {$feed['batch_name']}";
+            return "• {$feed['anime_name']} - {$feed['batch_name']} ({$feed['link']})";
         })->join("\n");
 
         Notification::make()

@@ -18,6 +18,7 @@ use App\Http\Controllers\CommentController;
 use Filament\Facades\Filament;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\AnimeDisplayController;
 
 
 
@@ -103,7 +104,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/anime/{anime_link}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::get('/autocomplete', [AnimeController::class, 'autocomplete'])->name('anime.autocomplete');
 
-;
+Route::prefix('anime-display')->group(function () {
+    Route::get('/anime-tab', [AnimeDisplayController::class, 'showTabbed'])->name('anime.tabbed');
+
+});
+
+
 
 
     

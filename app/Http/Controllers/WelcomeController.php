@@ -7,7 +7,7 @@ use App\Models\Slider;
 use App\Models\SocialMedia;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
+use App\Models\Anime;
 
 class WelcomeController extends Controller
 {
@@ -17,13 +17,23 @@ class WelcomeController extends Controller
 
         $latestReleases = collect();
         $mostVisited = collect();
-        $currentWorks = collect();
         $sliders = Slider::where('is_active', true)->orderBy('order')->get();
         $socialMedias = SocialMedia::where('is_active', true)->get();
 
+        $animes = Anime::query()
+        ->orderByRaw("FIELD(type, 'work_in_progress', 'recommendation')")
+        ->get()
+        ->unique(fn($anime) => $anime->mal_id . '-' . $anime->type)
+        ->map(function ($anime) {
+            $anime->genres = is_string($anime->genres)
+                ? array_map(fn($g) => ['name' => trim($g)], explode(',', $anime->genres))
+                : [];
+            return $anime;
+        })
+        ->values();
+
         foreach ($animeLinks as $anime) {
             try {
-                // Ambil data dari Jikan
                 $jikanResponse = Http::timeout(10)
                     ->withoutVerifying()
                     ->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
@@ -35,9 +45,7 @@ class WelcomeController extends Controller
                 $api = $jikanResponse['data'];
                 $batches = $anime->batches->sortByDesc('created_at');
 
-                // Ambil skor IMDb dari OMDb
                 $omdbScore = null;
-
                 try {
                     $omdbResponse = Http::timeout(10)
                         ->get(config('services.omdb.url'), [
@@ -63,7 +71,11 @@ class WelcomeController extends Controller
                         'episodes'           => $api['episodes'] ?? null,
                         'synopsis'           => $batch->name ?? '-',
                         'latest_batch_name'  => $batch->name ?? '-',
-                        'images'             => $api['images'] ?? [],
+                        'images' => [
+            'jpg' => [
+                'image_url' => $anime->poster ?: ($api['images']['jpg']['image_url'] ?? null),
+            ]
+        ],
                         'genres'             => $api['genres'] ?? [],
                         'created_at'         => $batch->created_at,
                     ];
@@ -71,11 +83,7 @@ class WelcomeController extends Controller
                     $latestReleases->push($item);
                     $mostVisited->push($item);
 
-                    if ($api['airing'] ?? false) {
-                        $currentWorks->push($item);
-                    }
-
-                    break; // Ambil satu batch terbaru saja
+                    break; // Ambil hanya 1 batch terbaru
                 }
             } catch (\Illuminate\Http\Client\RequestException $e) {
                 Log::error("Jikan API request failed: " . $e->getMessage());
@@ -83,16 +91,16 @@ class WelcomeController extends Controller
             }
         }
 
-        // Urutkan dan potong latest releases
+        // Sort & limit
         $latestReleases = $latestReleases
             ->sortByDesc('created_at')
             ->take(5)
             ->values();
 
         return view('welcome', [
+            'animes'         => $animes,  
             'latestReleases' => $latestReleases,
             'mostVisited'    => $mostVisited,
-            'currentWorks'   => $currentWorks,
             'sliders'        => $sliders,
             'socialMedias'   => $socialMedias,
         ]);

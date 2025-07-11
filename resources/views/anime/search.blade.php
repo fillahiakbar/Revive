@@ -103,9 +103,6 @@
                             <h3 class="font-bold truncate" title="{{ $anime['local_title'] }}">
                                 {{ $anime['local_title'] ?? $anime['title'] }}
                             </h3>
-                            @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
-                                <p class="text-gray-400 truncate">{{ $anime['title_english'] }}</p>
-                            @endif
 
                             {{-- Duration --}}
                             <p class="text-gray-400">
