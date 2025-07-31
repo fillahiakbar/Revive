@@ -30,32 +30,6 @@ Selamat datang di **Anime Manager** — aplikasi CRUD berbasis Laravel yang digu
 
 ---
 
-## 📂 Struktur Fitur
-
-```
-
-app/
-├── Http/Controllers/
-│   ├── AnimeController.php
-│   ├── GenreController.php
-│   └── DownloadController.php
-├── Models/
-│   ├── Anime.php
-│   ├── Genre.php
-│   └── Download.php
-├── Resources/
-│   └── views/
-│       ├── anime/
-│       ├── genres/
-│       ├── downloads/
-│       └── layouts/
-database/
-└── migrations/
-
-````
-
----
-
 ## 🔧 Instalasi Lokal
 
 ```bash
