@@ -1,5 +1,5 @@
 ```markdown
-# 🎌 Anime Manager CRUD - Laravel 12 + Jetstream + Tailwind CSS
+# 🎌 Anime Manager CRUD - Laravel 11 + Jetstream + Tailwind CSS
 
 Selamat datang di **Anime Manager** — aplikasi CRUD berbasis Laravel yang digunakan untuk mengelola koleksi anime, lengkap dengan fitur backend admin dan frontend publik.
 
@@ -85,26 +85,6 @@ Tidak perlu kunci API. Langsung konsumsi endpoint seperti:
 ```
 https://api.jikan.moe/v4/anime/{id}
 ```
-
-### Admin Login (default)
-
-```
-Email    : admin@example.com
-Password : password
-```
-
----
-
-## 📸 Cuplikan Tampilan
-
-| Halaman      | Tampilan                                                         |
-| ------------ | ---------------------------------------------------------------- |
-| Beranda      | ![Home](https://via.placeholder.com/400x200?text=Beranda)        |
-| Detail Anime | ![Detail](https://via.placeholder.com/400x200?text=Detail+Anime) |
-| Admin Panel  | ![Admin](https://via.placeholder.com/400x200?text=Panel+Admin)   |
-
----
-
 ## 📃 Lisensi
 
 MIT License © 2025 — Made with ❤️ by [Fillahi Akbar](mailto:fillahi099q@gmail.com)
@@ -117,8 +97,3 @@ Pull request dan masukan sangat diterima!
 Silakan buat issue jika menemukan bug atau ide pengembangan.
 
 ---
-
-```
-
-Kalau kamu punya nama proyek khusus atau ingin saya sesuaikan dengan fitur tambahan seperti filter genre, pagination, atau upload gambar, tinggal beri tahu saja — akan saya bantu buatkan ulang sesuai kebutuhanmu!
-```
