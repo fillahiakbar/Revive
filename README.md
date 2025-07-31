@@ -3,8 +3,6 @@
 
 Selamat datang di **Anime Manager** — aplikasi CRUD berbasis Laravel yang digunakan untuk mengelola koleksi anime, lengkap dengan fitur backend admin dan frontend publik.
 
-![Anime Manager Screenshot](https://via.placeholder.com/1200x600?text=Anime+Manager+Screenshot)
-
 ## 🚀 Fitur Utama
 
 - 🔒 Autentikasi aman dengan **Laravel Jetstream**
