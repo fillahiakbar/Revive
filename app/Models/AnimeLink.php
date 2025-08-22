@@ -7,7 +7,12 @@ use Illuminate\Support\Str;
 
 class AnimeLink extends Model
 {
-    protected $fillable = ['mal_id', 'title', 'poster', 'synopsis', 'season', 'year', 'type'];
+    protected $fillable = ['mal_id', 'title', 'poster','episodes', 'synopsis', 'season', 'year', 'type', 'genres', 'title_english', 'imdb_id', 'mal_score',
+    'imdb_score'];
+    
+     protected $casts = [
+        'click_count' => 'integer',
+    ];
 
     public function types()
     {
@@ -48,7 +53,19 @@ public function generateRssFile()
 
 public function comments()
 {
-    return $this->hasMany(Comment::class)->latest();
+    return $this->hasMany(Comment::class, 'anime_link_id');
 }
+
+public function relatedGroup()
+{
+    return $this->belongsTo(\App\Models\RelateAnimeGroup::class, 'related_anime_group_id');
+}
+
+public function relatedAnimes()
+{
+    return $this->hasMany(RelatedAnime::class);
+}
+
+
 
 }

@@ -11,6 +11,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Carbon;
 
 class UserResource extends Resource
 {
@@ -35,45 +37,36 @@ class UserResource extends Resource
                 ->required()
                 ->email()
                 ->unique(),
-
-            Forms\Components\Select::make('status')
-                ->label('الحالة')
-                ->options([
-                    'active' => 'نشط',
-                    'blocked' => 'محظور',
-                ])
-                ->required(),
         ]);
     }
 
-    public static function table(Tables\Table $table): Tables\Table
-    {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('name')
-                ->label('الاسم'),
-
-            Tables\Columns\TextColumn::make('email')
-                ->label('البريد الإلكتروني'),
-
-            Tables\Columns\TextColumn::make('status')
-                ->label('الحالة'),
-        ])
-        ->filters([
-            Tables\Filters\SelectFilter::make('status')
-                ->label('تصفية حسب الحالة')
-                ->options([
-                    'active' => 'نشط',
-                    'blocked' => 'محظور',
-                ]),
+   public static function table(Tables\Table $table): Tables\Table
+{
+    return $table
+        ->columns([
+            Tables\Columns\TextColumn::make('name')->label('الاسم'),
+            Tables\Columns\TextColumn::make('email')->label('البريد الإلكتروني'),
+            Tables\Columns\TextColumn::make('email_verified_at')
+                ->label('التحقق')
+                ->formatStateUsing(fn ($state) => $state ? '✅ مفعل' : '❌ غير مفعل'),
         ])
         ->actions([
             Tables\Actions\EditAction::make()->label('تعديل'),
             Tables\Actions\DeleteAction::make()->label('حذف'),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make()->label('حذف متعدد'),
+
+            // ✅ Tombol aktif/nonaktif verifikasi
+            Action::make('toggleVerification')
+                ->label(fn ($record) => $record->email_verified_at ? 'إلغاء التحقق' : 'تحقق الآن')
+                ->color(fn ($record) => $record->email_verified_at ? 'warning' : 'success')
+                ->icon(fn ($record) => $record->email_verified_at ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                ->action(function ($record) {
+                    $record->email_verified_at = $record->email_verified_at ? null : Carbon::now();
+                    $record->save();
+                })
+                ->requiresConfirmation()
+                ->visible(fn ($record) => true),
         ]);
-    }
+}
 
     public static function getRelations(): array
     {

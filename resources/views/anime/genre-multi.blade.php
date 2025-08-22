@@ -9,6 +9,7 @@
                 :selected-status="$selectedStatus ?? null"
                 :selected-types="$selectedTypes ?? []"
                 :selected-sort="$selectedSort ?? null"
+                :types="$types"
                 :query="$query ?? ''"
             />
 
@@ -25,21 +26,31 @@
                 <a href="{{ route('anime.show', $anime['mal_id']) }}"
                    class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
-                    {{-- Badge --}}
-                    @foreach ($anime['types'] ?? [] as $type)
-                        <span class="badge-{{ strtolower($type) }} text-xs px-2 py-0.5 rounded text-white font-medium absolute left-1 top-1 z-10">
-                            {{ $type }}
-                        </span>
-                    @endforeach
+                    {{-- Container badge --}}
+<div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
+    @foreach ($anime['types'] as $type)
+        @php
+            $color = $type['color'] ?? '#6b7280';
+            $label = $type['name'] ?? $type;
+        @endphp
+        <span
+            class="text-xs font-medium px-2 py-1 rounded"
+            style="background-color: {{ $color }}; color: white;"
+            title="{{ $label }}"
+        >
+            {{ $label }}
+        </span>
+    @endforeach
+</div>
 
                     {{-- Poster --}}
                     <div class="w-full bg-gray-800 flex items-center justify-center">
-                        @php
-                            $image = $anime['images']['jpg']['large_image_url']
-                                ?? $anime['images']['jpg']['image_url']
-                                ?? $anime['image']
-                                ?? null;
-                        @endphp
+@php
+    $image = $anime['image']
+        ?? $anime['images']['jpg']['image_url']
+        ?? $anime['images']['jpg']['large_image_url']
+        ?? null;
+@endphp
 
                         @if($image)
                             <img src="{{ $image }}"

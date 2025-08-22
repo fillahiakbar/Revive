@@ -34,8 +34,10 @@
                         {{-- Poster --}}
                         <div class="w-full bg-gray-800 flex items-center justify-center">
                             @php
-                                $image = $anime['images']['jpg']['large_image_url'] ?? $anime['images']['jpg']['image_url'] ?? null;
-                            @endphp
+    $image = data_get($anime, 'image') 
+        ?? data_get($anime, 'images.jpg.image_url') 
+        ?? data_get($anime, 'images.jpg.large_image_url');
+@endphp
 
                             @if($image)
                                 <img src="{{ $image }}"
@@ -67,6 +69,13 @@
                             <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
                                 {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
                             </h3>
+                            {{-- Judul English --}}
+@if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
+    <p class="text-gray-400 text-[11px] truncate" title="{{ $anime['title_english'] }}">
+        {{ $anime['title_english'] }}
+    </p>
+@endif
+
 
                             {{-- Duration --}}
                             <p class="text-gray-400">

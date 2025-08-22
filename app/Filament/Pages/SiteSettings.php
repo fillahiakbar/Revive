@@ -2,19 +2,20 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Forms;
-use Filament\Pages\Page;
 use App\Models\Setting;
+use Filament\Pages\Page;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Notifications\Notification;
 
-class SiteSettings extends Page
+class SiteSettings extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected static ?string $navigationIcon = 'heroicon-o-cog-8-tooth';
-
     protected static string $view = 'filament.pages.site-settings';
-
     protected static ?string $navigationLabel = 'إعدادات الموقع';
     protected static ?string $title = 'إعدادات الموقع';
 
@@ -22,17 +23,19 @@ class SiteSettings extends Page
 
     public function mount(): void
     {
-        $this->form->fill([
-            'public_registration_enabled' => isPublicRegistrationEnabled(),
-        ]);
+$this->data = [
+    'public_registration_enabled' => isPublicRegistrationEnabled() === true,
+];
     }
 
     public function form(Form $form): Form
     {
-        return $form->schema([
-            Toggle::make('public_registration_enabled')
-                ->label('تفعيل التسجيل العام')
-        ])->statePath('data');
+        return $form
+            ->schema([
+                Toggle::make('public_registration_enabled')
+                    ->label('تفعيل التسجيل العام'),
+            ])
+            ->statePath('data');
     }
 
     public function save()

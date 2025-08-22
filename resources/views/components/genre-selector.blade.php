@@ -4,53 +4,22 @@
     'selectedStatus' => null,
     'selectedTypes' => [],
     'selectedSort' => null,
+    'types' => [],
     'query' => ''
 ])
 
 <div class="space-y-6 text-white pt-24">
+    {{-- 🔍 Pencarian Nama Anime --}}
     <label class="block text-sm mb-2">الاسم</label>
-    {{-- 🟩 Pencarian Nama Anime --}}
-<div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-    <input type="text" name="q" value="{{ $query }}"
-           class="w-full bg-white/20 text-white rounded px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-           placeholder="مثال:">
-</div>
-
-
-    {{-- 🟨 Status --}}
-         <label class="block text-sm mb-2">الحالة</label>
     <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-   
-        <div class="flex gap-4 flex-wrap">
-            @foreach(['airing' => 'مستمر', 'complete' => 'منتهي', 'all' => 'الكل'] as $key => $label)
-                <label class="flex items-center gap-2">
-                    <input type="radio" name="status" value="{{ $key }}"
-                           {{ $selectedStatus === $key ? 'checked' : '' }} class="accent-red-500">
-                    <span>{{ $label }}</span>
-                </label>
-            @endforeach
-        </div>
+        <input type="text" name="q" value="{{ $query }}"
+            class="w-full bg-white/20 text-white rounded px-4 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="مثال: Mowgli">
     </div>
 
-    {{-- 🟥 Jenis Format --}}
-            <label class="block text-sm mb-2">النوع</label>
-    <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-
-        <div class="flex gap-4 flex-wrap">
-            @foreach(['TV', 'Movie', 'OVA', 'ONA', 'Special', 'BD', 'DVD', 'WEB', 'Live Action'] as $type)
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="types[]" value="{{ $type }}"
-                           {{ in_array($type, $selectedTypes) ? 'checked' : '' }} class="accent-green-500">
-                    <span>{{ $type }}</span>
-                </label>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- 🟪 Urutan Sortir --}}
+    {{-- 🔃 Sort --}}
     <label class="block text-sm mb-2">ترتيب حسب</label>
     <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-
         <div class="flex gap-6 flex-wrap">
             @foreach([
                 'title_asc' => 'A-Z',
@@ -61,25 +30,43 @@
             ] as $key => $label)
                 <label class="flex items-center gap-2">
                     <input type="radio" name="sort" value="{{ $key }}"
-                           {{ $selectedSort === $key ? 'checked' : '' }} class="accent-pink-500">
+                        {{ $selectedSort === $key ? 'checked' : '' }} class="accent-pink-500">
                     <span>{{ $label }}</span>
                 </label>
             @endforeach
         </div>
     </div>
 
-    {{-- 🟦 Genre Selector --}}
+{{-- 🎬 Jenis Format --}}
+<label class="block text-sm mb-2">فلتر البحث</label>
+<div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
+    <div class="flex gap-4 flex-wrap">
+        @foreach ($types as $type)
+            <label class="inline-flex items-center gap-2">
+                <input type="checkbox"
+                       name="types[]"
+                       value="{{ $type['name'] }}"
+                       {{ in_array($type['name'], $selectedTypes ?? []) ? 'checked' : '' }}
+                       class="form-checkbox">
+                <span>{{ $type['name'] }}</span>
+            </label>
+        @endforeach
+    </div>
+</div>
+
+
+
+    {{-- 🏷️ Genre Selector --}}
     <label class="block text-sm mb-2">التصنيفات</label>
     <div class="bg-white/5 backdrop-blur-md rounded p-4 backdrop-saturate-150">
-
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             @foreach($genres as $genre)
-                <label class="flex items-center space-x-2cursor-pointer">
-<input type="checkbox" name="genres[]" value="{{ $genre['id'] }}">
-@if(in_array($genre['id'], $selected))@endif
-<span class="mr-4">{{ $genre['name'] }}</span>
+                <label class="inline-flex items-center gap-2">
+                    <input type="checkbox" name="genres[]" value="{{ $genre['id'] }}"
+                        {{ in_array($genre['id'], $selected) ? 'checked' : '' }} class="accent-blue-500">
+                    <span>{{ $genre['name'] }}</span>
                 </label>
             @endforeach
-        </div>  
+        </div>
     </div>
 </div>

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\View;
 use App\Models\SocialMedia;
 
 
-class FortifyCustomProvider extends ServiceProvider
+class AppServiceProvider extends ServiceProvider
 {
    public function register(): void
 {

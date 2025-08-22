@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AnimeType extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'color'];
 
     public function animeLinks()
     {

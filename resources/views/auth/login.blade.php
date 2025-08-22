@@ -1,12 +1,12 @@
 <x-guest-layout>
-    <div class="min-h-screen flex justify-center px-4 py-6">
-        <div class="w-[500px] px-6 sm:px-10 py-10 rounded-xl">
+    <div class="min-h-screen flex items-center justify-center px-4 py-6 sm:px-6">
+        <div class="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 sm:px-6 py-8 sm:py-10 rounded-xl">
 
             {{-- Logo & Heading --}}
-            <div class="flex flex-col items-center justify-center mb-8 text-center">
-                <x-authentication-card-logo class="w-20 h-20" />
-                <h1 class="text-2xl font-bold mt-4 text-white">السلام عليكم</h1>
-                <p class="text-sm text-gray-300 mt-1">أهلاً وسهلاً! أدخل بياناتك</p>
+            <div class="flex flex-col items-center justify-center mb-6 sm:mb-8 text-center">
+                <x-authentication-card-logo class="w-16 h-16 sm:w-20 sm:h-20" />
+                <h1 class="text-xl sm:text-2xl font-bold mt-3 sm:mt-4 text-white">السلام عليكم</h1>
+                <p class="text-xs sm:text-sm text-gray-300 mt-1">أهلاً وسهلاً! أدخل بياناتك</p>
             </div>
 
             {{-- Validation --}}
@@ -18,12 +18,12 @@
             @endif
 
             {{-- Form --}}
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
+            <form method="POST" action="{{ route('login') }}" class="space-y-4 sm:space-y-6">
                 @csrf
 
                 {{-- Email --}}
                 <div>
-                    <x-label for="email" value="عنوان البريد الإلكتروني:" class="block text-right text-white mb-1" />
+                    <x-label for="email" value="عنوان البريد الإلكتروني:" class="block text-right text-white mb-1 text-sm sm:text-base" />
                     <div class="relative">
                         <input id="email" 
                                type="email" 
@@ -32,31 +32,31 @@
                                required 
                                autofocus 
                                autocomplete="username"
-                               class="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400"
+                               class="w-full pr-10 pl-4 py-2 sm:py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400"
                                placeholder="عنوان بريدك الإلكتروني" />
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
-                            <i class="fas fa-envelope"></i>
+                            <i class="fas fa-envelope text-sm sm:text-base"></i>
                         </span>
                     </div>
                 </div>
 
                 {{-- Password --}}
                 <div>
-                    <x-label for="password" value="كلمة المرور:" class="block text-right text-white mb-1" />
+                    <x-label for="password" value="كلمة المرور:" class="block text-right text-white mb-1 text-sm sm:text-base" />
                     <div class="relative">
                         <input id="password" 
                                type="password" 
                                name="password" 
                                required 
                                autocomplete="current-password"
-                               class="w-full pr-10 pl-10 py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400 selection:bg-red-500 selection:text-white"
+                               class="w-full pr-10 pl-10 py-2 sm:py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400 selection:bg-red-500 selection:text-white"
                                placeholder="كلمة المرور الخاصة بك" />
 
                         <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
-                            <i class="fas fa-lock"></i>
+                            <i class="fas fa-lock text-sm sm:text-base"></i>
                         </span>
                         <span class="absolute inset-y-0 left-3 flex items-center cursor-pointer text-gray-400" onclick="togglePassword()">
-                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                            <i class="fas fa-eye text-sm sm:text-base" id="togglePasswordIcon"></i>
                         </span>
                     </div>
                 </div>
@@ -77,20 +77,32 @@
                 {{-- Submit --}}
                 <div>
                     <button type="submit"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-lg transition">
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium sm:font-semibold py-2 sm:py-3 rounded-lg text-base sm:text-lg transition">
                         تسجيل الدخول
                     </button>
                 </div>
             </form>
 
             {{-- Register --}}
-            <div class="mt-6 text-center text-sm">
-                <span>أليس لديك حساب؟</span>
-                @if (isPublicRegistrationEnabled())
-                    <a href="/register" class="text-blue-600 hover:underline">
-                        سجّل الآن
+            @if (isPublicRegistrationEnabled())
+                <div class="mt-4 text-right">
+                    <a href="{{ route('register') }}" class="text-blue-400 hover:text-blue-300 hover:underline text-sm sm:text-base">
+                        تسجيل حساب جديد
                     </a>
-                @endif
+                </div>
+            @else
+                <p class="text-red-400 text-xs sm:text-sm mt-3 text-center drop-shadow-lg">
+                    🚫التسجيل مغلق الآن، تفقّد حساباتنا على منصّات التواصل الاجتماعي لمزيد من المعلومات
+                </p>
+            @endif
+
+            {{-- Ikon Media Sosial --}}
+            <div class="flex justify-center flex-wrap gap-3 sm:gap-4 text-white text-2xl sm:text-3xl mt-4 sm:mt-6">
+                @foreach ($socialMedias as $media)
+                    <a href="{{ $media->url }}" class="hover:text-red-500 transition" target="_blank" title="{{ $media->platform }}">
+                        <i class="fab fa-{{ getSocialIcon($media->platform) }}"></i>
+                    </a>
+                @endforeach
             </div>
         </div>
     </div>

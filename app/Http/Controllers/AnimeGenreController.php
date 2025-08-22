@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\AnimeLink;
-
+use App\Models\AnimeType;
 class AnimeGenreController extends Controller
 {
     private string $jikanApiUrl = 'https://api.jikan.moe/v4/';
@@ -18,7 +18,6 @@ class AnimeGenreController extends Controller
         try {
             Log::info('byGenre method called with genre_id: ' . $genre_id);
 
-            // Ambil semua genre
             $allGenresResponse = Http::timeout(30)->get($this->jikanApiUrl . 'genres/anime');
             $allGenres = $allGenresResponse->successful() ? $allGenresResponse->json()['data'] : [];
 
@@ -29,32 +28,54 @@ class AnimeGenreController extends Controller
                 abort(404, 'Genre not found');
             }
 
-            $params = [
-                'genres' => $genre_id,
-                'page' => $request->get('page', 1),
-                'limit' => 24,
-                'order_by' => $request->get('sort', 'popularity'),
-                'sort' => 'desc',
-                'sfw' => true
+            $query = AnimeLink::with(['types'])
+                ->whereHas('types', function ($q) use ($genre_id) {
+                    $q->where('mal_id', $genre_id);
+                });
+
+            $perPage = 24;
+            $page = $request->get('page', 1);
+
+            $animeLinks = $query->paginate($perPage, ['*'], 'page', $page);
+
+            $animeList = $animeLinks->getCollection()->map(function ($anime) {
+                $titleEnglish = null;
+                $score = null;
+                $images = ['jpg' => ['image_url' => $anime->image_url]];
+
+                try {
+                    $api = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+                    if ($api->successful()) {
+                        $data = $api->json('data');
+                        $titleEnglish = $data['title_english'] ?? null;
+                        $score = $data['score'] ?? null;
+                        $images = $data['images'] ?? $images;
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("API failed for mal_id {$anime->mal_id}: " . $e->getMessage());
+                }
+
+                return [
+                    'mal_id' => $anime->mal_id,
+                    'title' => $anime->title,
+                    'title_english' => $titleEnglish,
+                    'score' => $score,
+                    'images' => $images,
+                    'duration' => $anime->duration,
+                    'episodes' => $anime->episodes,
+                    'type' => $anime->type,
+                ];
+            })->values()->all();
+
+            $pagination = [
+                'current_page' => $animeLinks->currentPage(),
+                'last_visible_page' => $animeLinks->lastPage(),
+                'items_count' => $animeLinks->total(),
+                'has_next_page' => $animeLinks->hasMorePages(),
             ];
 
-            $animeResponse = Http::timeout(30)->get($this->jikanApiUrl . 'anime', $params);
-
-            if (!$animeResponse->successful()) {
-                Log::error('Anime API failed', ['params' => $params, 'status' => $animeResponse->status()]);
-                $animeList = [];
-                $pagination = null;
-            } else {
-                $animeData = $animeResponse->json();
-                $animeList = collect($animeData['data'] ?? [])
-                    ->filter(fn($anime) => $this->isAnimeAppropriate($anime))
-                    ->unique(fn($anime) => strtolower(trim($anime['title'] ?? '')))
-                    ->values()
-                    ->all();
-                $pagination = $animeData['pagination'] ?? null;
-            }
-
             return view('anime.by-genre', compact('animeList', 'genreData', 'pagination', 'allGenres', 'genre_id'));
+
         } catch (\Exception $e) {
             Log::error('Error in byGenre method', [
                 'genre_id' => $genre_id,
@@ -65,85 +86,117 @@ class AnimeGenreController extends Controller
     }
 
     public function genreMulti(Request $request)
-    {
-        $searchQuery = $request->query('q');
-        $types = $request->query('types', []);
-        $genreIds = $request->query('genres', []);
-        $sort = $request->query('sort', 'title_asc');
-        $status = $request->query('status');
-        $page = $request->query('page', 1);
+{
+    Log::info('genreMulti method called');
+    $searchQuery = $request->query('q');
+    $typesSelected = $request->query('types', []);
+    $genreIds = $request->query('genres', []);
+    $sort = $request->query('sort', 'title_asc');
+    $status = $request->query('status');
+    $page = $request->query('page', 1);
 
-        $query = AnimeLink::query();
+    $query = AnimeLink::query();
 
-        if ($searchQuery) {
-            $query->where('title', 'like', '%' . $searchQuery . '%');
-        }
-
-        if (!empty($types)) {
-            $query->whereIn('type', $types);
-        }
-
-        $animeLinks = $query->with('types')->paginate(24);
-
-        // Mapping dan gabungkan dengan Jikan API
-        $animes = $animeLinks->getCollection()->map(function ($anime) {
-            $data = null;
-
-            try {
-                $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
-                if ($response->successful()) {
-                    $data = $response->json('data');
-                }
-            } catch (\Exception $e) {
-                Log::warning("Gagal mengambil data Jikan untuk MAL ID {$anime->mal_id}: " . $e->getMessage());
-            }
-
-            return [
-                'mal_id' => $anime->mal_id,
-                'title' => $anime->title,
-                'local_title' => $anime->title,
-                'types' => $anime->types->pluck('name')->toArray(),
-                'episodes' => $data['episodes'] ?? null,
-                'duration' => $data['duration'] ?? null,
-                'score' => $data['score'] ?? null,
-                'images' => $data['images'] ?? null,
-                'image' => $data['images']['jpg']['image_url'] ?? null,
-            ];
-        });
-
-        // Buat ulang paginator dengan data baru
-        $paginated = new LengthAwarePaginator(
-            $animes,
-            $animeLinks->total(),
-            $animeLinks->perPage(),
-            $animeLinks->currentPage(),
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('anime.genre-multi', [
-            'animes' => $paginated,
-            'genres' => $this->getGenreList(),
-            'selected' => $genreIds ?? [],
-            'selectedTypes' => $types ?? [],
-            'selectedSort' => $sort ?? null,
-            'selectedStatus' => $status ?? null,
-            'query' => $searchQuery ?? '',
-            'hasMorePages' => $paginated->hasMorePages(),
-        ]);
+    if ($searchQuery) {
+        $query->where('title', 'like', '%' . $searchQuery . '%');
     }
 
-    private function getGenreList(): array
-    {
-        return Cache::remember('genre_list', now()->addHours(12), function () {
-            $response = Http::get($this->jikanApiUrl . 'genres/anime');
-            if ($response->failed()) return [];
+    if (!empty($typesSelected)) {
+        $query->whereHas('types', function ($q) use ($typesSelected) {
+            $q->whereIn('name', $typesSelected);
+        });
+    }
 
-            return collect($response->json('data'))
-                ->filter(fn($genre) => !in_array(strtolower($genre['name']), ['hentai', 'ecchi', 'erotica']))
-                ->map(fn($g) => ['id' => $g['mal_id'], 'name' => $g['name']])
-                ->sortBy('name')
-                ->values()
-                ->all();
+    if (!empty($genreIds)) {
+        $query->where(function ($q) use ($genreIds) {
+            foreach ($genreIds as $genre) {
+                $q->orWhere('genres', 'like', '%' . $genre . '%');
+            }
+        });
+    }
+
+    $animeLinks = $query->with('types')->paginate(24);
+
+    $animes = $animeLinks->getCollection()->map(function ($anime) {
+        $data = null;
+        try {
+            $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+            if ($response->successful()) {
+                $data = $response->json('data');
+            }
+        } catch (\Exception $e) {
+            Log::warning("Gagal mengambil data Jikan untuk MAL ID {$anime->mal_id}: " . $e->getMessage());
+        }
+
+        return [
+            'mal_id' => $anime->mal_id,
+            'title' => $anime->title,
+            'local_title' => $anime->title,
+            'episodes' => $data['episodes'] ?? null,
+            'duration' => $data['duration'] ?? null,
+            'score' => $data['score'] ?? null,
+            'images' => $data['images'] ?? null,
+            'image' => $anime->poster ?: ($data['images']['jpg']['image_url'] ?? null),
+            'types' => $anime->types->map(function ($type) {
+                return [
+                    'name' => $type->name,
+                    'color' => $type->color ?? '#6b7280',
+                ];
+            }),
+        ];
+    });
+
+    $paginated = new LengthAwarePaginator(
+        $animes,
+        $animeLinks->total(),
+        $animeLinks->perPage(),
+        $animeLinks->currentPage(),
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    $types = $this->getTypeListFromDatabase();
+    Log::info('Types Data: ', $types); // Debug
+    return view('anime.genre-multi', [
+        'animes' => $paginated,
+        'genres' => $this->getGenreListFromAnimeLinks(),
+        'types' => $types,
+        'selected' => $genreIds ?? [],
+        'selectedTypes' => $typesSelected ?? [],
+        'selectedSort' => $sort ?? null,
+        'selectedStatus' => $status ?? null,
+        'query' => $searchQuery ?? '',
+        'hasMorePages' => $paginated->hasMorePages(),
+    ]);
+}
+
+    private function getGenreListFromAnimeLinks(): array
+    {
+        return Cache::remember('genre_list_from_anime_links', now()->addHours(12), function () {
+            $allGenres = AnimeLink::pluck('genres')->filter()->flatMap(function ($item) {
+                return explode(',', $item);
+            })->map(fn($g) => trim($g))
+              ->unique()
+              ->sort()
+              ->values();
+
+            return $allGenres->map(function ($genre) {
+                return ['id' => $genre, 'name' => $genre];
+            })->toArray();
+        });
+    }
+
+    public function getTypeListFromDatabase(): array
+    {
+        return Cache::remember('anime_types_from_db', now()->addHours(12), function () {
+            return AnimeType::select('name', 'color')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($type) {
+                    return [
+                        'name' => $type->name,
+                        'color' => $type->color ?? '#6b7280',
+                    ];
+                })->toArray();
         });
     }
 

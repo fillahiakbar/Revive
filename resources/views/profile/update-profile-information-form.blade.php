@@ -24,7 +24,7 @@
                             reader.readAsDataURL($refs.photo.files[0]);
                         " />
 
-                    <x-label for="photo" value="{{ __('الصورة') }}" class="text-gray-200" />
+                    <x-label for="photo" value="{{ __('الصورة') }}" class="text-white" />
 
                     {{-- الصورة الحالية --}}
                     <div class="mt-2" x-show="! photoPreview">

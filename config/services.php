@@ -39,5 +39,16 @@ return [
     'url' => env('JIKAN_API_URL', 'https://api.jikan.moe/v4'),
 ],
 
+'omdb' => [
+    'key' => env('OMDB_API_KEY'),
+    'url' => env('OMDB_API_URL'),
+],
+'brevo' => [
+    'api_key' => env('BREVO_API_KEY'),
+],
+'from' => [
+    'address' => env('MAIL_FROM_ADDRESS', 'noreply@revivesubs.com'),
+    'name' => env('MAIL_FROM_NAME', 'Revive'),
+],
 
 ];

@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\AnimeLink; 
+use App\Models\AnimeLink;
 
 class AnimeListController extends Controller
 {
-    public function list(Request $request)
+     public function list(Request $request)
     {
         $letter = strtoupper($request->query('letter', 'ALL'));
         $page = (int) $request->query('page', 1);
@@ -27,47 +27,45 @@ class AnimeListController extends Controller
             }
         }
 
-        // Total data sebelum paginasi
         $total = $query->count();
 
-        // Data per halaman
         $animes = $query->orderBy('title', 'asc')
                         ->skip(($page - 1) * $perPage)
                         ->take($perPage)
                         ->get();
 
-        // Gabungkan data lokal dan API
+        // Ambil data dari API tanpa penyaringan
         $enhanced = $animes->map(function ($anime) {
             $malId = $anime->mal_id;
 
-            // Ambil dari API atau cache
             $apiData = cache()->remember("jikan_mal_{$malId}", 3600, function () use ($malId) {
                 $response = Http::get("https://api.jikan.moe/v4/anime/{$malId}");
                 if ($response->successful()) {
-                    $data = $response->json('data');
-                    return $this->isAnimeAppropriate($data) ? $data : null;
+                    return $response->json('data');
                 }
                 return null;
             });
 
             return [
-                'mal_id'        => $anime->mal_id,
-                'local_title'   => $anime->title,
-                'title'         => $apiData['title'] ?? $anime->title,
-                'images'        => $apiData['images'] ?? [],
-                'duration'      => $apiData['duration'] ?? null,
-                'score'         => $apiData['score'] ?? null,
-                'types' => $anime->types->map(function ($type) {
-    return [
-        'name' => $type->name,
-        'color' => $type->color ?? '#6b7280', // fallback abu-abu jika null
-    ];
-}),
-                'episodes'      => $anime->episodes,
+                'mal_id'      => $anime->mal_id,
+                'local_title' => $anime->title,
+                'title'       => $apiData['title'] ?? $anime->title,
+                'title_english' => $apiData['title_english'] ?? null,
+                'images'      => [
+                    'jpg' => [
+                        'image_url' => $anime->poster ?: ($apiData['images']['jpg']['image_url'] ?? null),
+                    ]
+                ],
+                'duration'    => $apiData['duration'] ?? null,
+                'score'       => $apiData['score'] ?? null,
+                'types'       => $anime->types->map(fn($type) => [
+                    'name' => $type->name,
+                    'color' => $type->color ?? '#6b7280',
+                ]),
+                'episodes'    => $anime->episodes,
             ];
-        })->filter(); // hilangkan null/unsafe
+        });
 
-        // Buat pagination manual
         $paginated = new LengthAwarePaginator(
             $enhanced,
             $total,
@@ -83,23 +81,5 @@ class AnimeListController extends Controller
             'animes' => $paginated,
             'letter' => $letter,
         ]);
-    }
-
-    private function isAnimeAppropriate($anime): bool
-    {
-        $rating = strtolower($anime['rating'] ?? '');
-        $unsafeRatings = ['rx', 'r+'];
-        foreach ($unsafeRatings as $r) {
-            if (str_contains($rating, $r)) return false;
-        }
-
-        $genres = collect($anime['genres'] ?? [])->pluck('name')->map(fn($g) => strtolower($g));
-        $explicitGenres = ['hentai', 'ecchi', 'erotica'];
-        if ($genres->intersect($explicitGenres)->isNotEmpty()) return false;
-
-        $studios = collect($anime['studios'] ?? [])->pluck('name');
-        if ($studios->isEmpty()) return false;
-
-        return true;
     }
 }

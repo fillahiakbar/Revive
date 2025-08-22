@@ -5,9 +5,29 @@ export default {
     "./resources/**/*.js",
     "./resources/**/*.vue",
   ],
+   // Tambahkan safelist untuk class-class gradient
+  safelist: [
+    {
+      pattern: /bg-\[url\(.*\)\]/,
+      variants: ['hover', 'focus'],
+    },
+    {
+      pattern: /(opacity|bg-opacity|from-opacity|via-opacity|to-opacity)-[0-9]+/,
+    },
+    'bg-gradient-to-l',
+    'from-white/100',
+    'via-white/5',
+    'to-transparent'
+  ],
   presets: [],
   darkMode: 'media', // or 'class'
   theme: {
+    extend: {
+    colors: {
+      imdb: '#F6C700',
+      mal: '#2E52A2',
+    },
+  },
     accentColor: ({ theme }) => ({
       ...theme('colors'),
       auto: 'auto',

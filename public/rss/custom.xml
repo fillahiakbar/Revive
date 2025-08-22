@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0">
+<channel>
+    <title>Custom Anime Feed</title>
+    <link>http://127.0.0.1:8000/anime/52299</link>
+    <description>Feed Manual via Panel</description>
+
+    <item>
+        <title>Solo Leveling - Solo Leveling Batch 1-10</title>
+        <link>http://127.0.0.1:8000/anime/52299</link>
+        <description><![CDATA[
+            <img src="http://127.0.0.1:8000/storage/custom-rss/01JYS3KBKQ9KA39785QFV4WBZT.jpg" alt="poster" /><br>
+            Anime: <strong>Solo Leveling</strong><br>
+            Batch: <strong>Solo Leveling Batch 1-10</strong>
+        ]]></description>
+        <pubDate>Fri, 27 Jun 2025 16:30:14 +0000</pubDate>
+    </item>
+</channel>
+</rss>
