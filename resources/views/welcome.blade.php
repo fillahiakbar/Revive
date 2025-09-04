@@ -18,13 +18,13 @@
         data-description="{{ $slide->description }}"
         data-link="{{ route('anime.show', ['mal_id' => $slide->mal_id]) }}"
     >
-        {{-- ✅ Gambar latar --}}
+ 
         <div class="absolute inset-0 bg-no-repeat bg-center bg-cover"
      style="background-image: url('{{ asset('storage/' . $slide->image) }}');">
 </div>
 
 
-        {{-- ✅ Overlay gradient --}}
+        
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/80"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70"></div>
     </div>
@@ -327,7 +327,7 @@
                     <div class="bg-white/5 backdrop-blur-md rounded-lg border-white/10">
                         <div class="space-y-5 z-10 rounded-xl p-6 relative ">
                             <div class="rounded-lg">
-                                @foreach ($mostVisited->take(5) as $index => $anime)
+                                @foreach ($mostVisited as $index => $anime)
                                     <a href="{{ route('anime.show', ['mal_id' => $anime['mal_id']]) }}" class="block duration-300 rounded-lg group">
                                         <div class="flex items-center p-3 gap-4 relative overflow-hidden bg-gradient-to-r transition-all duration-300">
                                             {{-- Purple line accent --}}
@@ -525,7 +525,7 @@
                         <span class="text-xs">{{ $anime->score }}</span>
                     </div>
                                 <p class="text-xs text-black mb-1">
-                                    حلقة: {{ $anime->episodes }}
+                                    عدد الحلقات: {{ $anime->episodes }}
                                 </p>
                             </div>
                             <img src="{{ $anime->poster }}" alt="{{ $anime->title }}"

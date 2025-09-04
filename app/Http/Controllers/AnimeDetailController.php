@@ -28,6 +28,19 @@ class AnimeDetailController extends Controller
         }
 
         $animeLink->incrementQuietly('click_count');
+        // Catat visit harian (untuk weekly/monthly aggregation)
+try {
+    $today = now()->toDateString();
+
+    $visit = \App\Models\AnimeVisit::firstOrCreate(
+        ['anime_link_id' => $animeLink->id, 'visited_date' => $today],
+        ['count' => 0]
+    );
+
+    $visit->increment('count');
+} catch (\Throwable $e) {
+    \Log::warning('Failed to increment anime visit: ' . $e->getMessage(), ['anime_link_id' => $animeLink->id]);
+}
 
         if (!$animeLink->mal_score || !$animeLink->imdb_score) {
             $this->updateScoresFromApi($animeLink);
