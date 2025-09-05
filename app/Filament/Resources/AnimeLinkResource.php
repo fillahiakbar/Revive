@@ -32,7 +32,6 @@ class AnimeLinkResource extends Resource
         return $form->schema([
             self::animeInfoSection(),
             self::batchesSection(),
-            self::relatedAnimesSection(),
         ]);
     }
 
@@ -186,34 +185,6 @@ class AnimeLinkResource extends Resource
             ]);
     }
 
-    protected static function relatedAnimesSection(): Repeater
-    {
-        return Repeater::make('relatedAnimes')
-            ->label('الأنميات المرتبطة')
-            ->relationship()
-            ->schema([
-                TextInput::make('mal_id')
-                    ->label('معرّف MAL')
-                    ->required()
-                    ->numeric()
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        if (blank($state)) {
-                            return;
-                        }
-
-                        $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$state}");
-                        if ($response->successful()) {
-                            $data = $response->json('data');
-                            $set('title', $data['title'] ?? '');
-                            $set('poster', $data['images']['jpg']['image_url'] ?? '');
-                        }
-                    }),
-
-                TextInput::make('title')->label('العنوان')->required(),
-                TextInput::make('poster')->label('رابط الصورة')->required(),
-            ]);
-    }
 
     public static function table(Table $table): Table
     {
