@@ -235,87 +235,140 @@
                 background-position: top;
                 background-size: auto 100%;">
            
-           
 {{-- Latest Releases --}}
-           <div class="lg:col-span-3 order-1 lg:order-1">
-               <h2 class="text-lg md:text-xl font-bold mb-6 pl-2 text-white">أحدث الإصدارات</h2>
-               
-               {{-- Background blur container --}}
-               <div class="bg-white/5 bg-opacity-30 backdrop-blur-lg rounded-xl p-6 border border-white/10 shadow-2xl">
-                   <div class="grid grid-cols-1 gap-4 md:gap-6">
-                       @foreach ($latestReleases as $anime)
-                           <a href="{{ route('anime.show', ['mal_id' => $anime['mal_id']]) }}" class="block hover:bg-gray-700 hover:bg-opacity-50 transition-all duration-300 rounded-lg group">
-                               <div class="p-4 flex items-center gap-4 relative overflow-hidden">
-                                   {{-- Anime Image --}}
-                                   <div class="relative z-10 w-20 md:w-28 h-28 md:h-40 overflow-hidden rounded-lg flex-shrink-0 shadow-lg order-1">
-                                       <img src="{{ $anime['images']['jpg']['image_url'] ?? '/img/default-poster.jpg' }}"
-                                           class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            alt="{{ $anime['title'] }}">
-                                       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                                   </div>
+<div class="lg:col-span-3 order-1 lg:order-1">
+    <h2 class="text-lg md:text-xl font-bold mb-6 pl-2 text-white">أحدث الإصدارات</h2>
 
-                                   {{-- Anime Info --}}
-                                   <div class="flex-1 relative z-10 min-w-0 space-y-3 order-2">
-                                       {{-- Title + Score --}}
-                                       <div class="flex items-center justify-between gap-4">
-                                           <p class="text-lg group-hover:text-blue-400 transition-colors duration-300 leading-tight">
-                                               <span class="font-bold text-base text-white">
-                                                   {{ $anime['title'] }}
-                                               </span>
-                                               @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
-                                                   <br>
-                                                   <span class="font-normal text-base text-white/70">
-                                                       {{ $anime['title_english'] }}
-                                                   </span>
-                                               @endif
-                                           </p>
+    {{-- Background blur container --}}
+    <div class="bg-white/5 bg-opacity-30 backdrop-blur-lg rounded-xl p-6 border border-white/10 shadow-2xl">
+        <div class="grid grid-cols-1 gap-4 md:gap-6">
+            @forelse ($latestReleases as $anime)
+                <a href="{{ route('anime.show', ['mal_id' => $anime['mal_id']]) }}" class="block hover:bg-gray-700 hover:bg-opacity-50 transition-all duration-300 rounded-lg group">
+                    <div class="p-4 flex items-center gap-4 relative overflow-hidden">
+                        {{-- Anime Image --}}
+                        <div class="relative z-10 w-20 md:w-28 h-28 md:h-40 overflow-hidden rounded-lg flex-shrink-0 shadow-lg order-1">
+                            <img src="{{ $anime['images']['jpg']['image_url'] ?? '/img/default-poster.jpg' }}"
+                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                 alt="{{ $anime['title'] }}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        </div>
 
-                                           <div class="flex items-center gap-2 text-xs flex-shrink-0">
-                                               <div>
-                                                   <div class="bg-yellow-500 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[15px] tracking-wide">IMDb</div>
-                                                   <div class="text-white text-center font-bold text-sm">{{ $anime['imdb_score'] ?? 'N/A' }}</div>
-                                               </div>
-                                               <div>
-                                                   <div class="bg-blue-600 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[15px] tracking-wide">MAL</div>
-                                                   <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
-                                               </div>
-                                           </div>
-                                       </div>
+                        {{-- Anime Info --}}
+                        <div class="flex-1 relative z-10 min-w-0 space-y-3 order-2">
+                            {{-- Title + Score --}}
+                            <div class="flex items-center justify-between gap-4">
+                                <p class="text-lg group-hover:text-blue-400 transition-colors duration-300 leading-tight">
+                                    <span class="font-bold text-base text-white">
+                                        {{ $anime['title'] }}
+                                    </span>
+                                    @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
+                                        <br>
+                                        <span class="font-normal text-base text-white/70">
+                                            {{ $anime['title_english'] }}
+                                        </span>
+                                    @endif
+                                </p>
 
-                                       {{-- Meta --}}
-                                       <div class="flex flex-wrap gap-2 text-sm text-white/70">
-                                           <span class="flex items-center gap-1">عدد الحلقات: {{ $anime['episodes'] ?? '؟' }}</span>
-                                       </div>
-                                       <div class="flex flex-wrap gap-2 text-sm text-white/70">
-                                           <span class="flex items-center gap-1">النوع: {{ $anime['type'] }}</span>
-                                       </div>
+                                <div class="flex items-center gap-2 text-xs flex-shrink-0">
+                                    <div>
+                                        <div class="bg-yellow-500 rounded px-2 py-1 text-center min-w-[50px] text-black font-bold text-[15px] tracking-wide">IMDb</div>
+                                        <div class="text-white text-center font-bold text-sm">{{ $anime['imdb_score'] ?? 'N/A' }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="bg-blue-600 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[15px] tracking-wide">MAL</div>
+                                        <div class="text-white text-center font-bold text-sm">{{ $anime['score'] ?? 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                       {{-- Genres --}}
-                                       <div class="flex flex-wrap gap-2">
-                                           <span class="text-sm text-white/70 shadow-sm">التصنيفات:</span>
-                                           @foreach (array_slice($anime['genres'], 0, 3) as $genre)
-                                               <span class="text-sm text-white/70 shadow-sm">
-                                                   @if (!$loop->first), @endif{{ $genre['name'] }}
-                                               </span>
-                                           @endforeach
-                                       </div>
+                            {{-- Meta --}}
+                            <div class="flex flex-wrap gap-2 text-sm text-white/70">
+                                <span class="flex items-center gap-1">عدد الحلقات: {{ $anime['episodes'] ?? '؟' }}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-sm text-white/70">
+                                <span class="flex items-center gap-1">النوع: {{ $anime['type'] ?? '-' }}</span>
+                            </div>
 
-                                       {{-- Batch Info --}}
-                                       <p class="text-sm text-white/70 leading-relaxed">
-                                           الإصدار: {{ $anime['latest_batch_name'] }}
-                                       </p>
-                                   </div>
-                               </div>
-                           </a>
+                            {{-- Genres --}}
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-sm text-white/70 shadow-sm">التصنيفات:</span>
+                                @foreach (array_slice($anime['genres'] ?? [], 0, 3) as $genre)
+  <span class="text-sm text-white/70 shadow-sm">
+    @if (!$loop->first), @endif
+    {{ is_array($genre) ? ($genre['name'] ?? $genre['title'] ?? '') : $genre }}
+  </span>
+@endforeach
 
-                           {{-- ✨ Line Separator --}}
-                           @if (!$loop->last)
-                               <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent opacity-50"></div>
-                           @endif
-                       @endforeach
-                   </div>
-               </div>
-           </div>
+                            </div>
+
+                            {{-- Batch Info --}}
+                            <p class="text-sm text-white/70 leading-relaxed">
+                                الإصدار: {{ $anime['latest_batch_name'] ?? '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- ✨ Line Separator --}}
+                @if (!$loop->last)
+                    <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent opacity-50"></div>
+                @endif
+            @empty
+                <div class="text-white/70">لا توجد بيانات.</div>
+            @endforelse
+        </div>
+
+        {{-- Pagination --}}
+        @if ($latestReleases->hasPages())
+            <div class="flex justify-center mt-10" dir="rtl">
+                <nav class="flex items-center space-x-2 rtl:space-x-reverse">
+                    @if (!$latestReleases->onFirstPage())
+                        <a href="{{ $latestReleases->url(1) }}"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                           title="الصفحة الأولى">
+                            &laquo;
+                        </a>
+                        <a href="{{ $latestReleases->previousPageUrl() }}"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                           title="السابقة">
+                            &lsaquo;
+                        </a>
+                    @endif
+
+                    @foreach ($latestReleases->getUrlRange(
+                                max(1, $latestReleases->currentPage() - 2),
+                                min($latestReleases->lastPage(), $latestReleases->currentPage() + 2)
+                            ) as $page => $url)
+                        <a href="{{ $url }}"
+                           class="w-10 h-10 flex items-center justify-center rounded-full text-sm transition
+                           {{ $latestReleases->currentPage() == $page ? 'bg-red-500 text-white font-bold' : 'bg-white text-black hover:bg-gray-300' }}"
+                           title="صفحة {{ $page }}">
+                            {{ $page }}
+                        </a>
+                    @endforeach
+
+                    @if ($latestReleases->hasMorePages())
+                        <a href="{{ $latestReleases->nextPageUrl() }}"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                           title="التالي">
+                            &rsaquo;
+                        </a>
+                        <a href="{{ $latestReleases->url($latestReleases->lastPage()) }}"
+                           class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                           title="الأخيرة">
+                            &raquo;
+                        </a>
+                    @endif
+                </nav>
+            </div>
+
+            <div class="text-center mt-4 text-gray-400 text-sm" dir="rtl">
+                صفحة {{ $latestReleases->currentPage() }} من {{ $latestReleases->lastPage() }}
+                ({{ $latestReleases->total() }} نتيجة)
+            </div>
+        @endif
+    </div>
+</div>
 
             {{-- Sidebar --}}
             <div class="space-y-8 order-2 lg:order-2 ml-10">

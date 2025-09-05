@@ -56,7 +56,7 @@ Route::get('/email/verify', function () {
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return redirect('/revive');
+    return redirect('/');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function () {
@@ -80,7 +80,7 @@ Route::get('/rss/{slug}.xml', [RssController::class, 'show']);
 
 // Route hanya untuk user yang login dan email terverifikasi
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/revive', [WelcomeController::class, 'index'])->name('revive');
+    Route::get('/', [WelcomeController::class, 'index'])->name('revive');
     Route::get('/about', [WelcomeController::class, 'about'])->name('about');
     Route::get('/terms', [WelcomeController::class, 'terms'])->name('terms');
     Route::get('/cookies', [WelcomeController::class, 'cookies'])->name('cookies');
@@ -126,12 +126,8 @@ Route::prefix('anime-display')->group(function () {
 // ROUTE LOGIN ADMIN FILAMENT
 // ===============================
 
-
-
-// Redirect admin/login ke custom login path
-// Custom login URL (tampilkan login Filament)
 Route::get('/admin', function () {
-    abort(403, 'Access to /admin is not allowed.');
+    abort(403, 'Access to admin is not allowed.');
 });
 
 // Blok akses ke /admin/login

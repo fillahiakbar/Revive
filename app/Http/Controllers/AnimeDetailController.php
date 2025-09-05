@@ -27,21 +27,24 @@ class AnimeDetailController extends Controller
             return redirect()->route('cartoon.detail', $mal_id);
         }
 
+        // increment click
         $animeLink->incrementQuietly('click_count');
-        // Catat visit harian (untuk weekly/monthly aggregation)
-try {
-    $today = now()->toDateString();
 
-    $visit = \App\Models\AnimeVisit::firstOrCreate(
-        ['anime_link_id' => $animeLink->id, 'visited_date' => $today],
-        ['count' => 0]
-    );
+        // catat visit harian (untuk agregasi weekly/monthly)
+        try {
+            $today = now()->toDateString();
 
-    $visit->increment('count');
-} catch (\Throwable $e) {
-    \Log::warning('Failed to increment anime visit: ' . $e->getMessage(), ['anime_link_id' => $animeLink->id]);
-}
+            $visit = \App\Models\AnimeVisit::firstOrCreate(
+                ['anime_link_id' => $animeLink->id, 'visited_date' => $today],
+                ['count' => 0]
+            );
 
+            $visit->increment('count');
+        } catch (\Throwable $e) {
+            Log::warning('Failed to increment anime visit: '.$e->getMessage(), ['anime_link_id' => $animeLink->id]);
+        }
+
+        // isi skor jika kosong
         if (!$animeLink->mal_score || !$animeLink->imdb_score) {
             $this->updateScoresFromApi($animeLink);
         }
@@ -49,20 +52,20 @@ try {
         $downloadLinks = $animeLink->batches->flatMap->batchLinks;
         $fromDatabase  = true;
 
-        // --- Ambil data Jikan (untuk fallback berbagai field) ---
+        // --- Ambil data Jikan (fallback berbagai field) ---
         $jikanData = Cache::remember("jikan_data_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
             try {
                 $response = Http::timeout(15)->get("https://api.jikan.moe/v4/anime/{$mal_id}/full");
                 if (!$response->successful()) {
                     Log::error("Jikan API failed for MAL ID {$mal_id}", [
-                        'status' => $response->status(),
+                        'status'   => $response->status(),
                         'response' => $response->json()
                     ]);
                     return [];
                 }
                 return $response->json('data') ?? [];
             } catch (\Exception $e) {
-                Log::error("Jikan API exception for MAL ID {$mal_id}: " . $e->getMessage());
+                Log::error("Jikan API exception for MAL ID {$mal_id}: ".$e->getMessage());
                 return [];
             }
         });
@@ -84,54 +87,55 @@ try {
                     ]);
                     if (!$response->successful()) {
                         Log::warning("OMDb API failed for IMDb ID {$imdbId}", [
-                            'status' => $response->status(),
+                            'status'   => $response->status(),
                             'response' => $response->json()
                         ]);
                         return [];
                     }
                     return $response->json();
                 } catch (\Exception $e) {
-                    Log::error("OMDb API exception for IMDb ID {$imdbId}: " . $e->getMessage());
+                    Log::error("OMDb API exception for IMDb ID {$imdbId}: ".$e->getMessage());
                     return [];
                 }
             });
         }
 
-        // --- Episodes: ambil dari DB dulu, kalau kosong fallback ke Jikan, lalu simpan ke DB ---
-        $episodes = $animeLink->episodes; // kolom di tabel anime_links
+        // --- Episodes: DB first, fallback ke Jikan lalu simpan quietly ---
+        $episodes = $animeLink->episodes;
         if (empty($episodes)) {
             $episodes = $jikanData['episodes'] ?? null;
             if (!empty($episodes)) {
-                // simpan diam-diam agar next request tidak call API lagi
                 $animeLink->episodes = $episodes;
                 $animeLink->saveQuietly();
             }
         }
+
+        // --- Genres: normalisasi agar selalu array of string ---
+        $rawGenres = $animeLink->genres ?: ($jikanData['genres'] ?? []);
+        $genres    = $this->normalizeGenres($rawGenres);
 
         $animeData = [
             'mal_id'         => $animeLink->mal_id,
             'title'          => $animeLink->title         ?? $jikanData['title'] ?? null,
             'title_english'  => $animeLink->title_english ?? $jikanData['title_english'] ?? null,
             'title_japanese' => $jikanData['title_japanese'] ?? null,
-            'poster'         => $animeLink->poster        ?? $jikanData['images']['jpg']['large_image_url'] ?? null,
-            'synopsis'       => $animeLink->synopsis      ?? $jikanData['synopsis'] ?? null,
-            'season'         => $animeLink->season        ?? $jikanData['season'] ?? null,
-            'year'           => $animeLink->year          ?? $jikanData['year'] ?? null,
-            'type'           => $animeLink->type          ?? $jikanData['type'] ?? null,
+            'poster'         => $animeLink->poster        ?? ($jikanData['images']['jpg']['large_image_url'] ?? null),
+            'synopsis'       => $animeLink->synopsis      ?? ($jikanData['synopsis'] ?? null),
+            'season'         => $animeLink->season        ?? ($jikanData['season'] ?? null),
+            'year'           => $animeLink->year          ?? ($jikanData['year'] ?? null),
+            'type'           => $animeLink->type          ?? ($jikanData['type'] ?? null),
             'status'         => $jikanData['status'] ?? 'Unknown',
             'studios'        => $jikanData['studios'] ?? [],
-            'genres'         => $animeLink->genres
-                                    ? explode(', ', $animeLink->genres)
-                                    : collect($jikanData['genres'] ?? [])->pluck('name')->toArray(),
-            'episodes'       => $episodes, // ← sudah DB-first
+            'genres'         => $genres,   // <- hasil normalisasi
+            'episodes'       => $episodes,
             'duration'       => $jikanData['duration'] ?? null,
             'aired'          => $jikanData['aired'] ?? [],
-            'score'          => $animeLink->mal_score ?? $jikanData['score'] ?? null,
-            'imdb_score'     => $animeLink->imdb_score ?? $omdbData['imdbRating'] ?? null,
+            'score'          => $animeLink->mal_score ?? ($jikanData['score'] ?? null),
+            'imdb_score'     => $animeLink->imdb_score ?? ($omdbData['imdbRating'] ?? null),
             'imdb_id'        => $animeLink->imdb_id ?? $imdbId,
         ];
 
-        // --- Rekomendasi ---
+        // --- Rekomendasi (Jikan) ---
         $recommendations = Cache::remember("recommendations_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
             $recs = [];
             try {
@@ -150,7 +154,7 @@ try {
                     }
                 }
             } catch (\Exception $e) {
-                Log::error("Failed to get recommendations for MAL ID {$mal_id}: " . $e->getMessage());
+                Log::error("Failed to get recommendations for MAL ID {$mal_id}: ".$e->getMessage());
             }
             return $recs;
         });
@@ -164,6 +168,41 @@ try {
         ]);
     }
 
+    /**
+     * Normalisasi kolom genres menjadi array of string.
+     * - menerima CSV string: "Action, Adventure"
+     * - menerima JSON array string: ["Action","Adventure"]
+     * - menerima array objek: [{"name":"Action"}, ...]
+     */
+    private function normalizeGenres($raw): array
+    {
+        if (is_null($raw)) return [];
+
+        // String CSV
+        if (is_string($raw)) {
+            return array_values(array_filter(array_map('trim', explode(',', $raw))));
+        }
+
+        // Array (string/objek)
+        if (is_array($raw)) {
+            return collect($raw)
+                ->map(function ($g) {
+                    if (is_string($g)) {
+                        return trim($g);
+                    }
+                    if (is_array($g)) {
+                        return $g['name'] ?? $g['title'] ?? (is_scalar(reset($g)) ? (string) reset($g) : null);
+                    }
+                    return null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        return [];
+    }
+
     protected function updateScoresFromApi(AnimeLink $animeLink)
     {
         $response = Http::get("https://api.jikan.moe/v4/anime/{$animeLink->mal_id}");
@@ -174,7 +213,6 @@ try {
                 $animeLink->mal_score = $data['score'];
             }
 
-            // optional: sekalian isi episodes jika kosong
             if (empty($animeLink->episodes) && isset($data['episodes'])) {
                 $animeLink->episodes = $data['episodes'];
             }

@@ -17,9 +17,9 @@ class WelcomeController extends Controller
         // ====== SETTINGS ======
         $period = SiteSetting::getMostVisitedPeriod(); // 'weekly' | 'monthly' | 'all_time'
 
-        // Atur limit agar "banyak" (ubah angka ini sesuai kebutuhan UI)
-        $LATEST_RELEASES_LIMIT = 5;
-        $MOST_VISITED_LIMIT    = 5;
+        // Atur jumlah per halaman "Latest Releases"
+        $LATEST_RELEASES_PER_PAGE = (int) request('lr_per', 5);
+        $LATEST_RELEASES_PAGE_NAME = 'lr';
 
         // ====== SLIDER & SOSMED ======
         $sliders = Slider::where('is_active', true)
@@ -45,63 +45,55 @@ class WelcomeController extends Controller
             })
             ->values();
 
-        // ====== LATEST RELEASES (tetap: ambil 1 batch terbaru per anime dari 15 anime terakhir) ======
-        $animeLinks = AnimeLink::with('batches')
+        // ====== LATEST RELEASES (Paginated by latest batch) ======
+        // Gunakan withMax('batches', 'created_at') untuk dapat waktu batch terbaru,
+        // urutkan desc, lalu paginate dengan pageName 'lr'
+        $latestLinks = AnimeLink::query()
             ->whereNotNull('mal_id')
-            ->orderByDesc('id')
-            ->limit($LATEST_RELEASES_LIMIT)
-            ->get();
+            ->whereHas('batches') // hanya yang punya batch
+            ->with(['batches' => fn ($q) => $q->orderByDesc('created_at')->limit(1)])
+            ->withMax('batches', 'created_at') // alias: batches_created_at_max
+            ->orderByDesc('batches_max_created_at')
+            ->paginate(
+                $LATEST_RELEASES_PER_PAGE,
+                ['*'],
+                $LATEST_RELEASES_PAGE_NAME
+            )
+            ->appends(request()->query());
 
-        $latestReleases = collect();
-        foreach ($animeLinks as $anime) {
-            $batch = $anime->batches->sortByDesc('created_at')->first();
-            if (!$batch || !$batch->name) {
-                continue;
-            }
-            $episodes = $anime->episodes ?? '؟';
+        // Ubah item paginator ke struktur array yang dipakai Blade,
+        // TANPA menghilangkan tipe paginator (pakai setCollection)
+        $latestReleases = $latestLinks->setCollection(
+            $latestLinks->getCollection()->map(function (AnimeLink $anime) {
+                $batch    = $anime->batches->first();
+                $episodes = $anime->episodes ?? '؟';
 
-            // Hindari call API di loop agar landing cepat. Bila ingin tetap fallback,
-            // Anda bisa aktifkan blok try-catch berikut, tapi disarankan di-cache.
-            /*
-            if (empty($anime->episodes) && $anime->mal_id) {
-                try {
-                    $resp = Http::timeout(5)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
-                    if ($resp->successful()) {
-                        $episodes = $resp['data']['episodes'] ?? '؟';
-                    }
-                } catch (\Throwable $e) {
-                    Log::warning("Jikan fail {$anime->mal_id}: {$e->getMessage()}");
-                }
-            }
-            */
-
-            $latestReleases->push([
-                'mal_id'            => $anime->mal_id,
-                'title'             => $anime->title,
-                'title_english'     => $anime->title_english ?? $anime->title,
-                'score'             => $anime->mal_score ?? 'N/A',
-                'imdb_score'        => $anime->imdb_score ?? 'N/A',
-                'type'              => $anime->type ?? '-',
-                'episodes'          => $episodes,
-                'synopsis'          => $batch->name ?? '-',
-                'latest_batch_name' => $batch->name ?? '-',
-                'images' => [
-                    'jpg' => ['image_url' => $anime->poster ?? '/img/default-poster.jpg']
-                ],
-                'genres' => is_string($anime->genres)
-                    ? array_map(fn ($g) => ['name' => trim($g)], explode(',', $anime->genres))
-                    : [],
-                'created_at'  => $batch->created_at,
-                'click_count' => (int) ($anime->click_count ?? 0),
-            ]);
-        }
-
-        // urut terbaru berdasarkan waktu batch dibuat
-        $latestReleases = $latestReleases->sortByDesc('created_at')->values()->take(5);
+                return [
+                    'mal_id'            => $anime->mal_id,
+                    'title'             => $anime->title,
+                    'title_english'     => $anime->title_english ?? $anime->title,
+                    'score'             => $anime->mal_score ?? 'N/A',
+                    'imdb_score'        => $anime->imdb_score ?? 'N/A',
+                    'type'              => $anime->type ?? '-',
+                    'episodes'          => $episodes,
+                    'synopsis'          => $batch?->name ?? '-',
+                    'latest_batch_name' => $batch?->name ?? '-',
+                    'images' => [
+                        'jpg' => ['image_url' => $anime->poster ?? '/img/default-poster.jpg']
+                    ],
+                    'genres' => is_string($anime->genres)
+                        ? array_map(fn ($g) => ['name' => trim($g)], explode(',', $anime->genres))
+                        : (is_array($anime->genres) ? $anime->genres : []),
+                    'created_at'  => $batch?->created_at ?? $anime->created_at,
+                    'click_count' => (int) ($anime->click_count ?? 0),
+                ];
+            })
+        );
 
         // ====== MOST VISITED (by period) ======
+        $MOST_VISITED_LIMIT = 5;
+
         if ($period === 'all_time') {
-            // Mode all-time: gunakan lifetime click_count
             $mostVisitedLinks = AnimeLink::query()
                 ->with(['batches' => fn ($q) => $q->orderByDesc('created_at')])
                 ->whereNotNull('mal_id')
@@ -109,13 +101,12 @@ class WelcomeController extends Controller
                 ->limit($MOST_VISITED_LIMIT)
                 ->get();
         } else {
-            // Mode weekly / monthly: hanya yang punya visit di periode tsb
             $mostVisitedLinks = AnimeLink::query()
                 ->with(['batches' => fn ($q) => $q->orderByDesc('created_at')])
                 ->whereNotNull('mal_id')
-                ->whereHasVisitsInPeriod($period)   // hanya yang punya visit minggu/bulan ini
-                ->withPeriodClicks($period)         // sum(count) sebagai alias -> period_clicks
-                ->orderByDesc('period_clicks')      // urut berdasarkan visit di periode
+                ->whereHasVisitsInPeriod($period)
+                ->withPeriodClicks($period)
+                ->orderByDesc('period_clicks')
                 ->limit($MOST_VISITED_LIMIT)
                 ->get();
         }
@@ -141,14 +132,13 @@ class WelcomeController extends Controller
                     ? array_map(fn ($g) => ['name' => trim($g)], explode(',', $anime->genres))
                     : [],
                 'created_at'  => $batch?->created_at ?? $anime->created_at,
-                // pakai angka sesuai konteks (period_clicks jika ada, fallback all-time click_count)
                 'click_count' => (int) ($anime->period_clicks ?? $anime->click_count ?? 0),
             ];
         })->values();
 
         return view('welcome', [
             'animes'         => $animes,
-            'latestReleases' => $latestReleases,
+            'latestReleases' => $latestReleases, // <- sekarang paginator
             'mostVisited'    => $mostVisited,
             'sliders'        => $sliders,
             'socialMedias'   => $socialMedias,

@@ -8,14 +8,37 @@ use Illuminate\Support\Str;
 
 class AnimeLink extends Model
 {
-    protected $fillable = [
-        'mal_id', 'title', 'poster', 'episodes', 'synopsis', 'season', 'year', 'type', 'genres', 'title_english', 'imdb_id', 'mal_score',
-        'imdb_score'
+   protected $fillable = [
+        'mal_id','title','poster','episodes','synopsis','season','year','type','genres',
+        'title_english','imdb_id','mal_score','imdb_score'
     ];
 
     protected $casts = [
         'click_count' => 'integer',
+
+        'genres' => 'array',
     ];
+
+
+    public function getGenresAttribute($value)
+    {
+       
+        if (is_array($this->attributes['genres'] ?? null)) return $this->attributes['genres'];
+
+
+        if (is_string($value)) {
+            $arr = array_filter(array_map(
+                fn($x) => trim($x),
+                preg_split('/,|\|/',$value) ?: []
+            ));
+    
+            $this->attributes['genres'] = $arr;
+            return $arr;
+        }
+
+        return [];
+    }
+
 
     public function types()
     {

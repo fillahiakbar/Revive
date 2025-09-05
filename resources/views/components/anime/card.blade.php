@@ -59,14 +59,7 @@
             </p>
         @endif
 
-        {{-- Durasi & Episode --}}
-        <p class="text-gray-400">
-            @php
-                preg_match('/\d+/', $anime['duration'] ?? '', $matches);
-                $durationMinutes = $matches[0] ?? 'N/A';
-            @endphp
-            {{ $durationMinutes }}m
-        </p>
+
         @if(!empty($anime['episodes']))
             <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
         @endif
