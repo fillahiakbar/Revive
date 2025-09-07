@@ -1,9 +1,5 @@
-Tentu! Berikut contoh **README.md** yang keren, profesional, dan informatif untuk proyek Laravel CRUD kamu — misalnya untuk aplikasi **Anime Manager**. Kamu bisa sesuaikan bagian-bagiannya dengan kebutuhanmu.
-
----
-
 ```markdown
-# 🎌 Anime Manager CRUD - Laravel 12 + Jetstream + Tailwind CSS
+# 🎌 Anime Manager CRUD - Laravel 11 + Jetstream + Tailwind CSS + Filament
 
 Selamat datang di **Anime Manager** — aplikasi CRUD berbasis Laravel yang digunakan untuk mengelola koleksi anime, lengkap dengan fitur backend admin dan frontend publik.
 
