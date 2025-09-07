@@ -15,8 +15,6 @@ class AnimeLink extends Model
 
     protected $casts = [
         'click_count' => 'integer',
-
-        'genres' => 'array',
     ];
 
 

@@ -169,21 +169,43 @@ class AnimeGenreController extends Controller
     ]);
 }
 
-    private function getGenreListFromAnimeLinks(): array
-    {
-        return Cache::remember('genre_list_from_anime_links', now()->addHours(12), function () {
-            $allGenres = AnimeLink::pluck('genres')->filter()->flatMap(function ($item) {
-                return explode(',', $item);
-            })->map(fn($g) => trim($g))
-              ->unique()
-              ->sort()
-              ->values();
+   private function getGenreListFromAnimeLinks(): array
+{
+    return Cache::remember('genre_list_from_anime_links', now()->addHours(12), function () {
+        $allGenres = AnimeLink::pluck('genres')
+            ->filter()
+            ->flatMap(function ($item) {
+                // Jika sudah array (hasil cast JSON), pakai langsung
+                if (is_array($item)) {
+                    return array_map('trim', $item);
+                }
 
-            return $allGenres->map(function ($genre) {
-                return ['id' => $genre, 'name' => $genre];
-            })->toArray();
-        });
-    }
+                // Jika string JSON valid -> decode ke array
+                if (is_string($item)) {
+                    $decoded = json_decode($item, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return array_map('trim', $decoded);
+                    }
+
+                    // Jika string biasa dipisah koma
+                    return array_map('trim', explode(',', $item));
+                }
+
+                // Selain itu abaikan
+                return [];
+            })
+            ->filter(fn ($g) => $g !== '' && $g !== null)
+            ->unique()
+            ->sort()
+            ->values();
+
+        return $allGenres->map(fn ($genre) => [
+            'id' => $genre,
+            'name' => $genre,
+        ])->toArray();
+    });
+}
+
 
     public function getTypeListFromDatabase(): array
     {

@@ -4,15 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnimeLinkResource\Pages;
 use App\Models\AnimeLink;
-use Filament\Forms\Components\{
-    Hidden,
-    Repeater,
-    Section,
-    Select,
-    Textarea,
-    TextInput,
-    RichEditor
-};
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
@@ -45,14 +43,10 @@ class AnimeLinkResource extends Resource
                     ->numeric()
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        if (blank($state)) {
-                            return;
-                        }
+                        if (blank($state)) return;
 
                         $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$state}");
-                        if (! $response->successful()) {
-                            return;
-                        }
+                        if (! $response->successful()) return;
 
                         $data = $response->json('data');
 
@@ -64,23 +58,24 @@ class AnimeLinkResource extends Resource
                         $set('year', $data['year'] ?? null);
                         $set('type', $data['type'] ?? '');
 
-                        $genres = collect($data['genres'] ?? [])->pluck('name')->implode(', ');
-                        $set('genres', $genres);
+                        $genresStr = collect($data['genres'] ?? [])
+                            ->pluck('name')
+                            ->filter()
+                            ->map(fn($s) => trim((string) $s))
+                            ->implode(', ');
+                        $set('genres', $genresStr);
 
-                        // MAL Score
                         $set('mal_score', $data['score'] ?? null);
 
-                        // Auto-set episodes: "1-<total>" bila tersedia
-                        $totalEpisodes = $data['episodes'] ?? null; // Bisa null kalau masih airing
+                        $totalEpisodes = $data['episodes'] ?? null;
                         if (is_int($totalEpisodes) && $totalEpisodes > 1) {
                             $set('episodes', "1-{$totalEpisodes}");
                         } elseif ($totalEpisodes === 1) {
                             $set('episodes', '1');
                         } else {
-                            $set('episodes', null); // biarkan user isi manual
+                            $set('episodes', null);
                         }
 
-                        // IMDb via OMDb
                         $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
                             'apikey' => config('services.omdb.key'),
                             't' => $data['title'] ?? '',
@@ -95,7 +90,6 @@ class AnimeLinkResource extends Resource
                 TextInput::make('title')->label('العنوان')->required(),
                 TextInput::make('poster')->label('رابط الصورة'),
 
-                // Episodes sebagai string (format "1-6")
                 TextInput::make('episodes')
                     ->label('عدد الحلقات')
                     ->placeholder('مثال: 1-6')
@@ -108,7 +102,29 @@ class AnimeLinkResource extends Resource
                     ->label('الأنواع')
                     ->readOnly()
                     ->disabled()
-                    ->dehydrated(true),
+                    ->dehydrated(true)
+                    ->dehydrateStateUsing(function ($state) {
+                        if (is_array($state)) {
+                            return implode(', ', array_filter(array_map(fn($s) => trim((string) $s), $state)));
+                        }
+                        $decoded = json_decode((string) $state, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            return implode(', ', array_filter(array_map(fn($s) => trim((string) $s), $decoded)));
+                        }
+                        $str = (string) $state;
+                        $str = preg_replace('/\s*,\s*/', ', ', $str);
+                        return trim($str);
+                    })
+                    ->formatStateUsing(function ($state) {
+                        if (is_array($state)) {
+                            return implode(', ', array_map(fn($s)=>trim((string)$s), $state));
+                        }
+                        $decoded = json_decode((string)$state, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            return implode(', ', array_map(fn($s)=>trim((string)$s), $decoded));
+                        }
+                        return (string) $state;
+                    }),
 
                 RichEditor::make('synopsis')->label('الملخص')->columnSpan('full'),
 
@@ -124,19 +140,9 @@ class AnimeLinkResource extends Resource
                 TextInput::make('year')->label('السنة'),
                 TextInput::make('type')->label('النوع'),
 
-                TextInput::make('mal_score')
-                    ->label('تقييم MAL')
-                    ->numeric()
-                    ->dehydrated(true),
-
-                TextInput::make('imdb_score')
-                    ->label('تقييم IMDb')
-                    ->numeric()
-                    ->dehydrated(true),
-
-                TextInput::make('imdb_id')
-                    ->label('معرّف IMDb')
-                    ->dehydrated(true),
+                TextInput::make('mal_score')->label('تقييم MAL')->numeric()->dehydrated(true),
+                TextInput::make('imdb_score')->label('تقييم IMDb')->numeric()->dehydrated(true),
+                TextInput::make('imdb_id')->label('معرّف IMDb')->dehydrated(true),
 
                 Select::make('related_anime_group_id')
                     ->label('المجموعة المرتبطة')
@@ -153,8 +159,7 @@ class AnimeLinkResource extends Resource
             ->relationship()
             ->label('حزم الحلقات')
             ->schema([
-                Hidden::make('anime_link_id')
-                    ->default(fn (\Filament\Forms\Get $get) => $get('../../id')),
+                Hidden::make('anime_link_id')->default(fn (\Filament\Forms\Get $get) => $get('../../id')),
                 TextInput::make('name')->label('الاسم')->required(),
                 Textarea::make('episodes')->label('قائمة الحلقات')->rows(3)->required(),
                 self::batchLinksRepeater(),
@@ -176,7 +181,6 @@ class AnimeLinkResource extends Resource
                         '1080' => '1080p',
                     ])
                     ->required(),
-
                 Textarea::make('url_torrent')->label('روابط التورنت')->rows(1),
                 Textarea::make('url_mega')->label('روابط ميجا')->rows(1),
                 Textarea::make('url_gdrive')->label('روابط Google Drive')->rows(1),
@@ -184,7 +188,6 @@ class AnimeLinkResource extends Resource
                 Textarea::make('url_gdriveHard')->label('روابط Google Drive Hardsub')->rows(1),
             ]);
     }
-
 
     public static function table(Table $table): Table
     {
@@ -196,11 +199,7 @@ class AnimeLinkResource extends Resource
                 TextColumn::make('season')->label('الموسم'),
                 TextColumn::make('year')->label('السنة'),
                 TextColumn::make('relatedGroup.name')->label('المجموعة المرتبطة'),
-                TextColumn::make('synopsis')
-                    ->label('الملخص')
-                    ->html()
-                    ->formatStateUsing(fn ($state) => "<div style='text-align: justify;'>{$state}</div>")
-                    ->limit(200),
+                TextColumn::make('synopsis')->label('الملخص')->html()->formatStateUsing(fn ($state) => "<div style='text-align: justify;'>{$state}</div>")->limit(200),
             ])
             ->actions([
                 \Filament\Tables\Actions\EditAction::make(),
@@ -240,7 +239,6 @@ class AnimeLinkResource extends Resource
     {
         $record->load('batches.batchLinks');
         $rssXml = view('rss.feed', ['anime' => $record])->render();
-
         File::ensureDirectoryExists(public_path('rss'));
         File::put(public_path("rss/{$record->slug}.xml"), $rssXml);
     }
