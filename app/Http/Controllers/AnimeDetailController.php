@@ -23,14 +23,11 @@ class AnimeDetailController extends Controller
             ->first();
 
         if (!$animeLink) {
-            // Jika tidak ditemukan berdasarkan MAL ID, coba redirect ke detail cartoon lokal
             return redirect()->route('cartoon.detail', $mal_id);
         }
 
-        // increment click
         $animeLink->incrementQuietly('click_count');
 
-        // catat visit harian (untuk agregasi weekly/monthly)
         try {
             $today = now()->toDateString();
 
@@ -44,7 +41,6 @@ class AnimeDetailController extends Controller
             Log::warning('Failed to increment anime visit: '.$e->getMessage(), ['anime_link_id' => $animeLink->id]);
         }
 
-        // isi skor jika kosong
         if (!$animeLink->mal_score || !$animeLink->imdb_score) {
             $this->updateScoresFromApi($animeLink);
         }
@@ -52,7 +48,6 @@ class AnimeDetailController extends Controller
         $downloadLinks = $animeLink->batches->flatMap->batchLinks;
         $fromDatabase  = true;
 
-        // --- Ambil data Jikan (fallback berbagai field) ---
         $jikanData = Cache::remember("jikan_data_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
             try {
                 $response = Http::timeout(15)->get("https://api.jikan.moe/v4/anime/{$mal_id}/full");
@@ -74,7 +69,6 @@ class AnimeDetailController extends Controller
             abort(404, 'Anime not found via API');
         }
 
-        // --- IMDb ---
         $imdbId = $animeLink->imdb_id ?? $this->extractImdbIdFromJikan($jikanData);
 
         $omdbData = [];
@@ -100,7 +94,6 @@ class AnimeDetailController extends Controller
             });
         }
 
-        // --- Episodes: DB first, fallback ke Jikan lalu simpan quietly ---
         $episodes = $animeLink->episodes;
         if (empty($episodes)) {
             $episodes = $jikanData['episodes'] ?? null;
@@ -110,7 +103,6 @@ class AnimeDetailController extends Controller
             }
         }
 
-        // --- Genres: normalisasi agar selalu array of string ---
         $rawGenres = $animeLink->genres ?: ($jikanData['genres'] ?? []);
         $genres    = $this->normalizeGenres($rawGenres);
 
@@ -126,16 +118,15 @@ class AnimeDetailController extends Controller
             'type'           => $animeLink->type          ?? ($jikanData['type'] ?? null),
             'status'         => $jikanData['status'] ?? 'Unknown',
             'studios'        => $jikanData['studios'] ?? [],
-            'genres'         => $genres,   // <- hasil normalisasi
+            'genres'         => $genres,
             'episodes'       => $episodes,
-            'duration'       => $jikanData['duration'] ?? null,
+            'duration'       => $animeLink->duration ?? ($jikanData['duration'] ?? null),
             'aired'          => $jikanData['aired'] ?? [],
             'score'          => $animeLink->mal_score ?? ($jikanData['score'] ?? null),
             'imdb_score'     => $animeLink->imdb_score ?? ($omdbData['imdbRating'] ?? null),
             'imdb_id'        => $animeLink->imdb_id ?? $imdbId,
         ];
 
-        // --- Rekomendasi (Jikan) ---
         $recommendations = Cache::remember("recommendations_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
             $recs = [];
             try {
@@ -168,22 +159,14 @@ class AnimeDetailController extends Controller
         ]);
     }
 
-    /**
-     * Normalisasi kolom genres menjadi array of string.
-     * - menerima CSV string: "Action, Adventure"
-     * - menerima JSON array string: ["Action","Adventure"]
-     * - menerima array objek: [{"name":"Action"}, ...]
-     */
     private function normalizeGenres($raw): array
     {
         if (is_null($raw)) return [];
 
-        // String CSV
         if (is_string($raw)) {
             return array_values(array_filter(array_map('trim', explode(',', $raw))));
         }
 
-        // Array (string/objek)
         if (is_array($raw)) {
             return collect($raw)
                 ->map(function ($g) {

@@ -86,126 +86,124 @@ class AnimeGenreController extends Controller
     }
 
     public function genreMulti(Request $request)
-{
-    Log::info('genreMulti method called');
-    $searchQuery = $request->query('q');
-    $typesSelected = $request->query('types', []);
-    $genreIds = $request->query('genres', []);
-    $sort = $request->query('sort', 'title_asc');
-    $status = $request->query('status');
-    $page = $request->query('page', 1);
+    {
+        Log::info('genreMulti method called');
+        $searchQuery = $request->query('q');
+        $typesSelected = $request->query('types', []);
+        $genreIds = $request->query('genres', []);
+        $sort = $request->query('sort', 'title_asc');
+        $status = $request->query('status');
+        $page = $request->query('page', 1);
 
-    $query = AnimeLink::query();
+        $query = AnimeLink::query();
 
-    if ($searchQuery) {
-        $query->where('title', 'like', '%' . $searchQuery . '%');
-    }
-
-    if (!empty($typesSelected)) {
-        $query->whereHas('types', function ($q) use ($typesSelected) {
-            $q->whereIn('name', $typesSelected);
-        });
-    }
-
-    if (!empty($genreIds)) {
-        $query->where(function ($q) use ($genreIds) {
-            foreach ($genreIds as $genre) {
-                $q->orWhere('genres', 'like', '%' . $genre . '%');
-            }
-        });
-    }
-
-    $animeLinks = $query->with('types')->paginate(24);
-
-    $animes = $animeLinks->getCollection()->map(function ($anime) {
-        $data = null;
-        try {
-            $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
-            if ($response->successful()) {
-                $data = $response->json('data');
-            }
-        } catch (\Exception $e) {
-            Log::warning("Gagal mengambil data Jikan untuk MAL ID {$anime->mal_id}: " . $e->getMessage());
+        if ($searchQuery) {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('title', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('title_english', 'like', '%' . $searchQuery . '%');
+            });
         }
 
-        return [
-            'mal_id' => $anime->mal_id,
-            'title' => $anime->title,
-            'local_title' => $anime->title,
-            'episodes' => $data['episodes'] ?? null,
-            'duration' => $data['duration'] ?? null,
-            'score' => $data['score'] ?? null,
-            'images' => $data['images'] ?? null,
-            'image' => $anime->poster ?: ($data['images']['jpg']['image_url'] ?? null),
-            'types' => $anime->types->map(function ($type) {
-                return [
-                    'name' => $type->name,
-                    'color' => $type->color ?? '#6b7280',
-                ];
-            }),
-        ];
-    });
+        if (!empty($typesSelected)) {
+            $query->whereHas('types', function ($q) use ($typesSelected) {
+                $q->whereIn('name', $typesSelected);
+            });
+        }
 
-    $paginated = new LengthAwarePaginator(
-        $animes,
-        $animeLinks->total(),
-        $animeLinks->perPage(),
-        $animeLinks->currentPage(),
-        ['path' => request()->url(), 'query' => request()->query()]
-    );
-
-    $types = $this->getTypeListFromDatabase();
-    Log::info('Types Data: ', $types); // Debug
-    return view('anime.genre-multi', [
-        'animes' => $paginated,
-        'genres' => $this->getGenreListFromAnimeLinks(),
-        'types' => $types,
-        'selected' => $genreIds ?? [],
-        'selectedTypes' => $typesSelected ?? [],
-        'selectedSort' => $sort ?? null,
-        'selectedStatus' => $status ?? null,
-        'query' => $searchQuery ?? '',
-        'hasMorePages' => $paginated->hasMorePages(),
-    ]);
-}
-
-   private function getGenreListFromAnimeLinks(): array
-{
-    return Cache::remember('genre_list_from_anime_links', now()->addHours(12), function () {
-        $allGenres = AnimeLink::pluck('genres')
-            ->filter()
-            ->flatMap(function ($item) {
-                // Jika sudah array (hasil cast JSON), pakai langsung
-                if (is_array($item)) {
-                    return array_map('trim', $item);
+        if (!empty($genreIds)) {
+            $query->where(function ($q) use ($genreIds) {
+                foreach ($genreIds as $genre) {
+                    $q->orWhere('genres', 'like', '%' . $genre . '%');
                 }
+            });
+        }
 
-                // Jika string JSON valid -> decode ke array
-                if (is_string($item)) {
-                    $decoded = json_decode($item, true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        return array_map('trim', $decoded);
+        $animeLinks = $query->with('types')->paginate(24);
+
+        $animes = $animeLinks->getCollection()->map(function ($anime) {
+            $data = null;
+            try {
+                $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$anime->mal_id}");
+                if ($response->successful()) {
+                    $data = $response->json('data');
+                }
+            } catch (\Exception $e) {
+                Log::warning("Gagal mengambil data Jikan untuk MAL ID {$anime->mal_id}: " . $e->getMessage());
+            }
+
+            return [
+                'mal_id' => $anime->mal_id,
+                'title' => $anime->title,
+                'local_title' => $anime->title,
+                'episodes' => $anime->episodes ?? ($data['episodes'] ?? null),
+                'duration' => $anime->duration ?? ($data['duration'] ?? null),
+                'score' => $anime->mal_score ?? ($data['score'] ?? null),
+                'images' => $data['images'] ?? null,
+                'image' => $anime->poster ?: ($data['images']['jpg']['image_url'] ?? null),
+                'types' => $anime->types->map(function ($type) {
+                    return [
+                        'name' => $type->name,
+                        'color' => $type->color ?? '#6b7280',
+                    ];
+                }),
+            ];
+        });
+
+        $paginated = new LengthAwarePaginator(
+            $animes,
+            $animeLinks->total(),
+            $animeLinks->perPage(),
+            $animeLinks->currentPage(),
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        $types = $this->getTypeListFromDatabase();
+        Log::info('Types Data: ', $types);
+        return view('anime.genre-multi', [
+            'animes' => $paginated,
+            'genres' => $this->getGenreListFromAnimeLinks(),
+            'types' => $types,
+            'selected' => $genreIds ?? [],
+            'selectedTypes' => $typesSelected ?? [],
+            'selectedSort' => $sort ?? null,
+            'selectedStatus' => $status ?? null,
+            'query' => $searchQuery ?? '',
+            'hasMorePages' => $paginated->hasMorePages(),
+        ]);
+    }
+
+    private function getGenreListFromAnimeLinks(): array
+    {
+        return Cache::remember('genre_list_from_anime_links', now()->addHours(12), function () {
+            $allGenres = AnimeLink::pluck('genres')
+                ->filter()
+                ->flatMap(function ($item) {
+                    if (is_array($item)) {
+                        return array_map('trim', $item);
                     }
 
-                    // Jika string biasa dipisah koma
-                    return array_map('trim', explode(',', $item));
-                }
+                    if (is_string($item)) {
+                        $decoded = json_decode($item, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            return array_map('trim', $decoded);
+                        }
 
-                // Selain itu abaikan
-                return [];
-            })
-            ->filter(fn ($g) => $g !== '' && $g !== null)
-            ->unique()
-            ->sort()
-            ->values();
+                        return array_map('trim', explode(',', $item));
+                    }
 
-        return $allGenres->map(fn ($genre) => [
-            'id' => $genre,
-            'name' => $genre,
-        ])->toArray();
-    });
-}
+                    return [];
+                })
+                ->filter(fn ($g) => $g !== '' && $g !== null)
+                ->unique()
+                ->sort()
+                ->values();
 
+            return $allGenres->map(fn ($genre) => [
+                'id' => $genre,
+                'name' => $genre,
+            ])->toArray();
+        });
+    }
 
     public function getTypeListFromDatabase(): array
     {

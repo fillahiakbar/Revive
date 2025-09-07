@@ -61,7 +61,7 @@
 
 
         @if(!empty($anime['episodes']))
-            <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
+            <p class="text-gray-400 text-xs">حلقات عدد: {{ $anime['episodes'] }}</p>
         @endif
 
         {{-- Score --}}

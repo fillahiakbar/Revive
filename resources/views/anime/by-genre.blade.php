@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="min-h-screen text-white pt-20">
-        {{-- Header --}}
         <div class="">
             <div class="container mx-auto px-4 py-8">
                 <div class="flex items-center justify-between">
@@ -9,8 +8,6 @@
                             {{ $genreData['name'] ?? 'Unknown Genre' }} Anime
                         </h1>
                     </div>
-
-                    {{-- Back Button --}}
                     <a href="{{ route('anime.genres') }}"
                        class="hover:text-red-700 px-4 py-2 pt-20 rounded-lg transition-colors">
                         Back to Genre
@@ -20,15 +17,10 @@
         </div>
 
         @php
-            // per page untuk kalkulasi teks info (default 24)
             $__perPage = $perPage ?? 24;
-
-            // Normalisasi $animeList → collection
             $__items = $animeList instanceof \Illuminate\Pagination\LengthAwarePaginator
                 ? collect($animeList->items())
                 : collect($animeList ?? []);
-
-            // Auto buat $pagination kalau view menerima paginator langsung
             if (!isset($pagination) && $animeList instanceof \Illuminate\Pagination\LengthAwarePaginator) {
                 $pagination = [
                     'current_page'      => $animeList->currentPage(),
@@ -39,11 +31,9 @@
             }
         @endphp
 
-        {{-- Grid --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pl-24 pr-24 gap-4 min-h-[600px]">
             @forelse($__items as $card)
-                {{-- Pakai komponen poster & detail dari DB --}}
-                <x-anime.card :anime="$card" />
+                <x-anime.card/>
             @empty
                 <div class="col-span-full text-center text-gray-500 py-20">
                     <div class="text-6xl mb-4">📺</div>
@@ -53,7 +43,6 @@
             @endforelse
         </div>
 
-        {{-- Pagination --}}
         @isset($pagination)
             @if(($pagination['last_visible_page'] ?? 1) > 1)
                 <div class="flex justify-center mt-10">
@@ -95,7 +84,6 @@
             @endif
         @endisset
 
-        {{-- JS Fallback --}}
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const images = document.querySelectorAll('img[src]');

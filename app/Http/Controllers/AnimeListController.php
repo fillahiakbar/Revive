@@ -9,16 +9,14 @@ use App\Models\AnimeLink;
 
 class AnimeListController extends Controller
 {
-     public function list(Request $request)
+    public function list(Request $request)
     {
         $letter = strtoupper($request->query('letter', 'ALL'));
         $page = (int) $request->query('page', 1);
         $perPage = 24;
 
-        // Ambil query builder dengan relasi
         $query = AnimeLink::with('types');
 
-        // Filter huruf awal judul
         if ($letter !== 'ALL') {
             if ($letter === '0-9') {
                 $query->whereRaw("LEFT(title, 1) REGEXP '^[0-9]'");
@@ -34,7 +32,6 @@ class AnimeListController extends Controller
                         ->take($perPage)
                         ->get();
 
-        // Ambil data dari API tanpa penyaringan
         $enhanced = $animes->map(function ($anime) {
             $malId = $anime->mal_id;
 
@@ -56,7 +53,7 @@ class AnimeListController extends Controller
                         'image_url' => $anime->poster ?: ($apiData['images']['jpg']['image_url'] ?? null),
                     ]
                 ],
-                'duration'    => $apiData['duration'] ?? null,
+                'duration'    => $anime->duration ?? null,
                 'score'       => $apiData['score'] ?? null,
                 'types'       => $anime->types->map(fn($type) => [
                     'name' => $type->name,

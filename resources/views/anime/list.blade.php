@@ -1,14 +1,10 @@
 <x-app-layout>
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
-
-            {{-- Judul Halaman --}}
             <div class="text-white text-right mb-6">
                 <p class="text-sm">الرئيسية . قائمة الأنمي A-Z</p>
                 <h1 class="text-sm font-bold">ترتيب حسب الحروف</h1>
             </div>
-
-            {{-- Navigation A-Z + 0-9 + الكل --}}
             <div class="px-4 py-6 rounded shadow mb-10 text-black">
                 <div class="flex flex-wrap justify-center items-center gap-2 text-sm font-bold">
                     <a href="{{ route('anime.list', ['letter' => 'ALL']) }}"
@@ -16,13 +12,11 @@
                        {{ $letter === 'ALL' ? 'bg-red-500 text-black' : 'bg-gray-200 hover:bg-red-400 hover:text-black' }}">
                         الكل
                     </a>
-
                     <a href="{{ route('anime.list', ['letter' => '0-9']) }}"
                        class="h-8 px-3 rounded-md flex items-center justify-center transition
                        {{ $letter === '0-9' ? 'bg-red-500 text-black' : 'bg-gray-200 hover:bg-red-400 hover:text-black' }}">
                         0-9
                     </a>
-
                     @foreach(range('Z', 'A') as $char)
                         <a href="{{ route('anime.list', ['letter' => $char]) }}"
                            class="w-8 h-8 rounded-md flex items-center justify-center transition
@@ -32,14 +26,10 @@
                     @endforeach
                 </div>
             </div>
-
-            {{-- Anime Grid --}}
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
     @forelse($animes as $anime)
         <a href="{{ route('anime.show', $anime['mal_id']) }}"
            class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
-
-           {{-- Container badge --}}
 <div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
     @foreach ($anime['types'] as $type)
         @php
@@ -55,13 +45,10 @@
         </span>
     @endforeach
 </div>
-
-            {{-- Poster --}}
             <div class="w-full bg-gray-800 flex items-center justify-center">
                 @php
                     $image = $anime['images']['jpg']['large_image_url'] ?? $anime['images']['jpg']['image_url'] ?? null;
                 @endphp
-
                 @if($image)
                     <img src="{{ $image }}"
                          alt="{{ $anime['title'] }}"
@@ -85,36 +72,21 @@
                     </div>
                 @endif
             </div>
-
-            {{-- Detail --}}
             <div class="p-2 text-xs">
-                {{-- Judul Lokal/Utama --}}
 <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
     {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
 </h3>
-
-{{-- Judul English --}}
 @if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
     <p class="text-gray-400 text-[11px] truncate" title="{{ $anime['title_english'] }}">
         {{ $anime['title_english'] }}
     </p>
 @endif
-
-                {{-- Duration dari API --}}
                 <p class="text-gray-400">
-                    @php
-                        preg_match('/\d+/', $anime['duration'] ?? '', $matches);
-                        $durationMinutes = $matches[0] ?? 'N/A';
-                    @endphp
-                    {{ $durationMinutes }}m
-                </p>
-
-                {{-- Episodes dari DB --}}
+    {{ !empty($anime['duration']) ? $anime['duration'] : 'N/A' }}
+</p>
                 @if(!empty($anime['episodes']))
-                    <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
+                        <p class="text-gray-400 text-xs">حلقات عدد: {{ $anime['episodes'] }}</p>
                 @endif
-
-                {{-- Score dari API --}}
                 @if(!empty($anime['score']))
                     <div class="flex items-center gap-1 mt-1">
                         <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -133,8 +105,6 @@
             <p class="text-sm mt-2">Try selecting a different letter or check back later.</p>
         </div>
     @endforelse
-
-    {{-- Grid Filler --}}
     @if($animes->count() > 0 && $animes->count() < 24)
         @for($i = $animes->count(); $i < 24; $i++)
             <div class="invisible">
@@ -147,8 +117,6 @@
         @endfor
     @endif
 </div>
-
-            {{-- Pagination --}}
             @if ($animes->hasPages())
                 <div class="flex justify-center mt-10">
                     <nav class="flex items-center space-x-2 rtl:space-x-reverse">
@@ -164,7 +132,6 @@
                                 &lsaquo;
                             </a>
                         @endif
-
                         @foreach ($animes->getUrlRange(max(1, $animes->currentPage() - 2), min($animes->lastPage(), $animes->currentPage() + 2)) as $page => $url)
                             <a href="{{ $url }}"
                                class="w-10 h-10 flex items-center justify-center rounded-full text-sm transition
@@ -173,7 +140,6 @@
                                 {{ $page }}
                             </a>
                         @endforeach
-
                         @if ($animes->hasMorePages())
                             <a href="{{ $animes->nextPageUrl() }}"
                                class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
@@ -188,7 +154,6 @@
                         @endif
                     </nav>
                 </div>
-
                 <div class="text-center mt-4 text-gray-400 text-sm">
                     Page {{ $animes->currentPage() }} of {{ $animes->lastPage() }}
                     ({{ $animes->total() }} total results)
@@ -196,8 +161,6 @@
             @endif
         </div>
     </div>
-
-    {{-- JS Error Handler --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('img[src]');

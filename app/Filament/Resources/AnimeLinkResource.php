@@ -100,8 +100,6 @@ class AnimeLinkResource extends Resource
 
                 TextInput::make('genres')
                     ->label('الأنواع')
-                    ->readOnly()
-                    ->disabled()
                     ->dehydrated(true)
                     ->dehydrateStateUsing(function ($state) {
                         if (is_array($state)) {
@@ -127,7 +125,6 @@ class AnimeLinkResource extends Resource
                     }),
 
                 RichEditor::make('synopsis')->label('الملخص')->columnSpan('full'),
-
                 Select::make('anime_types')
                     ->label('الوسوم (Tags)')
                     ->relationship('types', 'name')
@@ -135,11 +132,10 @@ class AnimeLinkResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required(),
-
                 TextInput::make('season')->label('الموسم'),
                 TextInput::make('year')->label('السنة'),
                 TextInput::make('type')->label('النوع'),
-
+                TextInput::make('duration')->label('المدة')->placeholder('Ex : دقائق 24 or Minutes 24')->maxLength(100),
                 TextInput::make('mal_score')->label('تقييم MAL')->numeric()->dehydrated(true),
                 TextInput::make('imdb_score')->label('تقييم IMDb')->numeric()->dehydrated(true),
                 TextInput::make('imdb_id')->label('معرّف IMDb')->dehydrated(true),
