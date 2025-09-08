@@ -4,51 +4,37 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AnimeLink;
-use Illuminate\Support\Facades\Http;
 
 class AnimeOngoingController extends Controller
 {
-    private $jikanApiUrl = 'https://api.jikan.moe/v4/anime/';
-
     public function index(Request $request)
     {
-        $localAnimes = AnimeLink::with(['types', 'batches.batchLinks'])->get();
+        $rows = AnimeLink::with(['types', 'batches.batchLinks'])
+            ->where('status', 'Currently Airing')
+            ->get();
 
-        $ongoingAnimes = [];
-
-        foreach ($localAnimes as $anime) {
-            $malId = $anime->mal_id;
-            if (!$malId) continue;
-
-            $apiData = cache()->remember("jikan_mal_{$malId}", 3600, function () use ($malId) {
-                $res = Http::get("https://api.jikan.moe/v4/anime/{$malId}");
-                return $res->successful() ? $res->json('data') : null;
-            });
-
-            if (!$apiData) continue;
-
-            if (($apiData['status'] ?? '') !== 'Currently Airing') continue;
-
-            $ongoingAnimes[] = [
+        $ongoingAnimes = $rows->map(function ($anime) {
+            return [
                 'mal_id'        => $anime->mal_id,
                 'local_title'   => $anime->title,
-                'title'         => $apiData['title'] ?? $anime->title,
-                'title_english' => $apiData['title_english'] ?? null,
-                'images'        => $apiData['images'] ?? [],
-                'duration'      => $anime->duration ?? null,
-                'score'         => $apiData['score'] ?? null,
-                'types' => $anime->types->map(fn($type) => [
-                    'name' => $type->name,
-                    'color' => $type->color ?? '#6b7280',
-                ]),
+                'title'         => $anime->title,
+                'title_english' => $anime->title_english,
+                'images'        => ['jpg' => ['image_url' => $anime->poster, 'large_image_url' => $anime->poster]],
+                'image'         => $anime->poster,
+                'duration'      => $anime->duration,
+                'score'         => $anime->mal_score,
+                'types'         => $anime->types->map(fn ($t) => [
+                    'name'  => $t->name,
+                    'color' => $t->color ?? '#6b7280',
+                ])->values()->all(),
                 'episodes'      => $anime->episodes,
-                'batches'       => $anime->batches ?? [],
+                'batches'       => $anime->batches,
             ];
-        }
+        })->values()->all();
 
         return view('anime.ongoing', [
             'animes' => $ongoingAnimes,
-            'pagination' => []
+            'pagination' => [],
         ]);
     }
 }

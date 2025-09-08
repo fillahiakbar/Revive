@@ -25,7 +25,7 @@
 </div>
                         <div class="w-full bg-gray-800 flex items-center justify-center">
                             @php
-                                $image = $anime['images']['jpg']['large_image_url'] ?? $anime['images']['jpg']['image_url'] ?? null;
+                                $image = $anime['image'] ?? null;
                             @endphp
                             @if($image)
                                 <img src="{{ $image }}"
@@ -51,7 +51,7 @@
                             @endif
                         </div>
                         <div class="p-2 text-xs">
-                            <h3 class="font-bold truncate" title="{{ $anime['local_title'] }}">
+                            <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
                                 {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
                             </h3>
 @if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
@@ -85,16 +85,4 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const images = document.querySelectorAll('img[src]');
-            images.forEach(img => {
-                img.addEventListener('error', function () {
-                    this.style.display = 'none';
-                    const fallback = this.nextElementSibling;
-                    if (fallback) fallback.style.display = 'flex';
-                });
-            });
-        });
-    </script>
 </x-app-layout>

@@ -8,9 +8,9 @@ use Illuminate\Support\Str;
 
 class AnimeLink extends Model
 {
-   protected $fillable = [
-        'mal_id','title','poster','episodes','duration','synopsis','season','year','type','genres',
-        'title_english','imdb_id','mal_score','imdb_score'
+    protected $fillable = [
+    'mal_id','title','poster','episodes','duration','synopsis','season','year','type','genres',
+    'title_english','imdb_id','mal_score','imdb_score','status'
     ];
 
     protected $casts = [

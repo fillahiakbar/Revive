@@ -76,6 +76,13 @@ class AnimeLinkResource extends Resource
                             $set('episodes', null);
                         }
 
+                        // set status ke enum DB
+                        $incomingStatus = $data['status'] ?? null; // e.g. "Finished Airing" | "Currently Airing" | "Finished"
+                        if ($incomingStatus === 'Finished') $incomingStatus = 'Finished Airing';
+                        if (in_array($incomingStatus, ['Currently Airing','Finished Airing'], true)) {
+                            $set('status', $incomingStatus);
+                        }
+
                         $omdb = Http::timeout(10)->get(config('services.omdb.url'), [
                             'apikey' => config('services.omdb.key'),
                             't' => $data['title'] ?? '',
@@ -123,6 +130,15 @@ class AnimeLinkResource extends Resource
                         }
                         return (string) $state;
                     }),
+
+                // STATUS (DB-based)
+                Select::make('status')
+                    ->label('حالة الأنمي')
+                    ->options([
+                        'Currently Airing' => 'Currently Airing',
+                        'Finished Airing'  => 'Finished Airing',
+                    ])
+                    ->required(),
 
                 RichEditor::make('synopsis')->label('الملخص')->columnSpan('full'),
                 Select::make('anime_types')
@@ -190,6 +206,7 @@ class AnimeLinkResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title')->label('العنوان')->searchable(),
+                TextColumn::make('status')->label('الحالة')->badge(),
                 TextColumn::make('type')->label('النوع الرسمي'),
                 TextColumn::make('types.name')->label('النوع')->limit(30),
                 TextColumn::make('season')->label('الموسم'),

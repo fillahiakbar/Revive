@@ -173,49 +173,8 @@
                     </div>
                 </div>
             @endif
-            @if($animeLink && $animeLink->relatedGroup && $animeLink->relatedGroup->relatedAnimes->count() > 1)
-                <div class="mt-16">
-                    <h2 class="text-xl font-bold mb-4 text-white">أعمال ذات صلة</h2>
-                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        @foreach($animeLink->relatedGroup->relatedAnimes->where('mal_id', '!=', $anime['mal_id']) as $related)
-                            <a href="{{ route('anime.show', $related->mal_id) }}"
-                               class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
-                                <div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
-                                    @foreach ($related->animeLink?->types ?? [] as $type)
-                                        <span class="text-xs font-medium px-2 py-1 rounded"
-                                              style="background-color: {{ $type->color ?? '#6b7280' }}; color: white;">
-                                            {{ $type->name }}
-                                        </span>
-                                    @endforeach
-                                </div>
-<div class="mx-auto bg-gray-800 flex items-center justify-center aspect-[2/3] 
-            w-24 sm:w-28 md:w-32 lg:w-36 overflow-hidden">
-    <img src="{{ $related->poster }}"
-         alt="{{ $related->title }}"
-         class="w-full h-full object-cover shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
-         loading="lazy"
-         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-    <div class="hidden w-full h-full items-center justify-center text-gray-800">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  clip-rule="evenodd"/>
-        </svg>
-    </div>
-</div>
-<div class="p-1 text-[11px] text-center">
-    <h3 class="font-bold truncate" title="{{ $related->title }}">{{ $related->title }}</h3>
-    @if (!empty($related->title_english) && $related->title_english !== $related->title)
-        <p class="text-gray-400 truncate" title="{{ $related->title_english }}">
-            {{ $related->title_english }}
-        </p>
-    @endif
-</div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
+            
+xa
             <div class="mt-10 px-4 md:px-8 lg:px-16 mx-0 sm:mx-4 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
                 <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
                 @if(session('success'))

@@ -87,16 +87,4 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const images = document.querySelectorAll('img[src]');
-            images.forEach(img => {
-                img.addEventListener('error', function () {
-                    this.style.display = 'none';
-                    const fallback = this.nextElementSibling;
-                    if (fallback) fallback.style.display = 'flex';
-                });
-            });
-        });
-    </script>
 </x-app-layout>
