@@ -82,6 +82,15 @@ class SliderResource extends Resource
                 Toggle::make('is_active')
                     ->label('هل تريد عرضه؟')
                     ->default(true),
+
+                TextInput::make('duration_ms')
+                    ->label('مدة التبديل (بالميلي ثانية)')
+                    ->numeric()
+                    ->default(5000)
+                    ->required()
+                    ->minValue(1000)
+                    ->maxValue(30000)
+                    ->helperText('المدة بين التبديل التلقائي للشرائح بالميلي ثانية (1000 = 1 ثانية)'),
             ]);
     }
 
@@ -110,6 +119,10 @@ class SliderResource extends Resource
 
                 TextColumn::make('order')
                     ->label('الترتيب')
+                    ->sortable(),
+
+                TextColumn::make('duration_ms')
+                    ->label('المدة (ms)')
                     ->sortable(),
 
                 IconColumn::make('is_active')

@@ -12,6 +12,7 @@
 
 
 
+
 [x-cloak] {
     display: none;
 }
@@ -48,6 +49,16 @@ body {
     background-repeat: no-repeat !important;
     background-size: cover !important;
     background-position: center !important;
+}
+
+/* Tambahkan ini di akhir atau bagian global */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Safari, Chrome */
 }
 
 /* Ensure background stays fixed on mobile */

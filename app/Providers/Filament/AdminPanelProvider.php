@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Admin;
+use App\Filament\Admin\Pages\Auth\Login; // Import custom Login class
+use Filament\Contracts\FilamentUser;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,6 +21,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Pages\GenerateCustomRss;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -25,19 +30,20 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
-            ->login()
+            ->path('5u34u30')
+            ->login(Login::class) // Daftarkan custom login page
+            ->authGuard('admin') // Pakai guard admin
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                GenerateCustomRss::class,
             ])
             ->resources([
                 \App\Filament\Resources\UserResource::class,
-                ])
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
@@ -57,11 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            
-            // Aktifkan SPA
             ->spa()
-            // Aktifkan Collapse menu sidebar
             ->sidebarFullyCollapsibleOnDesktop();
-            ;
     }
 }

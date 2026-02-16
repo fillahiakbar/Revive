@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" class="scrollbar-hidden">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +15,6 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @vite(['resources/js/slider.js'])
 
     <!-- Styles -->
     @livewireStyles
@@ -48,6 +47,8 @@
             <main class="relative z-20">
                 {{ $slot }}
             </main>
+            <x-scroll-to-top-button />
+
         </div>
 
         <!-- Footer -->

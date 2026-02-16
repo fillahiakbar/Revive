@@ -31,6 +31,34 @@ class CommentController extends Controller
             'author' => $request->input('author'),
         ]);
 
-        return back()->with('success', 'Komentar berhasil ditambahkan!');
+        return back()->with('success', 'تم إضافة التعليق بنجاح!');
     }
+
+    public function like($id)
+{
+    $comment = Comment::findOrFail($id);
+    $comment->likes = $comment->likes + 1;
+    $comment->save();
+
+    return back();
+}
+
+public function reply(Request $request, $id)
+{
+    $request->validate([
+        'body' => 'required|string',
+    ]);
+
+    $parent = Comment::findOrFail($id);
+
+    Comment::create([
+        'anime_link_id' => $parent->anime_link_id,
+        'user_id' => auth()->id(),
+        'body' => $request->input('body'),
+        'parent_id' => $parent->id, // Tambahkan kolom ini di DB kalau belum ada
+    ]);
+
+    return back()->with('success', 'تم إضافة التعليق بنجاح!');
+}
+
 }

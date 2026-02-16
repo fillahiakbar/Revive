@@ -1,7 +1,5 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-10 pt-24 px-6 text-white">
-
-        {{-- 🔵 Advanced Genre Selector --}}
         <form method="GET" action="{{ route('anime.genre.multi') }}">
             <x-genre-selector
                 :genres="$genres"
@@ -9,38 +7,41 @@
                 :selected-status="$selectedStatus ?? null"
                 :selected-types="$selectedTypes ?? []"
                 :selected-sort="$selectedSort ?? null"
+                :types="$types"
                 :query="$query ?? ''"
             />
-
             <div class="text-center mt-6 mb-10">
                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded text-lg">
                     بحث
                 </button>
             </div>
         </form>
-
-        {{-- Anime Grid --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
             @forelse($animes as $anime)
                 <a href="{{ route('anime.show', $anime['mal_id']) }}"
                    class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
-
-                    {{-- Badge --}}
-                    @foreach ($anime['types'] ?? [] as $type)
-                        <span class="badge-{{ strtolower($type) }} text-xs px-2 py-0.5 rounded text-white font-medium absolute left-1 top-1 z-10">
-                            {{ $type }}
-                        </span>
-                    @endforeach
-
-                    {{-- Poster --}}
+<div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
+    @foreach ($anime['types'] as $type)
+        @php
+            $color = $type['color'] ?? '#6b7280';
+            $label = $type['name'] ?? $type;
+        @endphp
+        <span
+            class="text-xs font-medium px-2 py-1 rounded"
+            style="background-color: {{ $color }}; color: white;"
+            title="{{ $label }}"
+        >
+            {{ $label }}
+        </span>
+    @endforeach
+</div>
                     <div class="w-full bg-gray-800 flex items-center justify-center">
-                        @php
-                            $image = $anime['images']['jpg']['large_image_url']
-                                ?? $anime['images']['jpg']['image_url']
-                                ?? $anime['image']
-                                ?? null;
-                        @endphp
-
+@php
+    $image = $anime['image']
+        ?? $anime['images']['jpg']['image_url']
+        ?? $anime['images']['jpg']['large_image_url']
+        ?? null;
+@endphp
                         @if($image)
                             <img src="{{ $image }}"
                                  alt="{{ $anime['title'] }}"
@@ -64,29 +65,16 @@
                             </div>
                         @endif
                     </div>
-
-                    {{-- Detail --}}
                     <div class="p-2 text-xs">
-                        {{-- Title --}}
                         <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
                             {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
                         </h3>
-
-                        {{-- Duration --}}
                         <p class="text-gray-400">
-                            @php
-                                preg_match('/\d+/', $anime['duration'] ?? '', $matches);
-                                $durationMinutes = $matches[0] ?? 'N/A';
-                            @endphp
-                            {{ $durationMinutes }}m
-                        </p>
-
-                        {{-- Episodes --}}
+    {{ !empty($anime['duration']) ? $anime['duration'] : 'N/A' }}
+</p>
                         @if(!empty($anime['episodes']))
-                            <p class="text-gray-400 text-xs">{{ $anime['episodes'] }} Episodes</p>
+                                 <p class="text-gray-400 text-xs">عدد الحلقات: {{ $anime['episodes'] }}</p>
                         @endif
-
-                        {{-- Score --}}
                         @if(!empty($anime['score']))
                             <div class="flex items-center gap-1 mt-1">
                                 <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -104,8 +92,6 @@
                     <p class="text-sm mt-2">Try changing filter or keyword.</p>
                 </div>
             @endforelse
-
-            {{-- Grid Filler --}}
             @if($animes->count() > 0 && $animes->count() < 24)
                 @for($i = $animes->count(); $i < 24; $i++)
                     <div class="invisible">
@@ -118,6 +104,5 @@
                 @endfor
             @endif
         </div>
-
     </div>
 </x-app-layout>

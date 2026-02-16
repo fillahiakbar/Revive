@@ -51,21 +51,20 @@
                        class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group">
 
                         {{-- Badge --}}
-<div class="absolute left-1 z-10 flex flex-wrap gap-1">
-    @foreach (($anime['types'] ?? []) as $type)
-        @php
-            $label = $type['name'];
-            $color = $type['color'] ?? '#6b7280';
-        @endphp
-        <span
-            class="text-xs px-2 py-0.5 rounded font-medium"
-            style="background-color: {{ $color }}; color: white;"
-        >
-            {{ $label }}
-        </span>
-    @endforeach
-</div>
-
+                        <div class="absolute left-1 z-10 flex flex-wrap gap-1">
+                            @foreach (($anime['types'] ?? []) as $type)
+                                @php
+                                    $label = $type['name'];
+                                    $color = $type['color'] ?? '#6b7280';
+                                @endphp
+                                <span
+                                    class="text-xs px-2 py-0.5 rounded font-medium"
+                                    style="background-color: {{ $color }}; color: white;"
+                                >
+                                    {{ $label }}
+                                </span>
+                            @endforeach
+                        </div>
 
                         {{-- Poster --}}
                         <div class="w-full bg-gray-800 flex items-center justify-center">
@@ -75,7 +74,7 @@
 
                             @if($image)
                                 <img src="{{ $image }}"
-                                     alt="{{ $anime['title'] }}"
+                                     alt="{{ $anime['local_title'] ?? ($anime['title'] ?? 'Anime') }}"
                                      class="w-full shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
                                      loading="lazy"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -103,7 +102,8 @@
                             <h3 class="font-bold truncate" title="{{ $anime['local_title'] }}">
                                 {{ $anime['local_title'] ?? $anime['title'] }}
                             </h3>
-                            @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
+                            @php $baseTitle = $anime['local_title'] ?? ($anime['title'] ?? ''); @endphp
+                            @if (!empty($anime['title_english']) && $anime['title_english'] !== $baseTitle)
                                 <p class="text-gray-400 truncate">{{ $anime['title_english'] }}</p>
                             @endif
 

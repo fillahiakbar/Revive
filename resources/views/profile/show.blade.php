@@ -7,7 +7,7 @@
     </x-slot>
 
     {{-- Wrapper with dark translucent background --}}
-    <div class="min-h-screen">
+    <div class="min-h-screen text-white">
         <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
 
             {{-- Update Profile Information --}}
@@ -18,6 +18,7 @@
 
                 <x-section-border class="border-gray-700" />
             @endif
+
 
             {{-- Update Password --}}
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
@@ -36,6 +37,8 @@
 
                 <x-section-border class="border-gray-700" />
             @endif
+            
+
 
             {{-- Browser Sessions --}}
             <div class="mt-10 sm:mt-0  rounded-xl px-6 py-8 shadow">
