@@ -38,7 +38,9 @@ class AnimeDetailController extends Controller
 
             $visit->increment('count');
         } catch (\Throwable $e) {
-            Log::warning('Failed to increment anime visit: '.$e->getMessage(), ['anime_link_id' => $animeLink->id]);
+            Log::warning('Failed to increment anime visit: '.$e->getMessage(), [
+                'anime_link_id' => $animeLink->id
+            ]);
         }
 
         if (!$animeLink->mal_score || !$animeLink->imdb_score) {
@@ -48,7 +50,6 @@ class AnimeDetailController extends Controller
         $downloadLinks = $animeLink->batches->flatMap->batchLinks;
         $fromDatabase  = true;
 
-        // === Fallback Jikan: coba /full, kalau gagal coba /anime/{id}, kalau tetap gagal pakai DB saja ===
         $jikanData = Cache::remember("jikan_data_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
             try {
                 $respFull = Http::timeout(15)->get("https://api.jikan.moe/v4/anime/{$mal_id}/full");
@@ -56,27 +57,17 @@ class AnimeDetailController extends Controller
                     return $respFull->json('data') ?? [];
                 }
 
-                Log::warning("Jikan /full failed for MAL ID {$mal_id}", [
-                    'status' => $respFull->status(),
-                    'json'   => $respFull->json(),
-                ]);
-
                 $respLite = Http::timeout(15)->get("https://api.jikan.moe/v4/anime/{$mal_id}");
                 if ($respLite->successful()) {
                     return $respLite->json('data') ?? [];
                 }
-
-                Log::error("Jikan /anime failed for MAL ID {$mal_id}", [
-                    'status' => $respLite->status(),
-                    'json'   => $respLite->json(),
-                ]);
             } catch (\Exception $e) {
                 Log::error("Jikan exception for MAL ID {$mal_id}: ".$e->getMessage());
             }
+
             return [];
         });
 
-        // Jangan abort. Kalau kosong, lanjut pakai data lokal.
         $imdbId = $animeLink->imdb_id ?? $this->extractImdbIdFromJikan($jikanData);
 
         $omdbData = [];
@@ -87,18 +78,15 @@ class AnimeDetailController extends Controller
                         'apikey' => config('services.omdb.key'),
                         'i'      => $imdbId,
                     ]);
-                    if (!$response->successful()) {
-                        Log::warning("OMDb API failed for IMDb ID {$imdbId}", [
-                            'status'   => $response->status(),
-                            'response' => $response->json()
-                        ]);
-                        return [];
+
+                    if ($response->successful()) {
+                        return $response->json();
                     }
-                    return $response->json();
                 } catch (\Exception $e) {
                     Log::error("OMDb API exception for IMDb ID {$imdbId}: ".$e->getMessage());
-                    return [];
                 }
+
+                return [];
             });
         }
 
@@ -135,40 +123,65 @@ class AnimeDetailController extends Controller
             'duration'       => $animeLink->duration ?? ($jikanData['duration'] ?? null),
             'aired'          => $jikanData['aired'] ?? [],
             'score'          => $animeLink->mal_score ?? ($jikanData['score'] ?? null),
-            'imdb_score'     => $animeLink->imdb_score ?? ($omdbData['imdbRating'] ?? null),
+            'imdb_score'     => $animeLink->imdb_score ?? (is_numeric($omdbData['imdbRating'] ?? null) ? (float) $omdbData['imdbRating'] : null),
             'imdb_id'        => $animeLink->imdb_id ?? $imdbId,
         ];
-
-        $recommendations = Cache::remember("recommendations_{$mal_id}", now()->addHours(6), function () use ($mal_id) {
-            $recs = [];
-            try {
-                $response = Http::timeout(15)->get("https://api.jikan.moe/v4/anime/{$mal_id}/recommendations");
-                if ($response->successful()) {
-                    foreach ($response['data'] as $item) {
-                        if (isset($item['entry'])) {
-                            $recs[] = [
-                                'mal_id' => $item['entry']['mal_id'] ?? null,
-                                'title'  => $item['entry']['title'] ?? 'Unknown',
-                                'type'   => $item['entry']['type'] ?? 'Unknown',
-                                'images' => $item['entry']['images'] ?? [],
-                            ];
-                        }
-                        if (count($recs) >= 12) break;
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error("Failed to get recommendations for MAL ID {$mal_id}: ".$e->getMessage());
-            }
-            return $recs;
-        });
 
         return view('anime.show', [
             'animeLink'     => $animeLink,
             'anime'         => $animeData,
             'downloadLinks' => $downloadLinks,
-            'similarAnime'  => $recommendations,
+            'similarAnime'  => [],
             'fromDatabase'  => $fromDatabase,
         ]);
+    }
+
+    protected function updateScoresFromApi(AnimeLink $animeLink)
+    {
+        $response = Http::get("https://api.jikan.moe/v4/anime/{$animeLink->mal_id}");
+
+        if ($response->successful()) {
+            $data = $response->json('data');
+
+            if (isset($data['score']) && is_numeric($data['score'])) {
+                $animeLink->mal_score = (float) $data['score'];
+            }
+
+            if (empty($animeLink->episodes) && isset($data['episodes'])) {
+                $animeLink->episodes = $data['episodes'];
+            }
+
+            if (!$animeLink->imdb_id && !empty($data['external_links'])) {
+                foreach ($data['external_links'] as $link) {
+                    if (str_contains($link['url'] ?? '', 'imdb.com/title/tt')) {
+                        $animeLink->imdb_id = preg_replace(
+                            '/^.*imdb\.com\/title\/(tt\d+).*$/',
+                            '$1',
+                            $link['url']
+                        );
+                        break;
+                    }
+                }
+            }
+
+            if ($animeLink->imdb_id) {
+                $omdb = Http::get(config('services.omdb.url'), [
+                    'apikey' => config('services.omdb.key'),
+                    'i'      => $animeLink->imdb_id,
+                ]);
+
+                if ($omdb->ok()) {
+                    $rating = $omdb->json('imdbRating');
+
+               
+                    if (is_numeric($rating)) {
+                        $animeLink->imdb_score = (float) $rating;
+                    }
+                }
+            }
+
+            $animeLink->save();
+        }
     }
 
     private function normalizeGenres($raw): array
@@ -181,59 +194,13 @@ class AnimeDetailController extends Controller
 
         if (is_array($raw)) {
             return collect($raw)
-                ->map(function ($g) {
-                    if (is_string($g)) {
-                        return trim($g);
-                    }
-                    if (is_array($g)) {
-                        return $g['name'] ?? $g['title'] ?? (is_scalar(reset($g)) ? (string) reset($g) : null);
-                    }
-                    return null;
-                })
+                ->map(fn ($g) => is_array($g) ? ($g['name'] ?? null) : $g)
                 ->filter()
                 ->values()
                 ->all();
         }
 
         return [];
-    }
-
-    protected function updateScoresFromApi(AnimeLink $animeLink)
-    {
-        $response = Http::get("https://api.jikan.moe/v4/anime/{$animeLink->mal_id}");
-        if ($response->successful()) {
-            $data = $response->json('data');
-
-            if (isset($data['score'])) {
-                $animeLink->mal_score = $data['score'];
-            }
-
-            if (empty($animeLink->episodes) && isset($data['episodes'])) {
-                $animeLink->episodes = $data['episodes'];
-            }
-
-            if (!$animeLink->imdb_id && !empty($data['external_links'])) {
-                foreach ($data['external_links'] as $link) {
-                    if (str_contains($link['url'] ?? '', 'imdb.com/title/tt')) {
-                        $animeLink->imdb_id = preg_replace('/^.*imdb\.com\/title\/(tt\d+).*$/', '$1', $link['url']);
-                        break;
-                    }
-                }
-            }
-
-            if ($animeLink->imdb_id) {
-                $omdb = Http::get(config('services.omdb.url'), [
-                    'apikey' => config('services.omdb.key'),
-                    'i'      => $animeLink->imdb_id,
-                ]);
-
-                if ($omdb->ok() && isset($omdb->json()['imdbRating'])) {
-                    $animeLink->imdb_score = $omdb->json()['imdbRating'];
-                }
-            }
-
-            $animeLink->save();
-        }
     }
 
     private function extractImdbIdFromJikan(array $jikanData): ?string
@@ -245,6 +212,7 @@ class AnimeDetailController extends Controller
                 }
             }
         }
+
         return null;
     }
 }

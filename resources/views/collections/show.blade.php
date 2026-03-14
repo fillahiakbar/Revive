@@ -2,21 +2,28 @@
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
             <div class="text-white text-right mb-6">
-                <h1 class="text-sm font-bold">قائمة الأنمي المكتمل</h1>
-                <h1 class="text-l mt-2">عددها: {{ is_object($animes) && method_exists($animes, 'total') ? $animes->total() : (is_object($animes) ? $animes->count() : count($animes)) }}</h1>
+                <p class="text-sm">
+                    <a href="{{ route('collections.index') }}"
+                        class="hover:text-red-400 transition text-2xl font-bold mt-2">سلسلة
+                    </a>
+                    <a class="hover:text-red-400 transition text-2xl font-bold mt-2">{{ $collection->title }}</a>
+                </p>
+                <h1 class="text-l mt-2">عدد الأعمال : {{ $collection->animeLinks->count() }}</h1>
             </div>
+
+            {{-- Anime Grid --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
-                @forelse($animes as $anime)
-                    <a href="{{ route('anime.show', $anime['mal_id']) }}"
+                @forelse($collection->animeLinks as $anime)
+                    <a href="{{ route('anime.show', $anime->mal_id) }}"
                         class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group block h-full">
 
                         {{-- Badge (Types) --}}
                         <div
-                            class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
-                            @foreach ($anime['types'] ?? [$anime['type']] as $type)
+                            class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
+                            @foreach ($anime->types as $type)
                                 @php
-                                    $label = is_array($type) ? $type['name'] : $type;
-                                    $color = is_array($type) ? $type['color'] ?? '#6b7280' : '#6b7280';
+                                    $color = $type->color ?? '#6b7280';
+                                    $label = $type->name ?? $type;
                                 @endphp
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"
                                     style="background-color: {{ $color }}; color: white;">
@@ -25,17 +32,15 @@
                             @endforeach
                         </div>
 
+
                         {{-- Poster --}}
                         <div
                             class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
                             @php
-                                $image =
-                                    data_get($anime, 'image') ??
-                                    (data_get($anime, 'images.jpg.image_url') ??
-                                        data_get($anime, 'images.jpg.large_image_url'));
+                                $poster = $anime->poster;
                             @endphp
-                            @if ($image)
-                                <img src="{{ $image }}" alt="{{ $anime['title'] }}"
+                            @if ($poster)
+                                <img src="{{ $poster }}" alt="{{ $anime->title }}"
                                     class="w-full h-full object-cover shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
                                     loading="lazy"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -51,40 +56,44 @@
                                     <span class="text-xs">No Image</span>
                                 </div>
                             @endif
+
+                            {{-- Collection Label Overlay --}}
+                            @if (!empty($anime->pivot->collection_label))
+                                <div class="absolute inset-x-0 bottom-0 z-10 text-center px-2 pt-8 pb-3"
+                                    style="background: linear-gradient(to top, rgba(30, 27, 75, 1) 0%, rgba(30, 27, 75, 0.85) 40%, rgba(30, 27, 75, 0) 100%);">
+                                    <span class="text-sm md:text-base font-bold text-white"
+                                        style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                                        {{ $anime->pivot->collection_label }}
+                                    </span>
+                                </div>
+                            @endif
                         </div>
 
                         {{-- Details --}}
-                        <div class="p-2 text-xs">
-                            <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
-                                {{ $anime['local_title'] ?? ($anime['title'] ?? 'Unknown Title') }}
+                        <div class="pt-2 text-xs text-right">
+                            <h3 class="font-bold truncate text-white text-sm" title="{{ $anime->title }}">
+                                {{ $anime->title }}
                             </h3>
-                            @if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
-                                <p class="text-gray-400 text-[11px] truncate" title="{{ $anime['title_english'] }}">
-                                    {{ $anime['title_english'] }}
-                                </p>
-                            @endif
-                            <p class="text-gray-400">
-                                {{ !empty($anime['duration']) ? $anime['duration'] : 'N/A' }}
-                            </p>
-                            @if (!empty($anime['score']))
-                                @if (!empty($anime['episodes']))
-                                    <p class="text-gray-400 text-xs">عدد الحلقات: {{ $anime['episodes'] }}</p>
-                                @endif
-                                <div class="flex items-center gap-1 mt-1">
-                                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+
+                            {{-- Score --}}
+                            <div class="flex justify-start items-center gap-1 mt-1">
+                                @if (!empty($anime->mal_score))
+                                    <span class="text-xs font-bold text-white">{{ $anime->mal_score }}</span>
+                                    <svg class="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
-                                    <span class="text-xs">{{ $anime['score'] }}</span>
-                                </div>
+                                @endif
+                            </div>
+
+                            @if ($anime->pivot->sort_order > 0)
+                                <p class="text-[9px] text-gray-600 mt-1">Order: {{ $anime->pivot->sort_order }}</p>
                             @endif
                         </div>
                     </a>
                 @empty
-                    <div class="col-span-full text-center text-gray-500 py-20">
-                        <div class="text-6xl mb-4">📺</div>
-                        <h3 class="text-xl font-bold mb-2">No Completed Anime Found</h3>
-                        <p class="text-sm mt-2">Try again later or refresh the data source.</p>
+                    <div class="col-span-full text-center text-gray-500 py-10">
+                        <p>No anime found in this collection.</p>
                     </div>
                 @endforelse
             </div>

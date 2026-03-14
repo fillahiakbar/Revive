@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\AnimeDisplayController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TorrentDownloadController;
+use App\Http\Controllers\CollectionController;
 
 // ===============================
 // ROUTES: AUTH (Forgot/Reset Password)
@@ -106,6 +107,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/team/{slug}', [TeamController::class, 'show'])->name('team.profile');
+
+    // Collections
+    Route::get('/collections',       [CollectionController::class, 'index'])->name('collections.index');
+    Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
+
 });
 
 // ===============================

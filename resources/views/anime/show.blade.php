@@ -207,35 +207,50 @@
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4">
             @foreach($animeLink->relatedGroup->relatedAnimes->where('mal_id', '!=', $anime['mal_id']) as $related)
                 <a href="{{ route('anime.show', $related->mal_id) }}"
-                   class="relative text-white rounded-lg overflow-hidden shadow">
-                    <div class="flex flex-wrap gap-2 mt-2 px-2 absolute top-0 z-10">
+                    class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group block h-full">
+
+                    {{-- Badge (Types) --}}
+                    <div class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
                         @foreach ($related->animeLink?->types ?? [] as $type)
-                            <span class="text-xs font-medium px-2 py-1 rounded"
-                                  style="background-color: {{ $type->color ?? '#6b7280' }}; color: white;">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"
+                                style="background-color: {{ $type->color ?? '#6b7280' }}; color: white;">
                                 {{ $type->name }}
                             </span>
                         @endforeach
                     </div>
 
-<div class="w-full bg-gray-800 flex items-center justify-center relative">
-    <img src="{{ $related->poster }}"
-         alt="{{ $related->title }}"
-         class="w-full shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
-         loading="lazy"
-         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    {{-- Poster --}}
+                    <div class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
+                        @if ($related->poster)
+                            <img src="{{ $related->poster }}" alt="{{ $related->title }}"
+                                class="w-full h-full object-cover shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="hidden w-full h-full items-center justify-center text-gray-500 bg-gray-800">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        @else
+                            <div class="flex items-center justify-center text-gray-500 bg-gray-800 w-full h-full">
+                                <span class="text-xs">No Image</span>
+                            </div>
+                        @endif
 
+                        {{-- Relation Title Overlay --}}
+                        @if (!empty($related->relation_title))
+                            <div class="absolute inset-x-0 bottom-0 z-10 text-center px-2 pt-8 pb-3"
+                                style="background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0) 100%);">
+                                <span class="text-xs font-bold text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                                    {{ $related->relation_title }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
 
-    @if(!empty($related->relation_title))
-        <div class="absolute inset-x-0 bottom-0 z-10 
-                    bg-gradient-to-t from-black/90 via-black/90 to-transparent
-                    text-center px-2 py-2">
-            <span class="text-sm md:text-base font-bold text-white drop-shadow">
-                {{ $related->relation_title }}
-            </span>
-        </div>
-    @endif
-</div>
-
+                    {{-- Details --}}
                     <div class="p-1 text-[11px] text-center">
                         <h3 class="font-bold truncate" title="{{ $related->title }}">{{ $related->title }}</h3>
                         @if (!empty($related->title_english) && $related->title_english !== $related->title)
@@ -244,7 +259,7 @@
                             </p>
                         @endif
                     </div>
-                </a>
+               </a>
             @endforeach
         </div>
     </div>
@@ -308,7 +323,7 @@
                                 <div class="flex-1">
                                     <div class="flex justify-between items-center mb-1">
                                         <span class="font-bold text-sm">{{ $comment->user->name ?? 'مستخدم' }}</span>
-                                        <span class="text-xs text-white/50">{{ $comment->created_at->diffForHumans() }}</span>
+                                        <span class="text-xs text-white/50">{{ $comment->created_at->locale('ar')->diffForHumans() }}</span>
                                     </div>
                                     <div class="text-white text-sm mb-2">{{ $comment->body }}</div>
 
@@ -330,7 +345,7 @@
                                                 <div class="bg-white/5 p-3 rounded-md">
                                                     <div class="flex justify-between items-center text-xs text-white/60">
                                                         <span>{{ $reply->user->name ?? 'مستخدم' }}</span>
-                                                        <span>{{ $reply->created_at->diffForHumans() }}</span>
+                                                        <span>{{ $reply->created_at->locale('ar')->diffForHumans() }}</span>
                                                     </div>
                                                     <div class="text-white text-sm mt-1">{{ $reply->body }}</div>
                                                 </div>

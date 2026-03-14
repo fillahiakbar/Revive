@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Anime;
 use App\Models\AnimeLink;
+use App\Models\Collection;
+use App\Models\Comment;
 use App\Models\Slider;
 use App\Models\SocialMedia;
 use App\Models\SiteSetting;
+use App\Models\PaymentMethod;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -136,13 +139,30 @@ class WelcomeController extends Controller
             ];
         })->values();
 
+        // ====== RANDOM COLLECTIONS ======
+        $randomCollections = Collection::with('animeLinks')
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+
+        // ====== LATEST COMMENTS ======
+        $latestComments = \App\Models\Comment::with(['user', 'animeLink'])
+            ->latest()
+            ->limit(2)
+            ->get();
+
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
+
         return view('welcome', [
-            'animes'         => $animes,
-            'latestReleases' => $latestReleases, // <- sekarang paginator
-            'mostVisited'    => $mostVisited,
-            'sliders'        => $sliders,
-            'socialMedias'   => $socialMedias,
-            'period'         => $period,
+            'animes'             => $animes,
+            'latestReleases'     => $latestReleases,
+            'mostVisited'        => $mostVisited,
+            'sliders'            => $sliders,
+            'socialMedias'       => $socialMedias,
+            'period'             => $period,
+            'randomCollections'  => $randomCollections,
+            'latestComments'     => $latestComments,
+            'paymentMethods'     => $paymentMethods,
         ]);
     }
 
