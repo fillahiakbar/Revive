@@ -11,16 +11,14 @@
             {{-- Search Form --}}
             <div class="max-w-2xl mx-auto mb-8">
                 <form action="{{ route('anime.search') }}" method="GET" class="flex gap-2">
-                    <input type="text"
-                           name="q"
-                           value="{{ $query }}"
-                           placeholder="ابحث عن الأنمي..."
-                           class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                           required>
+                    <input type="text" name="q" value="{{ $query }}" placeholder="ابحث عن الأنمي..."
+                        class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        required>
                     <button type="submit"
-                            class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition duration-200 flex items-center gap-2">
+                        class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition duration-200 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         بحث
                     </button>
@@ -28,15 +26,16 @@
             </div>
 
             {{-- Search Info --}}
-            @if($query)
+            @if ($query)
                 <div class="text-white text-center mb-6">
-                    <p class="text-sm">البحث عن: <span class="text-red-400 font-semibold">"{{ $query }}"</span></p>
+                    <p class="text-sm">البحث عن: <span class="text-red-400 font-semibold">"{{ $query }}"</span>
+                    </p>
                     <p class="text-xs text-gray-400 mt-1">تم العثور على {{ $animeList->count() }} نتيجة</p>
                 </div>
             @endif
 
             {{-- Error --}}
-            @if(isset($error))
+            @if (isset($error))
                 <div class="max-w-2xl mx-auto mb-8">
                     <div class="bg-red-600/20 border border-red-500 rounded-lg p-4 text-center">
                         <p class="text-red-400">{{ $error }}</p>
@@ -51,11 +50,12 @@
                         class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group block h-full">
 
                         {{-- Badge (Types) --}}
-                        <div class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
+                        <div
+                            class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
                             @foreach ($anime['types'] ?? [] as $type)
                                 @php
                                     $label = is_array($type) ? $type['name'] : $type;
-                                    $color = is_array($type) ? ($type['color'] ?? '#6b7280') : '#6b7280';
+                                    $color = is_array($type) ? $type['color'] ?? '#6b7280' : '#6b7280';
                                 @endphp
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"
                                     style="background-color: {{ $color }}; color: white;">
@@ -65,12 +65,16 @@
                         </div>
 
                         {{-- Poster --}}
-                        <div class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
+                        <div
+                            class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
                             @php
-                                $image = $anime['images']['jpg']['large_image_url'] ?? $anime['images']['jpg']['image_url'] ?? null;
+                                $image =
+                                    $anime['images']['jpg']['large_image_url'] ??
+                                    ($anime['images']['jpg']['image_url'] ?? null);
                             @endphp
                             @if ($image)
-                                <img src="{{ $image }}" alt="{{ $anime['local_title'] ?? ($anime['title'] ?? 'Anime') }}"
+                                <img src="{{ $image }}"
+                                    alt="{{ $anime['local_title'] ?? ($anime['title'] ?? 'Anime') }}"
                                     class="w-full h-full object-cover shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
                                     loading="lazy"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -122,7 +126,8 @@
                     <div class="col-span-full text-center text-gray-500 py-20">
                         <div class="text-6xl mb-4">🔍</div>
                         <h3 class="text-xl font-bold mb-2 text-gray-300">لم يتم العثور على نتائج</h3>
-                        <p class="text-gray-400 mb-4">لم نتمكن من العثور على أي أنمي يطابق بحثك "{{ $query }}"</p>
+                        <p class="text-gray-400 mb-4">لم نتمكن من العثور على أي أنمي يطابق بحثك "{{ $query }}"
+                        </p>
                         <div class="text-sm text-gray-500">
                             <p>جرّب:</p>
                             <ul class="list-disc list-inside mt-2 space-y-1">
@@ -139,10 +144,10 @@
 
     {{-- JS fallback for broken images --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const images = document.querySelectorAll('img[src]');
             images.forEach(img => {
-                img.addEventListener('error', function () {
+                img.addEventListener('error', function() {
                     this.style.display = 'none';
                     const fallback = this.nextElementSibling;
                     if (fallback) fallback.style.display = 'flex';
