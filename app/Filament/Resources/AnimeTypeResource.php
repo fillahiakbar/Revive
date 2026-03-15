@@ -14,8 +14,8 @@ class AnimeTypeResource extends Resource
 {
     protected static ?string $model = AnimeType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
-    protected static ?string $navigationLabel = 'وسوم الأنمي';
+    protected static ?string $navigationGroup = 'Anime Meta Data';
+    protected static ?string $navigationLabel = 'Anime Tags';
     protected static ?string $pluralModelLabel = 'وسوم الأنمي';
 
     public static function form(Form $form): Form

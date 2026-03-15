@@ -18,7 +18,8 @@ class CommentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'التعليقات';
+    protected static ?string $navigationGroup = 'Community';
+    protected static ?string $navigationLabel = 'Comments';
     protected static ?string $pluralLabel = 'جميع التعليقات';
     protected static ?string $modelLabel = 'تعليق';
 

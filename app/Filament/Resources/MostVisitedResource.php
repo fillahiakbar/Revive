@@ -20,8 +20,8 @@ class MostVisitedResource extends Resource
     protected static ?string $model = AnimeLink::class;
 
     protected static ?string $navigationIcon   = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Anime Meta Data';
     protected static ?string $navigationLabel  = 'Most Visited';
-    protected static ?string $pluralModelLabel = 'Most Visited';
 
     public static function form(Form $form): Form
     {

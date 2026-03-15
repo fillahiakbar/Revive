@@ -2,8 +2,11 @@
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
             <div class="text-white text-right mb-6">
-                <h1 class="text-sm font-bold">قائمة الأنمي المكتمل</h1>
-                <h1 class="text-l mt-2">عددها: {{ is_object($animes) && method_exists($animes, 'total') ? $animes->total() : (is_object($animes) ? $animes->count() : count($animes)) }}</h1>
+                <h1 class="text-lg font-bold">الرئيسية</h1>
+                <h1 class="text-sm font-bold">قائمة الأعمال المكتملة</h1>
+                <h1 class="text-l mt-2">عددها:
+                    {{ is_object($animes) && method_exists($animes, 'total') ? $animes->total() : (is_object($animes) ? $animes->count() : count($animes)) }}
+                </h1>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
                 @forelse($animes as $anime)
@@ -66,10 +69,10 @@
                             <p class="text-gray-400">
                                 {{ !empty($anime['duration']) ? $anime['duration'] : 'N/A' }}
                             </p>
+                            @if (!empty($anime['episodes']))
+                                <p class="text-gray-400 text-xs">عدد الحلقات: {{ $anime['episodes'] }}</p>
+                            @endif
                             @if (!empty($anime['score']))
-                                @if (!empty($anime['episodes']))
-                                    <p class="text-gray-400 text-xs">عدد الحلقات: {{ $anime['episodes'] }}</p>
-                                @endif
                                 <div class="flex items-center gap-1 mt-1">
                                     <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path

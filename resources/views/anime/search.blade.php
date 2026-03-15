@@ -110,6 +110,10 @@
                                 {{ $durationMinutes }}m
                             </p>
 
+                            @if (!empty($anime['episodes']))
+                                <p class="text-gray-400 text-xs mt-1">عدد الحلقات: {{ $anime['episodes'] }}</p>
+                            @endif
+
                             @if (!empty($anime['score']))
                                 <div class="flex items-center gap-1 mt-1">
                                     <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">

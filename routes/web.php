@@ -22,6 +22,7 @@ use App\Http\Controllers\AnimeDisplayController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\DonationController;
 
 // ===============================
 // ROUTES: AUTH (Forgot/Reset Password)
@@ -111,6 +112,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Collections
     Route::get('/collections',       [CollectionController::class, 'index'])->name('collections.index');
     Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
+
+    // Donate / Support
+    Route::get('/donate', [DonationController::class, 'index'])->name('donate.index');
 
 });
 

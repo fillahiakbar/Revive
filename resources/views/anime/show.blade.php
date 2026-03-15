@@ -140,7 +140,7 @@
             {{-- Download links --}}
             @if ($animeLink && $animeLink->batches->isNotEmpty())
                 <div class="px-4 md:px-8 lg:px-16 mx-0 sm:mx-4 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10 rounded-lg">
-                    <h2 class="text-xl font-bold pr-3 text-white">روابط الحلقات</h2>
+                    <h2 class="text-xl font-bold pr-3 text-white">روابط التحميل</h2>
                     <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
                         @foreach ($animeLink->batches as $batch)
                             @php
@@ -151,11 +151,16 @@
 
                             @if ($validLinks->isNotEmpty())
                                 @foreach ($validLinks as $link)
-                                    <div class="overflow-hidden shadow-md pt-3 rounded-md">
-                                        <span class="font-semibold block text-white text-sm mb-1 px-3">
-                                            Episode - {{ $batch->episodes ?? 'غير معروف' }}
-                                        </span>
-                                        <div class="bg-black text-white text-center py-2 font-semibold text-xs md:text-sm">
+                                    <div class="overflow-hidden shadow-md rounded-md mb-4 border border-white/5">
+                                        <div class="flex justify-between items-center bg-[#2b2b2b] px-4 py-3 text-xs md:text-sm" dir="rtl">
+                                            <span class="font-medium flex-shrink-0 text-gray-400">
+                                                {{ $batch->created_at ? $batch->created_at->locale('ar')->translatedFormat('d F Y') : '' }}
+                                            </span>
+                                            <span class="font-bold flex-shrink-0 text-gray-200">
+                                                الحلقة - {{ $batch->episodes ?? 'غير معروف' }}
+                                            </span>
+                                        </div>
+                                        <div class="bg-black text-white text-center py-3 font-semibold text-xs md:text-sm">
                                             {{ $batch->name }} 
                                         </div>
                                         <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
@@ -223,7 +228,7 @@
                     <div class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
                         @if ($related->poster)
                             <img src="{{ $related->poster }}" alt="{{ $related->title }}"
-                                class="w-full h-full object-cover shadow border border-white/10 transition-transform duration-300 group-hover:scale-105"
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 loading="lazy"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="hidden w-full h-full items-center justify-center text-gray-500 bg-gray-800">

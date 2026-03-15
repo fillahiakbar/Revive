@@ -20,6 +20,7 @@ class CollectionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Content';
+    protected static ?string $navigationLabel = 'Collections';
 
     public static function form(Form $form): Form
     {

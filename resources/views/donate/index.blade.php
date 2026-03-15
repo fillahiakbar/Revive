@@ -202,7 +202,7 @@
                     <template x-if="activeMethod && activeMethod.type === 'stc_pay'">
                         <div class="space-y-8 animate-fadeIn">
                             <div class="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                                <p class="text-gray-400 text-sm mb-4 uppercase tracking-widest">رقم الهاتف / Phone Number</p>
+                                <p class="text-gray-400 text-sm mb-4 uppercase tracking-widest">رقم الحساب</p>
                                 <div class="flex items-center justify-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-700 mx-auto max-w-sm group focus-within:border-red-500 transition-colors">
                                     <span class="text-2xl font-mono text-white tracking-wider" x-text="activeMethod.content"></span>
                                     <button @click="copyToClipboard(activeMethod.content)" class="text-gray-500 hover:text-white transition-colors">

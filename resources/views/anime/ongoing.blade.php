@@ -2,8 +2,11 @@
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
             <div class="text-white text-right mb-6">
-                <h1 class="text-sm font-bold">جميع الأنميات الجارية الآن</h1>
-                <h1 class="text-l mt-2">عددها: {{ is_object($animes) && method_exists($animes, 'total') ? $animes->total() : (is_object($animes) ? $animes->count() : count($animes)) }}</h1>
+                <h1 class="text-lg font-bold">الرئيسية</h1>
+                <h1 class="text-sm font-bold">قائمة الأعمال الجارية</h1>
+                <h1 class="text-l mt-2">عددها:
+                    {{ is_object($animes) && method_exists($animes, 'total') ? $animes->total() : (is_object($animes) ? $animes->count() : count($animes)) }}
+                </h1>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 min-h-[600px]">
                 @forelse($animes as $anime)
@@ -11,11 +14,12 @@
                         class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group block h-full">
 
                         {{-- Badge (Types) --}}
-                        <div class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
+                        <div
+                            class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
                             @foreach ($anime['types'] ?? [$anime['type']] as $type)
                                 @php
                                     $label = is_array($type) ? $type['name'] : $type;
-                                    $color = is_array($type) ? ($type['color'] ?? '#6b7280') : '#6b7280';
+                                    $color = is_array($type) ? $type['color'] ?? '#6b7280' : '#6b7280';
                                 @endphp
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"
                                     style="background-color: {{ $color }}; color: white;">
@@ -25,7 +29,8 @@
                         </div>
 
                         {{-- Poster --}}
-                        <div class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
+                        <div
+                            class="w-full bg-gray-800 flex items-center justify-center aspect-[2/3] relative overflow-hidden">
                             @php
                                 $image = $anime['image'] ?? null;
                             @endphp
@@ -51,7 +56,7 @@
                         {{-- Details --}}
                         <div class="p-2 text-xs">
                             <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
-                                {{ $anime['local_title'] ?? $anime['title'] ?? 'Unknown Title' }}
+                                {{ $anime['local_title'] ?? ($anime['title'] ?? 'Unknown Title') }}
                             </h3>
                             @if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
                                 <p class="text-gray-400 text-[11px] truncate" title="{{ $anime['title_english'] }}">

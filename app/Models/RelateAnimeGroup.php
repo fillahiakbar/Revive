@@ -12,5 +12,9 @@ class RelateAnimeGroup extends Model
     {
         return $this->hasMany(RelatedAnime::class);
     }
-    
+
+    public function animeLinks()
+    {
+        return $this->hasMany(AnimeLink::class, 'related_anime_group_id');
+    }
 }

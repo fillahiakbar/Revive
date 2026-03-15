@@ -15,8 +15,8 @@ class SocialMediaResource extends Resource
     protected static ?string $model = SocialMedia::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-share';
-
-    protected static ?string $navigationLabel = 'وسائل التواصل الاجتماعي';
+    protected static ?string $navigationGroup = 'App Settings';
+    protected static ?string $navigationLabel = 'Social Media Links';
     protected static ?string $pluralModelLabel = 'وسائل التواصل الاجتماعي';
     protected static ?string $modelLabel = 'وسيلة تواصل اجتماعي';
 

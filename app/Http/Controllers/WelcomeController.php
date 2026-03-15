@@ -166,7 +166,10 @@ class WelcomeController extends Controller
         ]);
     }
 
-    public function about()   { return view('about'); }
+    public function about()   {
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
+        return view('about', compact('paymentMethods'));
+    }
     public function terms()   { return view('terms'); }
     public function cookies() { return view('cookies'); }
     public function privacy() { return view('privacy'); }

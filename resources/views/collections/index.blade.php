@@ -2,7 +2,7 @@
     <div class="pt-24 pb-6">
         <div class="max-w-7xl pt-24 mx-auto sm:px-6 lg:px-8">
             <div class="text-white text-right mb-6">
-                <h1 class="text-xl font-bold">الرئيسية</h1>
+                <h1 class="text-lg font-bold">السلاسل</h1>
                 <p class="text-sm">قائمة السلاسل</p>
                 <p class="text-sm">عددها: {{ $collections->total() }}</p>
             </div>

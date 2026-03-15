@@ -85,10 +85,6 @@
                                     </svg>
                                 @endif
                             </div>
-
-                            @if ($anime->pivot->sort_order > 0)
-                                <p class="text-[9px] text-gray-600 mt-1">Order: {{ $anime->pivot->sort_order }}</p>
-                            @endif
                         </div>
                     </a>
                 @empty

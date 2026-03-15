@@ -63,7 +63,7 @@
         }
 
         .glass-panel {
-            background: rgba(17, 24, 39, 0.7);
+            background: rgba(24, 24, 24, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -130,7 +130,7 @@
                 </button>
 
                 <!-- Search Form -->
-                <form x-show="showInput" action="#" method="GET"
+                <form x-show="showInput" x-cloak style="display: none;" action="#" method="GET"
                     @submit="if(!searchQuery.trim()) { $event.preventDefault(); alert('Please enter a search term'); }"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 transform scale-95 -translate-x-4"
@@ -438,7 +438,7 @@
                             </div>
 
                             <!-- Main Content Area -->
-                            <div class="flex-1 w-full md:w-2/3 p-6 md:p-10 overflow-y-auto custom-scroll bg-gradient-to-br from-gray-900 to-black relative">
+                            <div class="flex-1 w-full md:w-2/3 p-6 md:p-10 overflow-y-auto custom-scroll bg-gradient-to-br from-neutral-900 to-black relative">
                                 <button @click="selectedMethod = null"
                                     class="absolute top-4 left-4 hidden md:flex items-center text-sm text-gray-400 hover:text-white transition">
                                     <svg class="w-4 h-4 ml-1 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,7 +451,7 @@
                                 <template x-if="selectedMethod.type === 'stc_pay'">
                                     <div class="space-y-8 animate-fadeIn mt-8">
                                         <div class="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                                            <p class="text-gray-400 text-sm mb-4 uppercase tracking-widest">رقم الهاتف / Phone Number</p>
+                                            <p class="text-gray-400 text-sm mb-4 uppercase tracking-widest">رقم الحساب</p>
                                             <div class="flex items-center justify-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-700 mx-auto max-w-sm group focus-within:border-red-500 transition-colors">
                                                 <span class="text-2xl font-mono text-white tracking-wider" x-text="selectedMethod.content"></span>
                                                 <button @click="copyToClipboard(selectedMethod.content)" class="text-gray-500 hover:text-white transition-colors">

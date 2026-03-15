@@ -43,6 +43,19 @@ class AnimeLink extends Model
         return $this->belongsToMany(AnimeType::class);
     }
 
+    public function collections()
+    {
+        return $this->belongsToMany(
+            \App\Models\Collection::class,
+            'anime_link_collection',
+            'anime_link_id',
+            'collection_id'
+        )
+            ->withPivot('sort_order', 'collection_label')
+            ->orderByPivot('sort_order', 'asc')
+            ->withTimestamps();
+    }
+
     public function batches()
     {
         return $this->hasMany(Batch::class, 'anime_link_id');

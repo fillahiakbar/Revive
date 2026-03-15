@@ -23,8 +23,8 @@ class SliderResource extends Resource
     protected static ?string $model = Slider::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
-    protected static ?string $navigationGroup = 'محتوى الموقع';
-    protected static ?string $navigationLabel = 'الشرائح الرئيسية';
+    protected static ?string $navigationGroup = 'App Settings';
+    protected static ?string $navigationLabel = 'Main Sliders';
     protected static ?string $pluralLabel = 'الشرائح';
 
     public static function form(Form $form): Form

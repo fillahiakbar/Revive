@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RelateAnimeGroupResource\Pages;
+use App\Filament\Resources\RelateAnimeGroupResource\RelationManagers;
 use App\Models\RelateAnimeGroup;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,9 +17,8 @@ class RelateAnimeGroupResource extends Resource
 {
     protected static ?string $model = RelateAnimeGroup::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-link';
-    protected static ?string $navigationLabel = 'مجموعات الأنمي المرتبطة';
-    protected static ?string $pluralModelLabel = 'مجموعات الأنمي المرتبطة';
+    protected static ?string $navigationGroup = 'Anime Meta Data';
+    protected static ?string $navigationLabel = 'Related Anime Groups';
 
     public static function form(Form $form): Form
     {
@@ -30,54 +30,6 @@ class RelateAnimeGroupResource extends Resource
                         ->required(),
                 ]),
 
-            Section::make('أنميات مرتبطة')
-                ->schema([
-                    Repeater::make('relatedAnimes')
-                        ->relationship()
-                        ->label('قائمة الأنميات المرتبطة')
-                        ->schema([
-                            TextInput::make('mal_id')
-                                ->label('MAL ID')
-                                ->numeric()
-                                ->required()
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set) {
-                                    $response = Http::get("https://api.jikan.moe/v4/anime/{$state}");
-
-                                    if ($response->successful()) {
-                                        $data = $response->json('data');
-
-                                        if (is_array($data)) {
-                                            $set('title', $data['title'] ?? '');
-                                            $set('title_english', $data['title_english'] ?? '');
-                                            $set('poster', $data['images']['jpg']['image_url'] ?? '');
-                                        }
-                                    }
-                                }),
-
-                            TextInput::make('poster')
-                                ->label('رابط الصورة')
-                                ->required()
-                                ->maxLength(512),
-
-                            TextInput::make('title')
-                                ->label('عنوان الأنمي')
-                                ->required(),
-
-                            TextInput::make('title_english')
-                                ->label('العنوان الإنجليزي')
-                                ->nullable(),
-
-                            TextInput::make('relation_title')
-                                ->label('العنوان المرتبط')
-                                ->placeholder('mis: Season 1, Movie, OVA, Special ...')
-                                ->maxLength(64)
-                                ->nullable(),
-                        ])
-                        ->createItemButtonLabel('➕ أضف أنمي')
-                        ->columns(2)
-                        ->defaultItems(1),
-                ])
         ]);
     }
 
@@ -100,7 +52,9 @@ class RelateAnimeGroupResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RelationManagers\AnimeLinksRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
