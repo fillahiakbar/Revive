@@ -136,6 +136,35 @@ class AnimeDetailController extends Controller
         ]);
     }
 
+    public function rate(\Illuminate\Http\Request $request, $mal_id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:10',
+        ]);
+
+        $animeLink = AnimeLink::where('mal_id', $mal_id)->firstOrFail();
+
+        \App\Models\AnimeRating::updateOrCreate(
+            [
+                'anime_link_id' => $animeLink->id,
+                'user_id' => auth()->id(),
+            ],
+            [
+                'rating' => $request->rating,
+            ]
+        );
+
+        // Refresh from DB
+        $animeLink->load('ratings');
+
+        return response()->json([
+            'success' => true,
+            'average' => number_format($animeLink->average_rating, 1),
+            'count' => $animeLink->ratings()->count(),
+            'message' => 'تم حفظ التقييم بنجاح!',
+        ]);
+    }
+
     protected function updateScoresFromApi(AnimeLink $animeLink)
     {
         $response = Http::get("https://api.jikan.moe/v4/anime/{$animeLink->mal_id}");

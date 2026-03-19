@@ -28,3 +28,10 @@ if (!function_exists('isPublicRegistrationEnabled')) {
         );
     }
 }
+
+if (!function_exists('getFundingInfo')) {
+    function getFundingInfo(): ?string
+    {
+        return Setting::get('funding_information', null);
+    }
+}

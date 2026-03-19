@@ -73,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anime basic
     Route::get('/list',                 [AnimeListController::class, 'list'])->name('anime.list');
     Route::get('/anime/mal/{mal_id}',   [AnimeDetailController::class, 'show'])->name('anime.show');
+    Route::post('/anime/{anime}/rate',  [AnimeDetailController::class, 'rate'])->name('anime.rate');
 
     // Genres
     Route::get('/genres',               [GenreController::class, 'genres'])->name('anime.genres');
@@ -115,6 +116,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Donate / Support
     Route::get('/donate', [DonationController::class, 'index'])->name('donate.index');
+
+    // Leaderboard
+    Route::get('/leaderboard', [\App\Http\Controllers\ReferralController::class, 'showLeaderboard'])->name('leaderboard.show');
 
 });
 

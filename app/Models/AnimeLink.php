@@ -100,6 +100,17 @@ class AnimeLink extends Model
         return $this->hasMany(Comment::class, 'anime_link_id');
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(AnimeRating::class, 'anime_link_id');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        $avg = $this->ratings()->avg('rating');
+        return $avg ? round($avg, 1) : 0;
+    }
+
     public function relatedGroup()
     {
         return $this->belongsTo(\App\Models\RelateAnimeGroup::class, 'related_anime_group_id');

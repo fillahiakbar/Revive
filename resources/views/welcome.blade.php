@@ -474,11 +474,11 @@
                             أحدث التعليقات
                         </h2>
                         <div class="bg-white/5 backdrop-blur-md rounded-lg border-white/10">
-                            <div class="space-y-4 z-10 rounded-xl p-6 relative">
-                                <div class="rounded-lg space-y-4">
+                            <div class="space-y-4 z-10 rounded-xl p-4 sm:p-6 relative">
+                                <div id="latest-comments-scroll" class="rounded-lg space-y-3 overflow-y-auto custom-scroll pr-2" style="max-height: 200px;">
                                     @foreach ($latestComments as $comment)
-                                        <div
-                                            class="bg-white/5 p-3 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+                                        <a href="{{ route('anime.show', $comment->animeLink->mal_id) }}#comments-section"
+                                            class="block bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300 group">
                                             <div class="flex items-start gap-3">
                                                 {{-- User Avatar --}}
                                                 <img src="{{ $comment->user->profile_photo_url ?? 'https://i.imgur.com/vSKdWqp.png' }}"
@@ -488,7 +488,7 @@
 
                                                 <div class="flex-1 min-w-0">
                                                     <div class="flex justify-between items-center mb-1">
-                                                        <span class="text-xs font-bold text-blue-300 truncate">
+                                                        <span class="text-xs font-bold text-blue-300 truncate group-hover:text-blue-400 transition-colors">
                                                             {{ $comment->user->name ?? 'مستخدم' }}
                                                         </span>
                                                         <span class="text-[10px] text-gray-500 flex-shrink-0">
@@ -496,17 +496,16 @@
                                                         </span>
                                                     </div>
 
-                                                    <a href="{{ route('anime.show', $comment->animeLink->mal_id) }}"
-                                                        class="block text-xs font-semibold text-white hover:text-red-400 transition-colors mb-1 truncate">
+                                                    <h3 class="text-xs font-semibold text-white group-hover:text-red-400 transition-colors mb-1 truncate">
                                                         {{ $comment->animeLink->title ?? 'Unknown Anime' }}
-                                                    </a>
+                                                    </h3>
 
-                                                    <p class="text-xs text-gray-300 line-clamp-2">
+                                                    <p class="text-xs text-gray-300 line-clamp-2 leading-relaxed">
                                                         {{ $comment->body }}
                                                     </p>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </a>
                                     @endforeach
                                 </div>
                             </div>
@@ -517,8 +516,10 @@
                 {{-- Donation Card (Sidebar) --}}
                 <div x-data="{
                     openDonationModal: false,
+                    openFundingModal: false,
                     selectedMethod: null,
                     activeCoin: null,
+                    mouseX: 0.5,
                 
                     selectMethod(method) {
                         if (typeof method.options === 'string') {
@@ -558,9 +559,25 @@
                                 دعمكم يعني لنا الكثير!
                             </p>
 
-                            <button @click="openDonationModal = true"
-                                       class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-red-900/50 flex items-center justify-center gap-2">
-                                <span>ادعمنا</span>
+                            <button
+                                x-ref="fundingBtn"
+                                @mousemove="
+                                    const rect = $refs.fundingBtn.getBoundingClientRect();
+                                    mouseX = Math.max(0, Math.min(1, ($event.clientX - rect.left) / rect.width));
+                                "
+                                @mouseleave="mouseX = 0.5"
+                                @click="mouseX >= 0.5 ? openDonationModal = true : openFundingModal = true"
+                                class="w-full py-3 relative overflow-hidden focus:outline-none text-white font-bold rounded-2xl transition-transform hover:scale-[1.02] flex items-center justify-center group shadow-lg shadow-black/50 border border-white/5"
+                            >
+                                <div class="absolute inset-0 bg-red-700 transition-opacity duration-200" :class="mouseX === 0.5 ? 'opacity-100' : 'opacity-0'"></div>
+                                <div class="absolute inset-0 bg-red-500 transition-opacity duration-200" :class="mouseX > 0.5 ? 'opacity-100' : 'opacity-0'"></div>
+                                <div class="absolute inset-0 bg-blue-500 transition-opacity duration-200" :class="mouseX < 0.5 ? 'opacity-100' : 'opacity-0'"></div>
+                                
+                                <div class="relative z-10 w-full flex items-center justify-center gap-2 text-lg drop-shadow-md pointer-events-none">
+                                    <span class="transition-all duration-300" :class="mouseX === 0.5 ? 'opacity-100' : (mouseX >= 0.5 ? 'opacity-100 scale-110' : 'opacity-50')">دعم</span>
+                                    <span class="text-white/50 transition-opacity duration-300" :class="mouseX !== 0.5 ? 'opacity-30' : 'opacity-70'">|</span>
+                                    <span class="transition-all duration-300" :class="mouseX === 0.5 ? 'opacity-100' : (mouseX < 0.5 ? 'opacity-100 scale-110' : 'opacity-50')">تمويل</span>
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -579,7 +596,7 @@
 
                             <!-- Header -->
                             <div x-show="!selectedMethod"
-                                class="p-6 border-b border-red-900/40 flex justify-between items-center bg-gradient-to-r from-black via-red-950/30 to-black">
+                                class="p-6 flex justify-between items-center bg-gradient-to-r from-black via-red-950/30 to-black">
                                 <h2
                                     class="text-2xl font-bold text-red-600 drop-shadow-md">
                                     ادعمنا
@@ -849,6 +866,41 @@
                                         </div>
                                     </div>
                                 </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Funding Modal Overlay -->
+                <template x-teleport="body">
+                    <div x-show="openFundingModal" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                    style="display: none;">
+
+                        <!-- Modal Content -->
+                        <div @click.away="openFundingModal = false"
+                            class="z-999 glass-panel max-w-2xl w-full rounded-2xl shadow-2xl overflow-hidden relative text-white transition-all duration-300">
+
+                            <!-- Header -->
+                            <div class="p-6 border-b border-green-900/40 flex justify-between items-center bg-gradient-to-r from-black via-green-950/30 to-black">
+                                <h2 class="text-2xl font-bold text-green-500 drop-shadow-md">
+                                    التمويل
+                                </h2>
+                                <button @click="openFundingModal = false"
+                                    class="text-gray-400 hover:text-white transition transform hover:rotate-90">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-6 md:p-8 bg-gradient-to-br from-neutral-900 to-black max-h-[80vh] overflow-y-auto custom-scroll prose prose-invert prose-green max-w-none text-right" dir="rtl">
+                                {!! getFundingInfo() ?: '<p class="text-center text-gray-400 mt-0">لا توجد معلومات للتمويل حالياً.</p>' !!}
                             </div>
                         </div>
                     </div>

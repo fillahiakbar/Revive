@@ -10,7 +10,7 @@
         <link>{{ $link }}</link>
         <description><![CDATA[
             <a href="{{ $link }}">
-                <img src="{{ asset('storage/' . $poster) }}" alt="{{ $animeName }}" width="600" /><br>
+                <img src="{{ Storage::url($poster) }}" alt="{{ $animeName }}" width="600" /><br>
             </a>
             <strong>{{ $animeName }}</strong> - <em>{{ $batchName }}</em><br>
             <a href="{{ $link }}">{{ $link }}</a>

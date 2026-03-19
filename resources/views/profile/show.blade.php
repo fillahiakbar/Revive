@@ -10,6 +10,13 @@
     <div class="min-h-screen text-white">
         <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
 
+            {{-- Referral Stats --}}
+            <div class="mb-10 rounded-xl px-6 py-8 shadow">
+                @include('profile.referral-stats')
+            </div>
+
+            <x-section-border class="border-gray-700" />
+
             {{-- Update Profile Information --}}
             @if (Laravel\Fortify\Features::canUpdateProfileInformation())
                 <div class="mb-10 rounded-xl px-6 py-8 shadow">

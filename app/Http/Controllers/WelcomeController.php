@@ -148,7 +148,7 @@ class WelcomeController extends Controller
         // ====== LATEST COMMENTS ======
         $latestComments = \App\Models\Comment::with(['user', 'animeLink'])
             ->latest()
-            ->limit(2)
+            ->limit(7)
             ->get();
 
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
