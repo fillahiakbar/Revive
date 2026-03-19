@@ -36,6 +36,17 @@ class ReferralController extends Controller
         }
 
         $ip = $request->ip();
+        
+        // Get active season
+        $season = \App\Models\LeaderboardSeason::active();
+        if (!$season) {
+            // Create initial season if none exists
+            $season = \App\Models\LeaderboardSeason::create([
+                'name' => 'Season 1',
+                'is_active' => true,
+                'start_date' => now(),
+            ]);
+        }
 
         $cookieName = 'ref_viewer_id';
         $viewerCookie = $request->cookie($cookieName);
@@ -56,6 +67,7 @@ class ReferralController extends Controller
 
         $alreadyClicked = RefClick::where('ref_user_id', $user->id)
             ->where('anime_id', $animeId)
+            ->where('season_id', $season->id)
             ->where(function($q) use ($ip, $viewerCookie) {
                 $q->where('viewer_cookie', $viewerCookie)
                   ->orWhere('viewer_ip', $ip);
@@ -70,10 +82,11 @@ class ReferralController extends Controller
                 'viewer_ip' => $ip,
                 'viewer_cookie' => $viewerCookie,
                 'viewer_user_id' => auth()->id(),
+                'season_id' => $season->id,
             ]);
 
             $stat = RefStat::firstOrCreate(
-                ['user_id' => $user->id],
+                ['user_id' => $user->id, 'season_id' => $season->id],
                 ['total_click' => 0, 'unique_click' => 0, 'anime_shared' => 0]
             );
 
@@ -112,7 +125,9 @@ class ReferralController extends Controller
 
     public function getLeaderboard()
     {
+        $season = \App\Models\LeaderboardSeason::active();
         $topUsers = RefStat::with('user:id,name')
+            ->when($season, fn($q) => $q->where('season_id', $season->id))
             ->orderBy('unique_click', 'desc')
             ->limit(100)
             ->get()
@@ -129,7 +144,9 @@ class ReferralController extends Controller
 
     public function showLeaderboard()
     {
+        $season = \App\Models\LeaderboardSeason::active();
         $topUsers = RefStat::with('user:id,name')
+            ->when($season, fn($q) => $q->where('season_id', $season->id))
             ->orderBy('unique_click', 'desc')
             ->limit(100)
             ->get();

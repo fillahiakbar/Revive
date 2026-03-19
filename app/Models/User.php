@@ -44,7 +44,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function refStats()
     {
-        return $this->hasOne(RefStat::class);
+        return $this->hasMany(RefStat::class);
+    }
+
+    public function currentRefStat()
+    {
+        $activeSeason = LeaderboardSeason::active();
+        return $this->hasOne(RefStat::class)->where('season_id', $activeSeason?->id);
     }
 
 public function sendEmailVerificationNotification()

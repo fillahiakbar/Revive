@@ -12,6 +12,7 @@ class RefClick extends Model
         'viewer_ip',
         'viewer_cookie',
         'viewer_user_id',
+        'season_id',
     ];
 
     public function refUser()
@@ -22,5 +23,10 @@ class RefClick extends Model
     public function viewerUser()
     {
         return $this->belongsTo(User::class, 'viewer_user_id');
+    }
+
+    public function season()
+    {
+        return $this->belongsTo(LeaderboardSeason::class, 'season_id');
     }
 }

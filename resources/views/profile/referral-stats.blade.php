@@ -9,12 +9,17 @@
 
     <x-slot name="content">
         @php
-            $stats = auth()->user()->refStats ?? new \App\Models\RefStat([
+            $stats = auth()->user()->currentRefStat ?? new \App\Models\RefStat([
                 'total_click' => 0,
                 'unique_click' => 0,
                 'anime_shared' => 0
             ]);
-            $rank = \App\Models\RefStat::where('unique_click', '>', $stats->unique_click)->count() + 1;
+            $activeSeason = \App\Models\LeaderboardSeason::active();
+            $rank = $activeSeason 
+                ? \App\Models\RefStat::where('season_id', $activeSeason->id)
+                    ->where('unique_click', '>', $stats->unique_click)
+                    ->count() + 1
+                : '-';
             if ($stats->unique_click == 0) $rank = '-';
         @endphp
         

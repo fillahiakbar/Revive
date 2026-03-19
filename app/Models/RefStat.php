@@ -8,11 +8,17 @@ class RefStat extends Model
 {
     protected $fillable = [
         'user_id',
+        'season_id',
         'total_click',
         'unique_click',
         'anime_shared',
         'last_updated',
     ];
+
+    public function season()
+    {
+        return $this->belongsTo(LeaderboardSeason::class, 'season_id');
+    }
 
     protected $casts = [
         'last_updated' => 'datetime',
