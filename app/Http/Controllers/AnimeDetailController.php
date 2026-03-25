@@ -17,7 +17,7 @@ class AnimeDetailController extends Controller
                 'batches.batchLinks',
                 'comments' => fn ($q) => $q->latest(),
                 'comments.user',
-                'relatedGroup.relatedAnimes.animeLink.types',
+                'relatedGroup.animeLinks.types',
             ])
             ->where('mal_id', $mal_id)
             ->first();

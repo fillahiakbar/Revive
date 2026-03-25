@@ -10,7 +10,7 @@ class AnimeLink extends Model
 {
     protected $fillable = [
     'mal_id','title','poster','episodes','duration','synopsis','season','year','type','genres',
-    'title_english','imdb_id','mal_score','imdb_score','status'
+    'title_english','imdb_id','mal_score','imdb_score','status','related_anime_group_id','relation_title'
     ];
 
     protected $casts = [
@@ -116,6 +116,11 @@ class AnimeLink extends Model
         return $this->belongsTo(\App\Models\RelateAnimeGroup::class, 'related_anime_group_id');
     }
 
+    public function relateAnimeGroup()
+    {
+        return $this->belongsTo(\App\Models\RelateAnimeGroup::class, 'related_anime_group_id');
+    }
+
     public function relatedAnimes()
     {
         return $this->hasMany(RelatedAnime::class);
@@ -126,10 +131,7 @@ class AnimeLink extends Model
     return $this->hasMany(\App\Models\AnimeVisit::class);
 }
 
-/**
- * Filter berdasarkan periode waktu terhadap visited_date pada anime_visits.
- * Mengembalikan query yang hanya memuat anime yang MEMILIKI kunjungan di periode itu.
- */
+
 public function scopeWhereHasVisitsInPeriod(Builder $query, string $period): Builder
 {
     $now = now();
@@ -137,14 +139,11 @@ public function scopeWhereHasVisitsInPeriod(Builder $query, string $period): Bui
     return match ($period) {
         'weekly'  => $query->whereHas('visits', fn ($q) => $q->where('visited_date', '>=', $now->copy()->startOfWeek()->toDateString())),
         'monthly' => $query->whereHas('visits', fn ($q) => $q->where('visited_date', '>=', $now->copy()->startOfMonth()->toDateString())),
-        default   => $query, // all_time: tidak difilter keberadaan visit
+        default   => $query, 
     };
 }
 
-/**
- * Tambahkan kolom agregasi period_clicks (sum count pada periode).
- * Menggunakan alias 'period_clicks' agar bisa ditampilkan/disort di Filament.
- */
+
 public function scopeWithPeriodClicks(Builder $query, string $period): Builder
 {
     $now = now();
@@ -155,7 +154,7 @@ public function scopeWithPeriodClicks(Builder $query, string $period): Builder
                 $q->where('visited_date', '>=', $now->copy()->startOfWeek()->toDateString());
             } elseif ($period === 'monthly') {
                 $q->where('visited_date', '>=', $now->copy()->startOfMonth()->toDateString());
-            } // all_time: tanpa filter → total sepanjang waktu
+            } 
         }],
         'count'
     );

@@ -412,17 +412,17 @@
             @endif
 
             {{-- Related Anime --}}
-           @if($animeLink && $animeLink->relatedGroup && $animeLink->relatedGroup->relatedAnimes->count() > 1)
+           @if($animeLink && $animeLink->relatedGroup && $animeLink->relatedGroup->animeLinks->count() > 1)
     <div class="mt-16">
         <h2 class="text-xl font-bold mb-4 text-white">أعمال ذات صلة</h2>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            @foreach($animeLink->relatedGroup->relatedAnimes->where('mal_id', '!=', $anime['mal_id']) as $related)
+            @foreach($animeLink->relatedGroup->animeLinks->where('id', '!=', $animeLink->id) as $related)
                 <a href="{{ route('anime.show', $related->mal_id) }}"
                     class="relative text-white rounded-lg overflow-hidden shadow hover:shadow-lg transition group block h-full">
 
                     {{-- Badge (Types) --}}
                     <div class="flex flex-wrap gap-1 mt-2 px-2 absolute top-0 z-10 left-0 right-0 pointer-events-none">
-                        @foreach ($related->animeLink?->types ?? [] as $type)
+                        @foreach ($related->types ?? [] as $type)
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"
                                 style="background-color: {{ $type->color ?? '#6b7280' }}; color: white;">
                                 {{ $type->name }}

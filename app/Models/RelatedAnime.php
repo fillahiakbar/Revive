@@ -7,17 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 class RelatedAnime extends Model
 {
     protected $fillable = [
-  'relate_anime_group_id','mal_id','poster','title','title_english','relation_title'
-];
+        'relate_anime_group_id',
+        'anime_link_id',
+        'mal_id',
+        'poster',
+        'title',
+        'title_english',
+        'relation_title',
+    ];
 
-    public function relatedAnimes()
+    public function group()
     {
-        return $this->hasMany(RelatedAnime::class);
+        return $this->belongsTo(RelateAnimeGroup::class, 'relate_anime_group_id');
     }
-        // === Tambahkan ini ===
+
+
     public function animeLink()
     {
-        // sesuaikan FK & owner key kalau beda
-        return $this->belongsTo(AnimeLink::class, 'mal_id', 'mal_id');
+        return $this->belongsTo(AnimeLink::class, 'anime_link_id');
     }
 }
