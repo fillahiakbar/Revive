@@ -18,7 +18,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-           View::composer('*', function ($view) {
+        if (config('app.env') !== 'local') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
+        View::composer('*', function ($view) {
             $view->with('socialMedias', SocialMedia::where('is_active', true)->get());
         });
     }

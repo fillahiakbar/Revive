@@ -78,7 +78,7 @@
 
                         {{-- Details --}}
                         <div class="p-2 text-xs">
-                            <h3 class="font-bold truncate" title="{{ $anime['local_title'] ?? $anime['title'] }}">
+                            <h3 class="font-bold truncate" dir="ltr" title="{{ $anime['local_title'] ?? $anime['title'] }}">
                                 {{ $anime['local_title'] ?? ($anime['title'] ?? 'Unknown Title') }}
                             </h3>
                             @if (!empty($anime['title_english']) && $anime['title_english'] !== ($anime['local_title'] ?? $anime['title']))
@@ -161,8 +161,7 @@
                     </nav>
                 </div>
                 <div class="text-center mt-4 text-gray-400 text-sm">
-                    Page {{ $animes->currentPage() }} of {{ $animes->lastPage() }}
-                    ({{ $animes->total() }} total results)
+                    صفحة {{ $animes->currentPage() }} من  {{ $animes->lastPage() }}
                 </div>
             @endif
         </div>

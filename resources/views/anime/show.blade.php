@@ -49,9 +49,9 @@
                         <div class="mb-8">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex-1 text-right">
-                                    <h1 class="text-3xl sm:text-4xl font-bold">{{ $anime['title'] }}</h1>
+                                    <h1 class="text-3xl sm:text-4xl font-bold" dir="ltr">{{ $anime['title'] }}</h1>
                                     @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
-                                        <h2 class="text-xl sm:text-2xl text-white/70 mt-1">{{ $anime['title_english'] }}</h2>
+                                        <h2 class="text-xl sm:text-2xl text-white/70 mt-1" dir="ltr">{{ $anime['title_english'] }}</h2>
                                     @endif
                                 </div>
                                 
@@ -463,7 +463,7 @@
 
                     {{-- Details --}}
                     <div class="p-1 text-[11px] text-center">
-                        <h3 class="font-bold truncate" title="{{ $related->title }}">{{ $related->title }}</h3>
+                        <h3 class="font-bold truncate" dir="ltr" title="{{ $related->title }}">{{ $related->title }}</h3>
                         @if (!empty($related->title_english) && $related->title_english !== $related->title)
                             <p class="text-gray-400 truncate" title="{{ $related->title_english }}">
                                 {{ $related->title_english }}
@@ -644,15 +644,15 @@
                             const btn = this.$refs.rateBtn;
                             const oldText = btn.innerText;
                             btn.innerText = 'Success!';
-                            btn.classList.add('bg-green-500', 'text-white');
-                            btn.classList.remove('bg-yellow-500', 'text-black');
+                            btn.style.backgroundColor = '#22c55e';
+                            btn.style.color = '#fff';
                             
                             setTimeout(() => {
                                 this.closeModal();
                                 setTimeout(() => {
                                     btn.innerText = 'Rate';
-                                    btn.classList.remove('bg-green-500', 'text-white');
-                                    btn.classList.add('bg-yellow-500', 'text-black');
+                                    btn.style.backgroundColor = '';
+                                    btn.style.color = '';
                                 }, 300);
                             }, 800);
                         } else {
@@ -701,7 +701,7 @@
 
                     <div class="text-center w-full mb-6">
                         <p class="text-[#fac916] font-bold uppercase tracking-[0.2em] text-xs mb-2">Rate This</p>
-                        <h3 class="text-white text-2xl font-semibold truncate px-4">{{ $anime['title'] }}</h3>
+                        <h3 class="text-white text-2xl font-semibold truncate px-4" dir="ltr">{{ $anime['title'] }}</h3>
                     </div>
 
                     {{-- 10 Stars row --}}
@@ -723,7 +723,7 @@
                             @click="submitRating()" 
                             :disabled="!currentRating || isSubmitting"
                             class="w-full py-3 rounded text-lg font-bold transition-all duration-300"
-                            :class="currentRating ? 'bg-[#fac916] hover:bg-[#eab308] text-black shadow-lg shadow-yellow-500/20' : 'bg-[#333333] text-gray-500 cursor-not-allowed'">
+                            :style="currentRating ? 'background-color: #fac916; color: #000; box-shadow: 0 10px 15px -3px rgba(234,179,8,0.2);' : 'background-color: #333; color: #6b7280; cursor: not-allowed;'">
                         <span x-show="!isSubmitting">Rate</span>
                         <span x-show="isSubmitting"><i class="fas fa-circle-notch fa-spin"></i></span>
                     </button>

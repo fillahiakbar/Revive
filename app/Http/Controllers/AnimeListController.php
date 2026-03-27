@@ -35,13 +35,44 @@ class AnimeListController extends Controller
         $enhanced = $animes->map(function ($anime) {
             $malId = $anime->mal_id;
 
-            $apiData = cache()->remember("jikan_mal_{$malId}", 3600, function () use ($malId) {
-                $response = Http::get("https://api.jikan.moe/v4/anime/{$malId}");
-                if ($response->successful()) {
-                    return $response->json('data');
+            $cacheKey = "jikan_mal_{$malId}";
+            $apiData = cache()->get($cacheKey);
+
+            if ($apiData === null) {
+                try {
+                    $response = Http::timeout(10)->get("https://api.jikan.moe/v4/anime/{$malId}");
+                    if ($response->successful()) {
+                        $apiData = $response->json('data');
+                        if ($apiData) {
+                            cache()->put($cacheKey, $apiData, 3600);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // API failed, continue with database data only
                 }
-                return null;
-            });
+            }
+
+            // Auto-save missing data from API to database
+            $needsSave = false;
+
+            if (empty($anime->mal_score) && !empty($apiData['score']) && is_numeric($apiData['score'])) {
+                $anime->mal_score = (float) $apiData['score'];
+                $needsSave = true;
+            }
+
+            if (empty($anime->duration) && !empty($apiData['duration'])) {
+                $anime->duration = $apiData['duration'];
+                $needsSave = true;
+            }
+
+            if (empty($anime->episodes) && !empty($apiData['episodes'])) {
+                $anime->episodes = $apiData['episodes'];
+                $needsSave = true;
+            }
+
+            if ($needsSave) {
+                $anime->saveQuietly();
+            }
 
             return [
                 'mal_id'      => $anime->mal_id,
@@ -54,7 +85,7 @@ class AnimeListController extends Controller
                     ]
                 ],
                 'duration'    => $anime->duration ?? null,
-                'score'       => $apiData['score'] ?? null,
+                'score'       => $anime->mal_score ?? ($apiData['score'] ?? null),
                 'types'       => $anime->types->map(fn($type) => [
                     'name' => $type->name,
                     'color' => $type->color ?? '#6b7280',

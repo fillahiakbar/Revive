@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
+use App\Services\RssGeneratorService;
 
 class GenerateCustomRss extends Page implements HasForms
 {
@@ -89,8 +90,8 @@ class GenerateCustomRss extends Page implements HasForms
         // Ensure RSS directory exists
         File::ensureDirectoryExists(public_path('rss'));
 
-        // Load existing feeds or create new array
-        $feeds = $this->loadExistingFeeds();
+        // Load existing feeds
+        $feeds = RssGeneratorService::loadExistingFeeds();
 
         // Add new feed item
         $newFeed = [
@@ -105,14 +106,8 @@ class GenerateCustomRss extends Page implements HasForms
         // Add to beginning of array (newest first)
         array_unshift($feeds, $newFeed);
 
-        // Generate complete RSS XML
-        $rssContent = $this->generateRssXml($feeds);
-
-        // Save RSS file
-        File::put(public_path('rss/' . $this->rssFileName), $rssContent);
-
-        // Update index for tracking
-        $this->updateFeedIndex($feeds);
+        // Generate complete RSS XML and save
+        RssGeneratorService::updateFromFeeds($feeds);
 
         Notification::make()
             ->title('RSS Feed item berhasil ditambahkan!')
@@ -125,106 +120,11 @@ class GenerateCustomRss extends Page implements HasForms
     }
 
     /**
-     * Generate complete RSS XML with all feed items
-     */
-    private function generateRssXml(array $feeds): string
-    {
-        $rssItems = '';
-        
-        foreach ($feeds as $feed) {
-            $pubDate = $feed['created_at']->format('D, d M Y H:i:s T');
-            $posterUrl = $feed['poster'] ? asset('storage/' . $feed['poster']) : '';
-            
-            // Ensure 'id' exists for GUID
-            $guid = isset($feed['id']) ? $feed['id'] : uniqid('feed_');
-            
-            $rssItems .= "
-        <item>+
-            <title><![CDATA[{$feed['anime_name']} - {$feed['batch_name']}]]></title>
-            <link>{$feed['link']}</link>
-            <description><![CDATA[
-                " . ($posterUrl ? "<img src=\"{$posterUrl}\" alt=\"{$feed['anime_name']}\" style=\"max-width: 300px; height: auto;\"><br>" : "") . "
-                {$feed['batch_name']}<br>
-                <a href=\"{$feed['link']}\" target=\"_blank\">{$feed['link']}</a>
-            ]]></description>
-            <pubDate>{$pubDate}</pubDate>
-            <guid isPermaLink=\"false\">{$guid}</guid>
-            " . ($posterUrl ? "<enclosure url=\"{$posterUrl}\" type=\"image/jpeg\" length=\"0\" />" : "") . "
-        </item>";
-        }
-
-        $channelTitle = 'Custom Anime RSS Feed';
-        $channelDescription = 'RSS Feed untuk update anime batch terbaru';
-        $channelLink = url('/');
-        $lastBuildDate = now()->format('D, d M Y H:i:s T');
-
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">
-    <channel>
-        <title><![CDATA[{$channelTitle}]]></title>
-        <description><![CDATA[{$channelDescription}]]></description>
-        <link>{$channelLink}</link>
-        <atom:link href=\"" . url('rss/' . $this->rssFileName) . "\" rel=\"self\" type=\"application/rss+xml\" />
-        <language>id-ID</language>
-        <lastBuildDate>{$lastBuildDate}</lastBuildDate>
-        <generator>Laravel Filament Custom RSS Generator</generator>
-        {$rssItems}
-    </channel>
-</rss>";
-    }
-
-    /**
-     * Load existing feeds from index file
-     */
-    private function loadExistingFeeds(): array
-    {
-        $indexPath = public_path('rss/index.json');
-        
-        if (!File::exists($indexPath)) {
-            return [];
-        }
-
-        $feedsData = json_decode(File::get($indexPath), true) ?? [];
-        
-        // Convert back to objects with Carbon dates and ensure 'id' exists
-        return collect($feedsData)->map(function ($feed) {
-            $feed['created_at'] = \Carbon\Carbon::parse($feed['created_at']);
-            // Add 'id' if it doesn't exist (for backward compatibility)
-            if (!isset($feed['id'])) {
-                $feed['id'] = uniqid('feed_');
-            }
-            return $feed;
-        })->toArray();
-    }
-
-    /**
-     * Update index file with all feeds data
-     */
-    private function updateFeedIndex(array $feeds): void
-    {
-        $indexPath = public_path('rss/index.json');
-        
-        // Convert feeds to storable format
-        $feedsData = collect($feeds)->map(function ($feed) {
-            return [
-                'anime_name' => $feed['anime_name'],
-                'batch_name' => $feed['batch_name'],
-                'link' => $feed['link'],
-                'poster' => $feed['poster'],
-                'created_at' => $feed['created_at']->toISOString(),
-                'id' => $feed['id'],
-            ];
-        })->toArray();
-
-        File::put($indexPath, json_encode($feedsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
-    /**
      * Show RSS feed URL and stats
      */
     public function viewRssFeed(): void
     {
-        $feeds = $this->loadExistingFeeds();
+        $feeds = RssGeneratorService::loadExistingFeeds();
         $feedCount = count($feeds);
         $rssUrl = url('rss/' . $this->rssFileName);
         

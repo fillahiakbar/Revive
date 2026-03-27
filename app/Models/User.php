@@ -17,20 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'email_verified_at',
-        'ref_code',
     ];
-
-    protected static function booted()
-    {
-        static::creating(function ($user) {
-            if (empty($user->ref_code)) {
-                do {
-                    $code = \Illuminate\Support\Str::random(8);
-                } while (static::where('ref_code', $code)->exists());
-                $user->ref_code = $code;
-            }
-        });
-    }
 
     public function comments()
 {

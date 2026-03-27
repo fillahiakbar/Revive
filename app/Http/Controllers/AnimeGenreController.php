@@ -60,7 +60,7 @@ class AnimeGenreController extends Controller
                     'mal_id' => $anime->mal_id,
                     'title' => $anime->title,
                     'title_english' => $titleEnglish,
-                    'score' => $score,
+                    'score' => $anime->mal_score ?? ($score ?? null),
                     'images' => $images,
                     'duration' => $anime->duration,
                     'episodes' => $anime->episodes,

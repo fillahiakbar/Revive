@@ -61,7 +61,7 @@ class AnimeController extends Controller
                     'mal_id' => $anime->mal_id,
                     'local_title' => $anime->title,
                     'title_english' => $titleEnglish,
-                    'score' => $score,
+                    'score' => $anime->mal_score ?? ($score ?? null),
                     'images' => [
     'jpg' => [
         'large_image_url' => $anime->image_url ?? $anime->poster ?? null,

@@ -21,7 +21,7 @@ class WelcomeController extends Controller
         $period = SiteSetting::getMostVisitedPeriod(); // 'weekly' | 'monthly' | 'all_time'
 
         // Atur jumlah per halaman "Latest Releases"
-        $LATEST_RELEASES_PER_PAGE = (int) request('lr_per', 5);
+        $LATEST_RELEASES_PER_PAGE = (int) request('lr_per', 6);
         $LATEST_RELEASES_PAGE_NAME = 'lr';
 
         // ====== SLIDER & SOSMED ======

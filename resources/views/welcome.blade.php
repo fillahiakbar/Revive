@@ -239,7 +239,7 @@
                                         <div class="flex items-center justify-between gap-4">
                                             <p
                                                 class="text-lg group-hover:text-blue-400 transition-colors duration-300 leading-tight">
-                                                <span class="font-bold text-base text-white">
+                                                <span class="font-bold text-base text-white" dir="ltr">
                                                     {{ $anime['title'] }}
                                                 </span>
                                                 @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
@@ -354,7 +354,6 @@
 
                         <div class="text-center mt-4 text-gray-400 text-sm" dir="rtl">
                             صفحة {{ $latestReleases->currentPage() }} من {{ $latestReleases->lastPage() }}
-                            ({{ $latestReleases->total() }} نتيجة)
                         </div>
                     @endif
                 </div>
@@ -404,7 +403,7 @@
                                             {{-- Anime Info --}}
                                             <div class="flex-1 relative z-10 min-w-0 order-3">
                                                 <div
-                                                    class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors duration-300 mb-1 leading-tight">
+                                                    class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors duration-300 mb-1 leading-tight" dir="ltr">
                                                     {{ $anime['title'] }}
                                                 </div>
                                             </div>
