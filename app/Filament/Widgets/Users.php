@@ -39,12 +39,21 @@ class Users extends ChartWidget
 
             $data = $keys->map(fn ($k) => (int) ($rows[$k] ?? 0))->all();
 
-            return [
-                'datasets' => [
-                    ['label' => 'New Users', 'data' => $data],
+        return [
+            'datasets' => [
+                [
+                    'label' => 'New Users',
+                    'data' => $data,
+                    'borderColor' => '#f59e0b', // Amber 500
+                    'backgroundColor' => 'rgba(245, 158, 11, 0.15)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                    'pointRadius' => 2,
+                    'pointBackgroundColor' => '#f59e0b',
                 ],
-                'labels' => $months->map(fn ($m) => $m->format('M Y'))->all(),
-            ];
+            ],
+            'labels' => $months->map(fn ($m) => $m->format('M Y'))->all(),
+        ];
         }
 
         // Daily (last 14 or 30 days)
@@ -63,7 +72,16 @@ class Users extends ChartWidget
 
         return [
             'datasets' => [
-                ['label' => 'New Users', 'data' => $data],
+                [
+                    'label' => 'New Users',
+                    'data' => $data,
+                    'borderColor' => '#f59e0b',
+                    'backgroundColor' => 'rgba(245, 158, 11, 0.15)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                    'pointRadius' => 2,
+                    'pointBackgroundColor' => '#f59e0b',
+                ],
             ],
             'labels' => $days->map(fn (string $d) => Carbon::parse($d)->format('d M'))->all(),
         ];

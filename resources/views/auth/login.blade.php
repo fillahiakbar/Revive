@@ -74,6 +74,14 @@
                     @endif
                 </div>
 
+                {{-- Turnstile --}}
+                <div class="flex flex-col items-center justify-center">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-theme="dark"></div>
+                    @error('cf-turnstile-response')
+                        <span class="text-red-500 text-sm mt-2 text-center">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 {{-- Submit --}}
                 <div>
                     <button type="submit"
@@ -118,4 +126,5 @@
             icon.classList.toggle('fa-eye-slash');
         }
     </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </x-guest-layout>

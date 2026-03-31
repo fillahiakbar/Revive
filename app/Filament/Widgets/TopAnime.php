@@ -34,11 +34,22 @@ class TopAnime extends BarChartWidget
         $labels = $rows->pluck('title')->map(fn ($t) => Str::limit($t, 24))->all();
         $data   = $rows->pluck('click_count')->map(fn ($v) => (int) $v)->all();
 
+        // Generate gradient-like colors per bar
+        $colors = [
+            '#f43f5e', '#fb923c', '#facc15', '#4ade80', '#22d3ee',
+            '#818cf8', '#c084fc', '#f472b6', '#38bdf8', '#a3e635',
+            '#f97316', '#e879f9', '#2dd4bf', '#fbbf24', '#a78bfa',
+            '#34d399', '#f87171', '#60a5fa', '#fb7185', '#84cc16',
+        ];
+
         return [
             'datasets' => [
                 [
                     'label' => 'Visits',
                     'data'  => $data,
+                    'backgroundColor' => array_slice($colors, 0, count($data)),
+                    'borderRadius' => 4,
+                    'borderWidth' => 0,
                 ],
             ],
             'labels' => $labels,

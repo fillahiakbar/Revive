@@ -52,6 +52,10 @@ class DailyVisits extends LineChartWidget
                 [
                     'label' => 'Total Visits',
                     'data'  => $data,
+                    'borderColor' => '#0ea5e9', // Tailwind Sky 500
+                    'backgroundColor' => 'rgba(14, 165, 233, 0.2)', // Sky 500 with opacity
+                    'fill' => true,
+                    'tension' => 0.4, // Smooth curved line
                 ],
             ],
             'labels' => $labels,

@@ -48,6 +48,16 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                \App\Filament\Widgets\StatsOverview::class,
+                \App\Filament\Widgets\TopAnime::class,
+                \App\Filament\Widgets\Users::class,
+                \App\Filament\Widgets\DailyVisits::class,
+                \App\Filament\Widgets\ContentReleaseChart::class,
+                \App\Filament\Widgets\UserGrowthChart::class,
+                \App\Filament\Widgets\CommentsActivityChart::class,
+                \App\Filament\Widgets\AnimeByTypePieChart::class,
+                \App\Filament\Widgets\AnimeByStatusPieChart::class,
+                \App\Filament\Widgets\LatestAnimeWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -239,7 +239,12 @@ class AnimeLinkResource extends Resource
             ->label('الملخص')
             ->html()
             ->limit(200),
+            TextColumn::make('updated_at')
+                ->label('Last Updated')
+                ->dateTime()
+                ->sortable(),
         ])
+            ->defaultSort('updated_at', 'desc')
             ->actions([
             \Filament\Tables\Actions\EditAction::make(),
         ])
