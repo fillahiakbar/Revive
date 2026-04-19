@@ -364,7 +364,7 @@
                     @foreach ($animeLink->batches as $batch)
                         @php
                             $allLinks = $batch->batchLinks->filter(fn ($link) =>
-                                $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard
+                                $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard || $link->url_pixeldrain
                             );
 
                             $hevcLinks = $allLinks->filter(fn($link) => $link->codec === 'x265');
@@ -438,6 +438,18 @@
                                                             <span>Mega</span>
                                                         </a>
                                                     @endif
+                                                    @if ($link->url_megaHard)
+                                                        <a href="{{ $link->url_megaHard }}" target="_blank"
+                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
+                                                           style="color: #E5E5E5;"
+                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                                                           onmouseout="this.style.background='transparent'">
+                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                                                            </svg>
+                                                            <span>Mega Hardsub</span>
+                                                        </a>
+                                                    @endif
                                                     @if ($link->url_gdrive)
                                                         <a href="{{ $link->url_gdrive }}" target="_blank"
                                                            class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
@@ -448,6 +460,18 @@
                                                                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                                                             </svg>
                                                             <span>GDrive</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_gdriveHard)
+                                                        <a href="{{ $link->url_gdriveHard }}" target="_blank"
+                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
+                                                           style="color: #E5E5E5;"
+                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                                                           onmouseout="this.style.background='transparent'">
+                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                                                            </svg>
+                                                            <span>GDrive Hardsub</span>
                                                         </a>
                                                     @endif
                                                     @if ($link->url_pixeldrain)
@@ -530,6 +554,18 @@
                                                             <span>Mega</span>
                                                         </a>
                                                     @endif
+                                                    @if ($link->url_megaHard)
+                                                        <a href="{{ $link->url_megaHard }}" target="_blank"
+                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
+                                                           style="color: #E5E5E5;"
+                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                                                           onmouseout="this.style.background='transparent'">
+                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                                                            </svg>
+                                                            <span>Mega Hardsub</span>
+                                                        </a>
+                                                    @endif
                                                     @if ($link->url_gdrive)
                                                         <a href="{{ $link->url_gdrive }}" target="_blank"
                                                            class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
@@ -540,6 +576,18 @@
                                                                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
                                                             </svg>
                                                             <span>GDrive</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_gdriveHard)
+                                                        <a href="{{ $link->url_gdriveHard }}" target="_blank"
+                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
+                                                           style="color: #E5E5E5;"
+                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                                                           onmouseout="this.style.background='transparent'">
+                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                                                            </svg>
+                                                            <span>GDrive Hardsub</span>
                                                         </a>
                                                     @endif
                                                     @if ($link->url_pixeldrain)
