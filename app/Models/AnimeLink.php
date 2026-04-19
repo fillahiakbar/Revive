@@ -10,7 +10,8 @@ class AnimeLink extends Model
 {
     protected $fillable = [
     'mal_id','title','poster','episodes','duration','synopsis','season','year','type','genres',
-    'title_english','imdb_id','mal_score','imdb_score','status','related_anime_group_id','relation_title'
+    'title_english','imdb_id','mal_score','imdb_score','status','related_anime_group_id','relation_title',
+    'subtitle_url','subtitle_file','subtitle_url_mega','subtitle_url_gdrive','subtitle_url_pixeldrain'
     ];
 
     protected $casts = [

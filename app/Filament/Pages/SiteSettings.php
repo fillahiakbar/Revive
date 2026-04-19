@@ -33,6 +33,7 @@ class SiteSettings extends Page implements HasForms
             'season_end_date' => Setting::get('season_end_date', ''),
             'rank1_achievement' => Setting::get('rank1_achievement', 'CHAMPION'),
             'leaderboard_prize' => Setting::get('leaderboard_prize', ''),
+            'share_feature_enabled' => Setting::get('share_feature_enabled', '0') === '1',
         ];
     }
 
@@ -42,6 +43,8 @@ class SiteSettings extends Page implements HasForms
             ->schema([
                 Toggle::make('public_registration_enabled')
                     ->label('تفعيل التسجيل العام'),
+                Toggle::make('share_feature_enabled')
+                    ->label('تفعيل ميزة مشاركة الأنمي والنقاط (Share & Earn)'),
                 RichEditor::make('funding_information')
                     ->label('معلومات التمويل')
                     ->columnSpanFull(),
@@ -75,6 +78,7 @@ class SiteSettings extends Page implements HasForms
         Setting::set('season_end_date', $this->data['season_end_date'] ?? '');
         Setting::set('rank1_achievement', $this->data['rank1_achievement'] ?? 'CHAMPION');
         Setting::set('leaderboard_prize', $this->data['leaderboard_prize'] ?? '');
+        Setting::set('share_feature_enabled', !empty($this->data['share_feature_enabled']) ? '1' : '0');
 
         Notification::make()
             ->title('تم حفظ الإعدادات بنجاح!')

@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
-<body class="font-cairo bg-center bg-no-repeat bg-cover h-screen overflow-hidden text-white"
+<body class="font-cairo bg-center bg-no-repeat bg-cover min-h-screen overflow-auto text-white"
       style="background-image: url('{{ asset('img/bg-login.png') }}'); direction: rtl;">
 
       
-    <div class="w-full h-screen flex items-center justify-center">
+    <div class="w-full min-h-screen flex items-center justify-center py-4">
         <div class="w-[500px]">
             {{-- Form di sini --}}
             {{ $slot }}

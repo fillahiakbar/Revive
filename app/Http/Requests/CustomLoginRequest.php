@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Laravel\Fortify\Http\Requests\LoginRequest as FortifyLoginRequest;
 use Laravel\Fortify\Fortify;
 use App\Rules\Turnstile;
+use App\Models\EmailBlacklist;
 
 class CustomLoginRequest extends FortifyLoginRequest
 {
@@ -16,9 +17,17 @@ class CustomLoginRequest extends FortifyLoginRequest
     public function rules()
     {
         return [
-            Fortify::username() => 'required|string',
+            Fortify::username() => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (EmailBlacklist::isBlacklisted($value)) {
+                        $fail('بريدك الإلكتروني محظور');
+                    }
+                },
+            ],
             'password' => 'required|string',
-            'cf-turnstile-response' => ['required', new Turnstile],
+            // 'cf-turnstile-response' => ['required', new Turnstile],
         ];
     }
 

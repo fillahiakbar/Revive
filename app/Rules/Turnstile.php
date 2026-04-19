@@ -21,8 +21,8 @@ class Turnstile implements ValidationRule
             'remoteip' => request()->ip(),
         ]);
 
-        if (! $response->json('success')) {
-            $fail('Verifikasi CAPTCHA gagal. Silakan coba lagi.');
+        if (!$response->json('success')) {
+            $fail('فشل التحقُّق، حاول مجددًا');
         }
     }
 }

@@ -18,8 +18,25 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
     public function update(User $user, array $input): void
     {
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:30',
+                new \App\Rules\ValidUsername,
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id),
+                function ($attribute, $value, $fail) {
+                    // Check if email is blacklisted (only if changing email)
+                    if (\App\Models\EmailBlacklist::isBlacklisted($value)) {
+                        $fail('هذا البريد الإلكتروني محظور ولا يمكن استخدامه.');
+                    }
+                },
+            ],
             'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:1024'],
         ])->validateWithBag('updateProfileInformation');
 

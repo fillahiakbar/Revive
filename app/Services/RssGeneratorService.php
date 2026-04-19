@@ -99,7 +99,7 @@ class RssGeneratorService
         }
 
         $channelTitle = 'Custom Anime RSS Feed';
-        $channelDescription = 'RSS Feed untuk update anime batch terbaru';
+        $channelDescription = 'RSS Feed for latest anime batch updates';
         $channelLink = url('/');
         $lastBuildDate = now()->format('D, d M Y H:i:s T');
 
@@ -110,7 +110,7 @@ class RssGeneratorService
         <description><![CDATA[{$channelDescription}]]></description>
         <link>{$channelLink}</link>
         <atom:link href=\"" . url('rss/' . self::$rssFileName) . "\" rel=\"self\" type=\"application/rss+xml\" />
-        <language>id-ID</language>
+        <language>en-US</language>
         <lastBuildDate>{$lastBuildDate}</lastBuildDate>
         <generator>Laravel Filament Custom RSS Generator</generator>
         {$rssItems}

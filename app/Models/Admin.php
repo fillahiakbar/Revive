@@ -14,6 +14,14 @@ class Admin extends Authenticatable implements FilamentUser
 
     protected $hidden = ['password', 'remember_token'];
 
+    /**
+     * Relationship to EmailBlacklist
+     */
+    public function emailBlacklists()
+    {
+        return $this->hasMany(EmailBlacklist::class, 'blocked_by');
+    }
+
  
     public function canAccessPanel(\Filament\Panel $panel): bool
     {

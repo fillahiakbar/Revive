@@ -162,7 +162,7 @@ class AnimeGenreController extends Controller
                     $data = $response->json('data');
                 }
             } catch (\Exception $e) {
-                Log::warning("Gagal mengambil data Jikan untuk MAL ID {$anime->mal_id}: " . $e->getMessage());
+                Log::warning("Failed to fetch Jikan data for MAL ID {$anime->mal_id}: " . $e->getMessage());
             }
 
             return [

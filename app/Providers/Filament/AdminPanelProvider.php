@@ -33,6 +33,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('5u34u30')
             ->login(Login::class) // Daftarkan custom login page
             ->authGuard('admin') // Pakai guard admin
+            ->favicon(asset('img/logo.png'))
+            ->brandLogo(asset('img/logo.png'))
+            ->brandLogoHeight('2.5rem')
+            ->brandName('Revive')
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -43,6 +47,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->resources([
                 \App\Filament\Resources\UserResource::class,
+                \App\Filament\Resources\EmailBlacklistResource::class,
+                \App\Filament\Resources\BatchLinkResource::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

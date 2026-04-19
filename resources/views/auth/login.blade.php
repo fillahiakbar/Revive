@@ -1,9 +1,9 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center px-4 py-6 sm:px-6">
-        <div class="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 sm:px-6 py-8 sm:py-10 rounded-xl">
+    <div class="flex items-center justify-center px-4 py-4 sm:px-6">
+        <div class="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 sm:px-6 py-4 sm:py-6 rounded-xl">
 
             {{-- Logo & Heading --}}
-            <div class="flex flex-col items-center justify-center mb-6 sm:mb-8 text-center">
+            <div class="flex flex-col items-center justify-center mb-3 sm:mb-4 text-center">
                 <x-authentication-card-logo class="w-16 h-16 sm:w-20 sm:h-20" />
                 <h1 class="text-xl sm:text-2xl font-bold mt-3 sm:mt-4 text-white">السلام عليكم</h1>
                 <p class="text-xs sm:text-sm text-gray-300 mt-1">أهلاً وسهلاً! أدخل بياناتك</p>
@@ -11,6 +11,11 @@
 
             {{-- Validation --}}
             <x-validation-errors class="mb-4" />
+            @if (session('blacklisted'))
+                <div class="mb-4 p-4 rounded-lg bg-red-600/20 border border-red-500 text-center">
+                    <p class="text-red-400 font-bold text-base sm:text-lg">بريدك الإلكتروني محظور</p>
+                </div>
+            @endif
             @if (session('status'))
                 <div class="mb-4 font-medium text-sm text-green-500">
                     {{ session('status') }}
@@ -18,7 +23,7 @@
             @endif
 
             {{-- Form --}}
-            <form method="POST" action="{{ route('login') }}" class="space-y-4 sm:space-y-6">
+            <form method="POST" action="{{ route('login') }}" class="space-y-3 sm:space-y-4">
                 @csrf
 
                 {{-- Email --}}

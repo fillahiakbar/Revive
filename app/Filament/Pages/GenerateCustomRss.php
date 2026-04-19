@@ -51,7 +51,7 @@ class GenerateCustomRss extends Page implements HasForms
                     ->required(),
 
                 TextInput::make('link')
-                    ->label('Link ke Website')
+                    ->label('Website Link')
                     ->required()
                     ->url(),
             ])
@@ -110,8 +110,8 @@ class GenerateCustomRss extends Page implements HasForms
         RssGeneratorService::updateFromFeeds($feeds);
 
         Notification::make()
-            ->title('RSS Feed item berhasil ditambahkan!')
-            ->body("Ditambahkan ke: {$this->rssFileName}")
+            ->title('RSS Feed item successfully added!')
+            ->body("Added to: {$this->rssFileName}")
             ->success()
             ->send();
 
@@ -130,8 +130,8 @@ class GenerateCustomRss extends Page implements HasForms
         
         if ($feedCount === 0) {
             Notification::make()
-                ->title('RSS Feed Kosong')
-                ->body('Belum ada item dalam RSS feed. Tambahkan item pertama!')
+                ->title('RSS Feed Empty')
+                ->body('No items in the RSS feed yet. Add your first item!')
                 ->warning()
                 ->send();
             return;
@@ -143,7 +143,7 @@ class GenerateCustomRss extends Page implements HasForms
 
         Notification::make()
             ->title("RSS Feed Ready! ({$feedCount} items)")
-            ->body("URL: {$rssUrl}\n\nItems terbaru:\n{$latestFeeds}")
+            ->body("URL: {$rssUrl}\n\nLatest items:\n{$latestFeeds}")
             ->info()
             ->duration(15000)
             ->send();
@@ -166,7 +166,7 @@ class GenerateCustomRss extends Page implements HasForms
         }
 
         Notification::make()
-            ->title('Semua RSS feeds berhasil dihapus!')
+            ->title('All RSS feeds successfully deleted!')
             ->success()
             ->send();
     }

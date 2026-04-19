@@ -24,7 +24,7 @@ class AnimeLinkResource extends Resource
     protected static ?string $navigationGroup = 'Content';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Anime Links';
-    protected static ?string $pluralModelLabel = 'روابط الأنمي';
+    protected static ?string $pluralModelLabel = 'Anime Links';
 
     public static function form(Form $form): Form
     {
@@ -36,10 +36,10 @@ class AnimeLinkResource extends Resource
 
     protected static function animeInfoSection(): Section
     {
-        return Section::make('معلومات الأنمي')
+        return Section::make('Anime Information')
             ->schema([
             TextInput::make('mal_id')
-            ->label('معرّف MyAnimeList')
+            ->label('MyAnimeList ID')
             ->required()
             ->numeric()
             ->reactive()
@@ -101,19 +101,19 @@ class AnimeLinkResource extends Resource
             }
         }),
 
-            TextInput::make('title')->label('العنوان')->required(),
-            TextInput::make('poster')->label('رابط الصورة'),
+            TextInput::make('title')->label('Title')->required(),
+            TextInput::make('poster')->label('Poster URL'),
 
             TextInput::make('episodes')
-            ->label('عدد الحلقات')
-            ->placeholder('مثال: 1-6')
+            ->label('Total Episodes')
+            ->placeholder('Example: 1-6')
             ->rule('regex:/^\d+(-\d+)?$/')
-            ->helperText('أدخل رقماً أو نطاقاً، مثل: 1-6'),
+            ->helperText('Enter a number or range, e.g., 1-6'),
 
-            TextInput::make('title_english')->label('العنوان بالإنجليزية'),
+            TextInput::make('title_english')->label('English Title'),
 
             TextInput::make('genres')
-            ->label('الأنواع')
+            ->label('Genres')
             ->dehydrated(true)
             ->dehydrateStateUsing(function ($state) {
             if (is_array($state)) {
@@ -123,7 +123,7 @@ class AnimeLinkResource extends Resource
         }),
 
             Select::make('status')
-            ->label('حالة الأنمي')
+            ->label('Status')
             ->options([
                 'Currently Airing' => 'Currently Airing',
                 'Finished Airing' => 'Finished Airing',
@@ -131,41 +131,50 @@ class AnimeLinkResource extends Resource
             ->required(),
 
             RichEditor::make('synopsis')
-            ->label('الملخص')
+            ->label('Synopsis')
             ->columnSpan('full'),
 
             Select::make('anime_types')
-            ->label('الوسوم (Tags)')
+            ->label('Tags')
             ->relationship('types', 'name')
             ->multiple()
             ->searchable()
             ->preload()
             ->required(),
 
-            TextInput::make('season')->label('الموسم'),
-            TextInput::make('year')->label('السنة'),
-            TextInput::make('type')->label('النوع'),
+            TextInput::make('season')->label('Season'),
+            TextInput::make('year')->label('Year'),
+            TextInput::make('type')->label('Type'),
             TextInput::make('duration')
-            ->label('المدة')
-            ->placeholder('Ex : دقائق 24 or Minutes 24')
+            ->label('Duration')
+            ->placeholder('Ex: 24 min')
             ->maxLength(100),
 
             TextInput::make('mal_score')
-            ->label('تقييم MAL')
+            ->label('MAL Score')
             ->numeric()
             ->dehydrated(true),
 
             TextInput::make('imdb_score')
-            ->label('تقييم IMDb')
+            ->label('IMDb Score')
             ->numeric()
             ->dehydrated(true),
 
             TextInput::make('imdb_id')
-            ->label('معرّف IMDb')
+            ->label('IMDb ID')
             ->dehydrated(true),
 
+            Section::make('Subtitles')
+                ->description('Manage subtitle files or links.')
+                ->schema([
+                    TextInput::make('subtitle_url')
+                        ->label('Subtitle URL')
+                        ->URL()
+                        ->placeholder('https://...'),
+                ]),
+
             Select::make('related_anime_group_id')
-            ->label('المجموعة المرتبطة')
+            ->label('Related Group')
             ->relationship('relatedGroup', 'name')
             ->searchable()
             ->preload()
@@ -177,15 +186,16 @@ class AnimeLinkResource extends Resource
     {
         return Repeater::make('batches')
             ->relationship()
-            ->label('حزم الحلقات')
+            ->label('Episode Batches')
+            ->columnSpan('full')
             ->schema([
             Hidden::make('anime_link_id')
             ->default(fn(\Filament\Forms\Get $get) => $get('../../id')),
 
-            TextInput::make('name')->label('الاسم')->required(),
+            TextInput::make('name')->label('Name')->required(),
 
             Textarea::make('episodes')
-            ->label('قائمة الحلقات')
+            ->label('Episode List')
             ->rows(3)
             ->required(),
 
@@ -197,10 +207,20 @@ class AnimeLinkResource extends Resource
     {
         return Repeater::make('batchLinks')
             ->relationship()
-            ->label('روابط التحميل')
+            ->label('Download Links')
+            ->grid(2)
             ->schema([
+            Select::make('codec')
+            ->label('Codec (HEVC/H.264)')
+            ->options([
+                'x264' => 'H.264 (x264)',
+                'x265' => 'HEVC (x265)',
+            ])
+            ->required()
+            ->default('x264'),
+
             Select::make('resolution')
-            ->label('الدقة')
+            ->label('Resolution')
             ->options([
                 '360' => '360p',
                 '480' => '480p',
@@ -210,17 +230,18 @@ class AnimeLinkResource extends Resource
             ->required(),
 
             Textarea::make('url_torrent')
-            ->label('روابط التورنت')
+            ->label('Torrent URL')
             ->rows(1),
 
             TextInput::make('url_rr_torrent')
-            ->label('RR Torrent')
+            ->label('RR Torrent URL')
             ->placeholder('torrent file path'),
 
-            Textarea::make('url_mega')->label('روابط ميجا')->rows(1),
-            Textarea::make('url_gdrive')->label('روابط Google Drive')->rows(1),
-            Textarea::make('url_megaHard')->label('روابط ميجا Hardsub')->rows(1),
-            Textarea::make('url_gdriveHard')->label('روابط Google Drive Hardsub')->rows(1),
+            Textarea::make('url_mega')->label('Mega URL')->rows(1),
+            Textarea::make('url_gdrive')->label('Google Drive URL')->rows(1),
+            Textarea::make('url_megaHard')->label('Mega Hardsub URL')->rows(1),
+            Textarea::make('url_gdriveHard')->label('Google Drive Hardsub URL')->rows(1),
+            Textarea::make('url_pixeldrain')->label('PixelDrain URL')->rows(1),
         ]);
     }
 
@@ -228,15 +249,15 @@ class AnimeLinkResource extends Resource
     {
         return $table
             ->columns([
-            TextColumn::make('title')->label('العنوان')->searchable(),
-            TextColumn::make('status')->label('الحالة')->badge(),
-            TextColumn::make('type')->label('النوع الرسمي'),
-            TextColumn::make('types.name')->label('النوع')->limit(30),
-            TextColumn::make('season')->label('الموسم'),
-            TextColumn::make('year')->label('السنة'),
-            TextColumn::make('relatedGroup.name')->label('المجموعة المرتبطة'),
+            TextColumn::make('title')->label('Title')->searchable(),
+            TextColumn::make('status')->label('Status')->badge(),
+            TextColumn::make('type')->label('Official Type'),
+            TextColumn::make('types.name')->label('Tags')->limit(30),
+            TextColumn::make('season')->label('Season'),
+            TextColumn::make('year')->label('Year'),
+            TextColumn::make('relatedGroup.name')->label('Related Group'),
             TextColumn::make('synopsis')
-            ->label('الملخص')
+            ->label('Synopsis')
             ->html()
             ->limit(200),
             TextColumn::make('updated_at')

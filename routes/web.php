@@ -118,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/donate', [DonationController::class, 'index'])->name('donate.index');
 
     // Leaderboard
-    Route::get('/leaderboard', [\App\Http\Controllers\ReferralController::class, 'showLeaderboard'])->name('leaderboard.show');
+    // Route::get('/leaderboard', [\App\Http\Controllers\ReferralController::class, 'showLeaderboard'])->name('leaderboard.show');
 
 });
 

@@ -54,7 +54,7 @@ class AnimeController extends Controller
                         $score = $data['score'] ?? null;
                     }
                 } catch (\Exception $e) {
-                    Log::warning('API gagal untuk mal_id: ' . $anime->mal_id);
+                    Log::warning('API failed for mal_id: ' . $anime->mal_id);
                 }
 
                 $result[] = [
@@ -94,7 +94,7 @@ class AnimeController extends Controller
             return view('anime.search', [
                 'animeList' => collect([]),
                 'query' => $query,
-                'error' => 'Terjadi kesalahan saat pencarian. Silakan coba lagi.',
+                'error' => 'An error occurred during the search. Please try again.',
             ]);
         }
     }

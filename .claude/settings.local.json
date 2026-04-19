@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where php:*)",
+      "Bash(echo 'CREATE TABLE IF NOT EXISTS email_blacklists \\(:*)",
+      "Read(//tmp/**)",
+      "Bash(mysql:*)",
+      "Bash(php:*)",
+      "Bash(find *)"
+    ]
+  }
+}

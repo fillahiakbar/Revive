@@ -1,8 +1,8 @@
 <x-app-layout>
     <div class="bg-no-repeat min-h-screen pt-20 overflow-x-hidden">
         <div class="max-w-7xl mx-auto px-4 py-20 text-white">
-            <div class="flex flex-col lg:flex-row gap-8 items-center lg:items-start w-full">
-                
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+
                 @php
                     $reviveScore = number_format($animeLink->average_rating, 1);
                     $reviveRatingCount = $animeLink->ratings()->count();
@@ -10,9 +10,9 @@
                 @endphp
 
                 {{-- Poster & Rate Panel --}}
-                <div class="flex flex-col items-center lg:items-start gap-3 shrink-0">
-                    <div class="bg-gray-800 flex items-center justify-center
-                                flex-none aspect-[2/3] w-48 md:w-56 lg:w-64
+                <div class="flex flex-col gap-4">
+                    <div class="mx-auto sm:mx-0 bg-gray-800 flex items-center justify-center
+                                flex-none aspect-[2/3] w-48 md:w-48 lg:w-48
                                 overflow-hidden rounded-md shadow-lg">
                         @php
                             $poster = $animeLink->poster 
@@ -22,7 +22,7 @@
                         <img
                         src="{{ $poster }}"
                         alt="{{ $anime['title'] }}"
-                        class="w-full h-full object-cover object-center border border-white/10"
+                        class="block w-full h-auto max-h-[60vh] sm:h-60 md:h-72 lg:h-80 object-contain sm:object-cover object-center border border-white/10"
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 640px) 10rem, (max-width: 768px) 14rem, (max-width: 1024px) 16rem, 18rem"
@@ -31,12 +31,12 @@
                     </div>
 
                     {{-- User Rate Button --}}
-                    <div class="w-full bg-white/5 backdrop-blur-sm rounded-lg py-1.5 px-3 text-center cursor-pointer hover:bg-white/10 transition border border-white/10" onclick="openRatingModal()">
-                        <div class="flex flex-col items-center gap-0.5">
-                            <svg class="w-5 h-5 text-yellow-500 {{ $userRating ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="mx-auto sm:mx-0 w-48 md:w-48 lg:w-48 bg-white/5 backdrop-blur-sm rounded-lg p-3 text-center cursor-pointer hover:bg-white/10 transition border border-white/10" onclick="openRatingModal()">
+                        <div class="flex flex-col items-center gap-1">
+                            <svg class="w-8 h-8 text-yellow-500 {{ $userRating ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
-                            <span class="text-white font-bold tracking-widest text-[11px]" id="userRatingDisplay">
+                            <span class="text-white font-bold tracking-widest text-sm" id="userRatingDisplay">
                                 {{ $userRating ? $userRating . '/10' : 'RATE' }}
                             </span>
                         </div>
@@ -45,7 +45,7 @@
 
                 {{-- Main Info --}}
                 <div class="flex-1">
-                    <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-8 mx-0 sm:mx-4 mb-6 mt-0 shadow-2xl rounded-lg">
+                    <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-8 mx-0 sm:mx-4 my-6 shadow-2xl rounded-lg">
                         <div class="mb-8">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex-1 text-right">
@@ -155,7 +155,6 @@
             </div>
 
             {{-- Share Buttons --}}
-            @if(\App\Models\Setting::get('share_feature_enabled', '0') === '1')
             @auth
             <div class="mt-6 text-right bg-white/10 p-4 rounded-lg border border-white/20 backdrop-blur-sm" dir="rtl">
                 <h3 class="text-lg font-semibold mb-3">شارك الأنمي واحصل على نقاط!</h3>
@@ -333,7 +332,6 @@
                 });
             </script>
             @endauth
-            @endif
 
             {{-- Synopsis (RTL) --}}
             <div class="mt-8" dir="rtl">
@@ -345,248 +343,70 @@
                 </div>
             </div>
 
-           
-            {{-- Subtitle --}}
-            @if(isset($animeLink) && $animeLink->subtitle_url)
-            <div class="mt-6 flex justify-start" dir="ltr">
-                <a href="{{ $animeLink->subtitle_url }}" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:brightness-125 transition-colors"
-                   style="background: rgba(255, 255, 255, 0.358); border: 1px solid rgba(255,255,255,0.1);">
-                    <span>ملفات الترجمة</span>
-                </a>
-            </div>
-            @endif
-
             {{-- Download links --}}
             @if ($animeLink && $animeLink->batches->isNotEmpty())
-                <div class="mt-10 space-y-4">
-                    <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-4">
-                    @foreach ($animeLink->batches as $batch)
-                        @php
-                            $allLinks = $batch->batchLinks->filter(fn ($link) =>
-                                $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard
-                            );
+                <div class="px-4 md:px-8 lg:px-16 mx-0 sm:mx-4 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 space-y-4 mt-10 rounded-lg">
+                    <h2 class="text-xl font-bold pr-3 text-white">روابط التحميل</h2>
+                    <div id="download-scroll" class="max-h-[600px] overflow-y-auto pr-1 space-y-3">
+                        @foreach ($animeLink->batches as $batch)
+                            @php
+                                $validLinks = $batch->batchLinks->filter(fn ($link) =>
+                                    $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard
+                                );
+                            @endphp
 
-                            $hevcLinks = $allLinks->filter(fn($link) => $link->codec === 'x265');
-                            $avcLinks  = $allLinks->filter(fn($link) => $link->codec === 'x264' || !$link->codec);
-
-                            $maxRes = $allLinks->max('resolution');
-                            $episodeTitle = $anime['title'] . ' - ' . ($batch->episodes ?? '??');
-                            if ($maxRes) $episodeTitle .= ' [' . $maxRes . 'p]';
-
-                            $hasSubtitle = $animeLink->subtitle_url_mega || $animeLink->subtitle_url_gdrive || $animeLink->subtitle_url_pixeldrain;
-                        @endphp
-
-                        @if ($allLinks->isNotEmpty())
-                            <div x-data="{ openDropdown: null }"
-                                 class="relative rounded-xl p-4 md:p-5 transition-all duration-200"
-                                 :class="{ 'z-50': openDropdown !== null, 'z-10': openDropdown === null }"
-                                 style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px);">
-
-                                {{-- Meta Header (Episode & Date) --}}
-                                <div class="flex justify-between items-center w-full mb-3 text-[14px] font-semibold text-white/70">
-                                    <div dir="rtl">
-                                        {{ \Carbon\Carbon::parse($batch->created_at ?? now())->locale('ar')->translatedFormat('j F Y') }}
+                            @if ($validLinks->isNotEmpty())
+                                @foreach ($validLinks as $link)
+                                    <div class="overflow-hidden shadow-md rounded-md mb-4 border border-white/5">
+                                        <div class="flex justify-between items-center bg-[#2b2b2b] px-4 py-3 text-xs md:text-sm" dir="rtl">
+                                            <span class="font-medium flex-shrink-0 text-gray-400">
+                                                {{ $batch->created_at ? $batch->created_at->locale('ar')->translatedFormat('d F Y') : '' }}
+                                            </span>
+                                            <span class="font-bold flex-shrink-0 text-gray-200">
+                                                الحلقة - {{ $batch->episodes ?? 'غير معروف' }}
+                                            </span>
+                                        </div>
+                                        <div class="bg-black text-white text-center py-3 font-semibold text-xs md:text-sm">
+                                            {{ $batch->name }} 
+                                        </div>
+                                        <div class="bg-white flex flex-wrap md:flex-nowrap justify-center items-center px-3 py-2 gap-2">
+                                            <div class="flex flex-wrap gap-2">
+                                                @if ($link->url_torrent)
+                                                    <a href="{{ $link->url_torrent }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        Torrent ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_rr_torrent)
+                                                    <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}" class="bg-blue-600 text-white border px-2 py-1 rounded hover:bg-blue-700 text-xs shadow">
+                                                        RR Torrent ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_mega)
+                                                    <a href="{{ $link->url_mega }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        Mega ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_gdrive)
+                                                    <a href="{{ $link->url_gdrive }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        GDrive ({{ $link->resolution }}p)
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_megaHard)
+                                                    <a href="{{ $link->url_megaHard }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        ({{ $link->resolution }}p) (هاردسب | Hardsub) Mega
+                                                    </a>
+                                                @endif
+                                                @if ($link->url_gdriveHard)
+                                                    <a href="{{ $link->url_gdriveHard }}" target="_blank" class="bg-white text-black border px-2 py-1 rounded hover:bg-gray-100 text-xs shadow">
+                                                        ({{ $link->resolution }}p) (هاردسب | Hardsub) GDrive
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div dir="rtl">الحلقة {{ $batch->episodes ?? '??' }}</div>
-                                </div>
-
-                                {{-- Episode Title --}}
-                                <h3 class="text-right text-lg font-semibold text-white mb-4" dir="ltr">
-                                    {{ $episodeTitle }}
-                                </h3>
-
-                                {{-- Dropdown Buttons Row --}}
-                                <div class="flex flex-wrap justify-right gap-2">
-
-                                    {{-- HEVC Button --}}
-                                    @if ($hevcLinks->isNotEmpty())
-                                        <div class="relative">
-                                            <button @click="openDropdown = (openDropdown === 'HEVC' ? null : 'HEVC')"
-                                                    @click.outside="if(openDropdown === 'HEVC') openDropdown = null"
-                                                    class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-white transition-colors hover:brightness-125 cursor-pointer"
-                                                    style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
-                                                <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125m1.5 3.75c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125" />
-                                                </svg>
-                                                <span>HEVC</span>
-                                                <svg class="w-3 h-3 opacity-60 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === 'HEVC' }" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </button>
-
-                                            {{-- HEVC Dropdown --}}
-                                            <div x-show="openDropdown === 'HEVC'" x-cloak
-                                                 x-transition:enter="transition ease-out duration-150"
-                                                 x-transition:enter-start="opacity-0 translate-y-1"
-                                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                                 x-transition:leave="transition ease-in duration-100"
-                                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                                 x-transition:leave-end="opacity-0 translate-y-1"
-                                                 class="absolute z-50 mt-2 w-52 rounded-xl overflow-hidden divide-y divide-white/[0.08]"
-                                                 style="background: rgba(51, 51, 51, 0.95); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-                                                @foreach ($hevcLinks as $link)
-                                                    @if ($link->url_mega)
-                                                        <a href="{{ $link->url_mega }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>Mega</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_gdrive)
-                                                        <a href="{{ $link->url_gdrive }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>GDrive</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_pixeldrain)
-                                                        <a href="{{ $link->url_pixeldrain }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>PixelDrain</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_torrent)
-                                                        <a href="{{ $link->url_torrent }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                                                            </svg>
-                                                            <span>Torrent</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_rr_torrent)
-                                                        <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                                                            </svg>
-                                                            <span>RR Torrent</span>
-                                                        </a>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    {{-- H.264 Button --}}
-                                    @if ($avcLinks->isNotEmpty())
-                                        <div class="relative">
-                                            <button @click="openDropdown = (openDropdown === 'AVC' ? null : 'AVC')"
-                                                    @click.outside="if(openDropdown === 'AVC') openDropdown = null"
-                                                    class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-white transition-colors hover:brightness-125 cursor-pointer"
-                                                    style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
-                                                <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125m1.5 3.75c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125" />
-                                                </svg>
-                                                <span>H.264</span>
-                                                <svg class="w-3 h-3 opacity-60 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === 'AVC' }" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </button>
-
-                                            {{-- H.264 Dropdown --}}
-                                            <div x-show="openDropdown === 'AVC'" x-cloak
-                                                 x-transition:enter="transition ease-out duration-150"
-                                                 x-transition:enter-start="opacity-0 translate-y-1"
-                                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                                 x-transition:leave="transition ease-in duration-100"
-                                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                                 x-transition:leave-end="opacity-0 translate-y-1"
-                                                 class="absolute z-50 mt-2 w-52 rounded-xl overflow-hidden divide-y"
-                                                 style="background: rgba(51, 51, 51, 0.95); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-                                                @foreach ($avcLinks as $link)
-                                                    @if ($link->url_mega)
-                                                        <a href="{{ $link->url_mega }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>Mega</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_gdrive)
-                                                        <a href="{{ $link->url_gdrive }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>GDrive</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_pixeldrain)
-                                                        <a href="{{ $link->url_pixeldrain }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-                                                            </svg>
-                                                            <span>PixelDrain</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_torrent)
-                                                        <a href="{{ $link->url_torrent }}" target="_blank"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                                                            </svg>
-                                                            <span>Torrent</span>
-                                                        </a>
-                                                    @endif
-                                                    @if ($link->url_rr_torrent)
-                                                        <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}"
-                                                           class="flex items-center gap-3 px-4 py-3 text-[15px] transition-colors"
-                                                           style="color: #E5E5E5;"
-                                                           onmouseover="this.style.background='rgba(255,255,255,0.05)'"
-                                                           onmouseout="this.style.background='transparent'">
-                                                            <svg class="w-5 h-5 opacity-40 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                                                            </svg>
-                                                            <span>RR Torrent</span>
-                                                        </a>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
+                                @endforeach
+                            @endif
+                        @endforeach
                     </div>
                 </div>
             @endif

@@ -7,11 +7,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasProfilePhoto;
     use Notifiable;
+
     protected $fillable = [
         'name',
         'email',
@@ -19,10 +21,60 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
     public function comments()
 {
     return $this->hasMany(Comment::class);
 }
+
+    /**
+     * Validation rules for user registration
+     */
+    public static function registrationRules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:30',
+                new \App\Rules\ValidUsername,
+            ],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users'),
+                function ($attribute, $value, $fail) {
+                    // Check if email is blacklisted
+                    if (\App\Models\EmailBlacklist::isBlacklisted($value)) {
+                        $fail('هذا البريد الإلكتروني محظور ولا يمكن استخدامه.');
+                    }
+                },
+            ],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ];
+    }
 
     public function refClicks()
     {
