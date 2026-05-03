@@ -47,15 +47,32 @@
                 <div class="flex-1 flex flex-col">
                     <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-10 mx-0 sm:mx-6 shadow-2xl rounded-lg flex-1 flex flex-col">
                         <div class="mb-8">
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex-1 text-right">
+                            <style>
+                                @media (max-width: 640px) {
+                                    .mobile-header-stack {
+                                        flex-direction: column-reverse !important;
+                                        align-items: flex-start !important;
+                                        gap: 0.75rem !important;
+                                    }
+                                    .mobile-title-right {
+                                        text-align: right !important;
+                                        width: 100% !important;
+                                    }
+                                    .mobile-rating-right {
+                                        margin-right: 0 !important;
+                                        margin-left: 0 !important;
+                                    }
+                                }
+                            </style>
+                            <div class="flex items-start justify-between mb-4 mobile-header-stack">
+                                <div class="flex-1 text-right mobile-title-right">
                                     <h1 class="text-3xl sm:text-4xl font-bold" dir="ltr">{{ $anime['title'] }}</h1>
                                     @if (!empty($anime['title_english']) && $anime['title_english'] !== $anime['title'])
                                         <h2 class="text-xl sm:text-2xl text-white/70 mt-1" dir="ltr">{{ $anime['title_english'] }}</h2>
                                     @endif
                                 </div>
                                 
-                                <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4">
+                                <div class="flex items-center gap-2 text-xs flex-shrink-0 ml-4 mobile-rating-right">
                                     <div class="block cursor-pointer" onclick="openRatingModal()">
                                         <div class="bg-red-600 rounded px-2 py-1 text-center min-w-[50px] text-white font-bold text-[15px] uppercase tracking-wide">Revive</div>
                                         <div class="text-white text-center font-bold text-sm" id="reviveScoreDisplay">
@@ -81,9 +98,11 @@
                         </div>
 
                         {{-- Info boxes --}}
-                        <div class="grid md:grid-cols-2 gap-4 mt-auto pt-4 lg:pt-8">
-                            <div class="bg-white/90 text-black p-4 lg:p-6 rounded-md">
-                                <div class="grid gap-3 lg:gap-4 text-sm lg:text-base">
+                        <div class="flex-1 flex flex-col mt-4 lg:mt-8">
+                            <div class="mb-3"><h1 class="text-2xl font-bold text-white text-right">تفاصيل الانمي</h1></div>
+                            <div class="grid md:grid-cols-2 gap-4 flex-1">
+                            <div class="bg-white/90 text-black p-4 lg:p-8 rounded-md flex flex-col justify-center h-full">
+                                <div class="grid gap-3 lg:gap-5 text-sm lg:text-base">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">حالة الأنمي:</span>
                                         <span class="font-semibold">{{ $anime['status'] ?? 'Unknown' }}</span>
@@ -123,8 +142,8 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white/90 text-black p-4 lg:p-6 rounded-md">
-                                <div class="grid gap-3 lg:gap-4 text-sm lg:text-base">
+                            <div class="bg-white/90 text-black p-4 lg:p-8 rounded-md flex flex-col justify-center h-full">
+                                <div class="grid gap-3 lg:gap-5 text-sm lg:text-base">
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">نوع الأنمي:</span>
                                         <span class="font-semibold">{{ $anime['type'] ?? 'Unknown' }}</span>
@@ -149,6 +168,7 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -580,11 +600,11 @@
                             $isSeries = in_array('TV', $animeTypes) || in_array('WEB', $animeTypes);
 
                             if ($isMovie) {
-                                $contentLabel = 'فيلم'; // Movie
+                                $contentLabel = 'فيلم';
                             } elseif ($isOVA) {
                                 $contentLabel = 'OVA';
                             } else {
-                                $contentLabel = 'الحلقة ' . ($batch->episodes ?? '??'); // Episode + number
+                                $contentLabel = $batch->episodes;
                             }
                         @endphp
 
