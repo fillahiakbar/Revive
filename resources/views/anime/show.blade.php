@@ -346,14 +346,24 @@
             </div>
 
            
-            {{-- Subtitle --}}
-            @if(isset($animeLink) && $animeLink->subtitle_url)
-            <div class="mt-6 flex justify-start" dir="ltr">
+            {{-- Subtitle & PixelDrain --}}
+            @if(isset($animeLink) && ($animeLink->subtitle_url || $animeLink->subtitle_url_pixeldrain))
+            <div class="mt-6 flex justify-start gap-3" dir="ltr">
+                @if($animeLink->subtitle_url)
                 <a href="{{ $animeLink->subtitle_url }}" target="_blank"
                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:brightness-125 transition-colors"
                    style="background: rgba(255, 255, 255, 0.358); border: 1px solid rgba(255,255,255,0.1);">
                     <span>ملفات الترجمة</span>
                 </a>
+                @endif
+
+                @if($animeLink->subtitle_url_pixeldrain)
+                <a href="{{ $animeLink->subtitle_url_pixeldrain }}" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:brightness-125 transition-colors"
+                   style="background: rgba(255, 255, 255, 0.358); border: 1px solid rgba(255,255,255,0.1);">
+                    <span>مشاهدة مباشرة</span>
+                </a>
+                @endif
             </div>
             @endif
 
@@ -532,7 +542,10 @@
                     }
                 </style>
 
+               
+
                 <div class="ep-list-container mt-10 bg-white/20 backdrop-blur-lg p-6 rounded-lg overflow-y-auto" style="max-height: 380px;">
+                    <div class="text-2xl font-semibold mb-4">قائمة الحلقات </div>
                     <div class="ep-card-grid" id="episode-grid">
                         @foreach ($animeLink->batches as $batch)
                         @php
@@ -540,8 +553,16 @@
                                 $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard || $link->url_pixeldrain
                             );
 
-                            $hevcLinks = $allLinks->filter(fn($link) => $link->codec === 'x265');
-                            $avcLinks  = $allLinks->filter(fn($link) => $link->codec === 'x264' || !$link->codec);
+                            $groupedLinks = $allLinks->groupBy(function ($link) {
+                                $codec = (string)$link->codec;
+                                if (empty($codec) || stripos($codec, '264') !== false || stripos($codec, 'avc') !== false || stripos($codec, 'h.264') !== false) {
+                                    return 'H.264';
+                                }
+                                if (stripos($codec, '265') !== false || stripos($codec, 'hevc') !== false) {
+                                    return 'HEVC';
+                                }
+                                return $codec;
+                            });
 
                             $maxRes = $allLinks->max('resolution');
                             $episodeTitle = $anime['title'] . ' - ' . ($batch->episodes ?? '??');
@@ -551,6 +572,20 @@
 
                             // Collect unique codecs for pills
                             $codecs = $allLinks->pluck('codec')->filter()->unique()->values();
+
+                            // Determine content label based on anime type
+                            $animeTypes = $animeLink->types->pluck('name')->toArray();
+                            $isMovie = in_array('Movie', $animeTypes);
+                            $isOVA = in_array('OVA', $animeTypes);
+                            $isSeries = in_array('TV', $animeTypes) || in_array('WEB', $animeTypes);
+
+                            if ($isMovie) {
+                                $contentLabel = 'فيلم'; // Movie
+                            } elseif ($isOVA) {
+                                $contentLabel = 'OVA';
+                            } else {
+                                $contentLabel = 'الحلقة ' . ($batch->episodes ?? '??'); // Episode + number
+                            }
                         @endphp
 
                         @if ($allLinks->isNotEmpty())
@@ -558,19 +593,19 @@
                                  class="ep-card"
                                  :class="{ 'z-50': openDropdown !== null, 'z-10': openDropdown === null }">
 
-                                {{-- Header: Episode Title + Episode Number/Badge --}}
-                                <div class="ep-card__header">
-                                    {{-- Episode Title --}}
-                                    <div class="ep-card__title" title="{{ $episodeTitle }}">
-                                        {{ $episodeTitle }}
+                                {{-- Header: Episode Number/Badge + Episode Title --}}
+                                <div class="flex flex-col items-start gap-1.5 mb-3 w-full">
+                                    {{-- Episode Number + NEW Badge --}}
+                                    <div class="flex items-center gap-2">
+                                        <span class="ep-card__ep-num">{{ $contentLabel }}</span>
                                     </div>
                                     
-                                    {{-- Episode Number + NEW Badge --}}
-                                    <div class="flex items-center gap-2 shrink-0">
+                                    {{-- Episode Title --}}
+                                    <div class="ep-card__title w-full mt-2" title="{{ $episodeTitle }}">
                                         @if ($isNew)
                                             <span class="ep-card__badge-new">NEW</span>
                                         @endif
-                                        <span class="ep-card__ep-num">الحلقة {{ $batch->episodes ?? '??' }}</span>
+                                        {{ $episodeTitle }}
                                     </div>
                                 </div>
 
@@ -579,23 +614,23 @@
 
                                     {{-- Download Buttons --}}
                                     <div class="ep-card__actions">
-                                        {{-- HEVC Button --}}
-                                        @if ($hevcLinks->isNotEmpty())
+                                        @foreach ($groupedLinks as $codecName => $links)
                                             <div class="relative">
-                                                <button @click="openDropdown = (openDropdown === 'HEVC' ? null : 'HEVC')"
-                                                        @click.outside="if(openDropdown === 'HEVC') openDropdown = null"
+                                                @php $safeCodec = \Illuminate\Support\Str::slug($codecName); @endphp
+                                                <button @click="openDropdown = (openDropdown === '{{ $safeCodec }}' ? null : '{{ $safeCodec }}')"
+                                                        @click.outside="if(openDropdown === '{{ $safeCodec }}') openDropdown = null"
                                                         class="ep-card__dl-btn">
                                                     <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
                                                     </svg>
-                                                    <span>HEVC</span>
-                                                    <svg class="w-3 h-3 opacity-50 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === 'HEVC' }" fill="currentColor" viewBox="0 0 20 20">
+                                                    <span>{{ $codecName }}</span>
+                                                    <svg class="w-3 h-3 opacity-50 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === '{{ $safeCodec }}' }" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                                     </svg>
                                                 </button>
 
-                                                {{-- HEVC Dropdown --}}
-                                                <div x-show="openDropdown === 'HEVC'" x-cloak
+                                                {{-- Dropdown --}}
+                                                <div x-show="openDropdown === '{{ $safeCodec }}'" x-cloak
                                                      x-transition:enter="transition ease-out duration-150"
                                                      x-transition:enter-start="opacity-0 translate-y-1"
                                                      x-transition:enter-end="opacity-100 translate-y-0"
@@ -603,7 +638,7 @@
                                                      x-transition:leave-start="opacity-100 translate-y-0"
                                                      x-transition:leave-end="opacity-0 translate-y-1"
                                                      class="ep-card__dropdown right-0">
-                                                    @foreach ($hevcLinks as $link)
+                                                    @foreach ($links as $link)
                                                         @if ($link->url_mega)
                                                             <a href="{{ $link->url_mega }}" target="_blank">
                                                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
@@ -649,79 +684,7 @@
                                                     @endforeach
                                                 </div>
                                             </div>
-                                        @endif
-
-                                        {{-- H.264 Button --}}
-                                        @if ($avcLinks->isNotEmpty())
-                                            <div class="relative">
-                                                <button @click="openDropdown = (openDropdown === 'AVC' ? null : 'AVC')"
-                                                        @click.outside="if(openDropdown === 'AVC') openDropdown = null"
-                                                        class="ep-card__dl-btn">
-                                                    <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
-                                                    </svg>
-                                                    <span>H.264</span>
-                                                    <svg class="w-3 h-3 opacity-50 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === 'AVC' }" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                </button>
-
-                                                {{-- H.264 Dropdown --}}
-                                                <div x-show="openDropdown === 'AVC'" x-cloak
-                                                     x-transition:enter="transition ease-out duration-150"
-                                                     x-transition:enter-start="opacity-0 translate-y-1"
-                                                     x-transition:enter-end="opacity-100 translate-y-0"
-                                                     x-transition:leave="transition ease-in duration-100"
-                                                     x-transition:leave-start="opacity-100 translate-y-0"
-                                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                                     class="ep-card__dropdown right-0">
-                                                    @foreach ($avcLinks as $link)
-                                                        @if ($link->url_mega)
-                                                            <a href="{{ $link->url_mega }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>Mega</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_megaHard)
-                                                            <a href="{{ $link->url_megaHard }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>Mega Hardsub</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_gdrive)
-                                                            <a href="{{ $link->url_gdrive }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>GDrive</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_gdriveHard)
-                                                            <a href="{{ $link->url_gdriveHard }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>GDrive Hardsub</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_pixeldrain)
-                                                            <a href="{{ $link->url_pixeldrain }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>PixelDrain</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_torrent)
-                                                            <a href="{{ $link->url_torrent }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                                                                <span>Torrent</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_rr_torrent)
-                                                            <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                                                                <span>RR Torrent</span>
-                                                            </a>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
+                                        @endforeach
                                     </div>
 
                                     {{-- Date --}}

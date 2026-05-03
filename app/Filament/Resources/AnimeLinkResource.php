@@ -171,6 +171,10 @@ class AnimeLinkResource extends Resource
                         ->label('Subtitle URL')
                         ->URL()
                         ->placeholder('https://...'),
+                    TextInput::make('subtitle_url_pixeldrain')
+                        ->label('PixelDrain URL')
+                        ->URL()
+                        ->placeholder('https://pixeldrain.com/...'),
                 ]),
 
             Select::make('related_anime_group_id')
@@ -208,16 +212,22 @@ class AnimeLinkResource extends Resource
         return Repeater::make('batchLinks')
             ->relationship()
             ->label('Download Links')
-            ->grid(2)
+            ->grid(3)
             ->schema([
-            Select::make('codec')
-            ->label('Codec (HEVC/H.264)')
-            ->options([
+            TextInput::make('codec')
+            ->label('Codec / Format')
+            ->datalist([
                 'x264' => 'H.264 (x264)',
                 'x265' => 'HEVC (x265)',
+                'AV1' => 'AV1',
+                'Hardsub' => 'Hardsub',
+                'Dual Audio' => 'Dual Audio',
+                'RAW' => 'RAW',
+                'xvid' => 'XViD',
             ])
             ->required()
-            ->default('x264'),
+            ->default('x264')
+            ->helperText('Select from preset or type custom codec/format'),
 
             Select::make('resolution')
             ->label('Resolution')

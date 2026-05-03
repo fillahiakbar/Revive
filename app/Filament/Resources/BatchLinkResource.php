@@ -31,14 +31,20 @@ class BatchLinkResource extends Resource
                 ->searchable()
                 ->preload(),
 
-            Forms\Components\Select::make('codec')
-                ->label('الترميز')
-                ->options([
-                    'x264' => 'x264 (AVC)',
-                    'x265' => 'x265 (HEVC)',
+            Forms\Components\TextInput::make('codec')
+                ->label('الترميز / Codec')
+                ->datalist([
+                    'x264' => 'H.264 (x264)',
+                    'x265' => 'HEVC (x265)',
+                    'AV1' => 'AV1',
+                    'Hardsub' => 'Hardsub',
+                    'Dual Audio' => 'Dual Audio',
+                    'RAW' => 'RAW',
+                    'xvid' => 'XViD',
                 ])
                 ->required()
-                ->default('x264'),
+                ->default('x264')
+                ->helperText('Select from preset or type custom codec/format'),
 
             Forms\Components\TextInput::make('resolution')
                 ->label('الدقة')
