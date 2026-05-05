@@ -15,8 +15,6 @@ class AnimeDetailController extends Controller
                 'types',
                 'batches' => fn ($q) => $q->has('batchLinks')->orderByDesc('created_at'),
                 'batches.batchLinks',
-                'comments' => fn ($q) => $q->latest(),
-                'comments.user',
                 'relatedGroup.animeLinks.types',
             ])
             ->where('mal_id', $mal_id)
@@ -127,12 +125,24 @@ class AnimeDetailController extends Controller
             'imdb_id'        => $animeLink->imdb_id ?? $imdbId,
         ];
 
+        // Paginated comments (10 per page), only top-level comments
+        $comments = null;
+        if ($animeLink) {
+            $comments = $animeLink->comments()
+                ->with(['user', 'replies.user'])
+                ->whereNull('parent_id')
+                ->latest()
+                ->paginate(10)
+                ->withQueryString();
+        }
+
         return view('anime.show', [
             'animeLink'     => $animeLink,
             'anime'         => $animeData,
             'downloadLinks' => $downloadLinks,
             'similarAnime'  => [],
             'fromDatabase'  => $fromDatabase,
+            'comments'      => $comments,
         ]);
     }
 

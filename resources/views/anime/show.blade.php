@@ -45,7 +45,7 @@
 
                 {{-- Main Info --}}
                 <div class="flex-1 flex flex-col">
-                    <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-10 mx-0 sm:mx-6 shadow-2xl rounded-lg flex-1 flex flex-col">
+                    <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-10 shadow-2xl rounded-lg flex-1 flex flex-col">
                         <div class="mb-8">
                             <style>
                                 @media (max-width: 640px) {
@@ -99,76 +99,80 @@
 
                         {{-- Info boxes --}}
                         <div class="flex-1 flex flex-col mt-4 lg:mt-8">
-                            <div class="mb-3"><h1 class="text-2xl font-bold text-white text-right">تفاصيل الانمي</h1></div>
-                            <div class="grid md:grid-cols-2 gap-4 flex-1">
-                            <div class="bg-white/90 text-black p-4 lg:p-8 rounded-md flex flex-col justify-center h-full">
-                                <div class="grid gap-3 lg:gap-5 text-sm lg:text-base">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">حالة الأنمي:</span>
-                                        <span class="font-semibold">{{ $anime['status'] ?? 'Unknown' }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">موسم الإصدار:</span>
-                                        <span class="font-semibold">
-                                            @if(isset($anime['season']) && isset($anime['year']))
-                                                {{ ucfirst($anime['season']) }} {{ $anime['year'] }}
-                                            @else
-                                                {{ $anime['year'] ?? 'Unknown' }}
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">الاستوديو:</span>
-                                        <span class="font-semibold">
-                                            @if(isset($anime['studios'][0]['name']))
-                                                {{ $anime['studios'][0]['name'] }}
-                                            @else
-                                                Unknown
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">التصنيفات:</span>
-                                        <span class="font-semibold">
-                                            @if(!empty($anime['genres']))
-                                                @foreach($anime['genres'] as $index => $genre)
-                                                    {{ $genre }}@if($index < count($anime['genres']) - 1), @endif
-                                                @endforeach
-                                            @else
-                                                Unknown
-                                            @endif
-                                        </span>
+                            <div class="mb-4"><h2 class="text-xl lg:text-2xl font-bold text-white text-right drop-shadow-md">تفاصيل الانمي</h2></div>
+                            <div class="grid md:grid-cols-2 gap-4 lg:gap-6 flex-1">
+                                
+                                {{-- Card 1 --}}
+                                <div class="bg-white/5 border border-white/10 rounded-xl p-5 lg:p-6 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
+                                    <div class="flex flex-col gap-3 text-sm lg:text-[0.95rem]">
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">حالة الأنمي:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">{{ $anime['status'] ?? 'Unknown' }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">موسم الإصدار:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">
+                                                @if(isset($anime['season']) && isset($anime['year']))
+                                                    {{ ucfirst($anime['season']) }} {{ $anime['year'] }}
+                                                @else
+                                                    {{ $anime['year'] ?? 'Unknown' }}
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">الاستوديو:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">
+                                                @if(isset($anime['studios'][0]['name']))
+                                                    {{ $anime['studios'][0]['name'] }}
+                                                @else
+                                                    Unknown
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">التصنيفات:</span>
+                                            <span class="text-white font-semibold text-left text-xs lg:text-sm" dir="ltr">
+                                                @if(!empty($anime['genres']))
+                                                    @foreach($anime['genres'] as $index => $genre)
+                                                        {{ $genre }}@if($index < count($anime['genres']) - 1), @endif
+                                                    @endforeach
+                                                @else
+                                                    Unknown
+                                                @endif
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="bg-white/90 text-black p-4 lg:p-8 rounded-md flex flex-col justify-center h-full">
-                                <div class="grid gap-3 lg:gap-5 text-sm lg:text-base">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">نوع الأنمي:</span>
-                                        <span class="font-semibold">{{ $anime['type'] ?? 'Unknown' }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">عدد الحلقات:</span>
-                                        <span class="font-semibold">{{ $anime['episodes'] ?? 'Unknown' }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">البث الحصري:</span>
-                                        <span class="font-semibold">
-                                            @if(isset($anime['aired']['from']))
-                                                {{ date('M j, Y', strtotime($anime['aired']['from'])) }}
-                                            @else
-                                                Unknown
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">مدة الحلقة:</span>
-                                        <span class="font-semibold">{{ $anime['duration'] ?? 'Unknown' }}</span>
+                                {{-- Card 2 --}}
+                                <div class="bg-white/5 border border-white/10 rounded-xl p-5 lg:p-6 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
+                                    <div class="flex flex-col gap-3 text-sm lg:text-[0.95rem]">
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">نوع الأنمي:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">{{ $anime['type'] ?? 'Unknown' }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">عدد الحلقات:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">{{ $anime['episodes'] ?? 'Unknown' }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">البث الحصري:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">
+                                                @if(isset($anime['aired']['from']))
+                                                    {{ date('M j, Y', strtotime($anime['aired']['from'])) }}
+                                                @else
+                                                    Unknown
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center w-full">
+                                            <span class="text-white/60 font-medium whitespace-nowrap">مدة الحلقة:</span>
+                                            <span class="text-white font-semibold text-left" dir="ltr">{{ $anime['duration'] ?? 'Unknown' }}</span>
+                                        </div>
                                     </div>
                                 </div>
+
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -368,19 +372,27 @@
            
             {{-- Subtitle & PixelDrain --}}
             @if(isset($animeLink) && ($animeLink->subtitle_url || $animeLink->subtitle_url_pixeldrain))
-            <div class="mt-6 flex justify-start gap-3" dir="ltr">
+            <div class="mt-6 flex justify-start gap-3 flex-wrap" dir="ltr">
                 @if($animeLink->subtitle_url)
                 <a href="{{ $animeLink->subtitle_url }}" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:brightness-125 transition-colors"
-                   style="background: rgba(255, 255, 255, 0.358); border: 1px solid rgba(255,255,255,0.1);">
+                   class="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
+                   style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <svg class="w-5 h-5 opacity-90 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 13h4m-4 3h8"/>
+                    </svg>
                     <span>ملفات الترجمة</span>
                 </a>
                 @endif
 
                 @if($animeLink->subtitle_url_pixeldrain)
                 <a href="{{ $animeLink->subtitle_url_pixeldrain }}" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white hover:brightness-125 transition-colors"
-                   style="background: rgba(255, 255, 255, 0.358); border: 1px solid rgba(255,255,255,0.1);">
+                   class="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
+                   style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <svg class="w-5 h-5 opacity-90 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span>مشاهدة مباشرة</span>
                 </a>
                 @endif
@@ -415,6 +427,64 @@
                         backdrop-filter: blur(16px);
                         -webkit-backdrop-filter: blur(16px);
                         overflow: visible;
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        min-height: 144px;
+                    }
+                    .ep-card__square {
+                        flex-shrink: 0;
+                        width: 4rem;
+                        height: 4rem;
+                        background: rgba(0, 0, 0, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        border-radius: 0.5rem;
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0.25rem;
+                        text-align: center;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__square {
+                            width: 4.5rem;
+                            height: 4.5rem;
+                        }
+                    }
+                    .ep-card__square-top {
+                        font-size: 0.65rem;
+                        font-weight: 600;
+                        color: rgba(255, 255, 255, 0.6);
+                        margin-bottom: 0.1rem;
+                        direction: rtl;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__square-top {
+                            font-size: 0.75rem;
+                        }
+                    }
+                    .ep-card__square-bottom {
+                        font-size: 0.95rem;
+                        font-weight: 700;
+                        color: rgba(255, 255, 255, 0.95);
+                        line-height: 1.1;
+                        direction: ltr;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__square-bottom {
+                            font-size: 1.1rem;
+                        }
+                    }
+                    .ep-card__content {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        min-width: 0;
+                        justify-content: center;
+                        gap: 0.35rem;
                     }
                     .ep-card__header {
                         display: flex;
@@ -469,6 +539,8 @@
                         justify-content: space-between;
                         gap: 0.5rem;
                         flex-wrap: wrap;
+                        margin-top: 0.25rem;
+                        width: 100%;
                     }
                     .ep-card__pills {
                         display: flex;
@@ -490,22 +562,31 @@
                     }
                     .ep-card__actions {
                         display: flex;
-                        align-items: center;
-                        gap: 0.4rem;
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 0.35rem;
                         flex-shrink: 0;
+                        width: 100px;
                     }
                     .ep-card__dl-btn {
                         display: flex;
                         align-items: center;
+                        justify-content: center;
                         gap: 6px;
-                        padding: 6px 14px;
-                        border-radius: 8px;
-                        font-size: 0.78rem;
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 0.8rem;
                         font-weight: 600;
                         color: #fff;
-                        background: rgba(255, 255, 255, 0.1);
+                        background: rgba(255, 255, 255, 0.15);
                         border: 1px solid rgba(255, 255, 255, 0.2);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
                         cursor: pointer;
+                        transition: all 0.2s ease;
+                        flex-shrink: 0;
+                        white-space: nowrap;
+                        width: 100%;
                     }
                     .ep-card__dropdown {
                         position: absolute;
@@ -564,13 +645,13 @@
 
                
 
-                <div class="ep-list-container mt-10 bg-white/20 backdrop-blur-lg p-6 rounded-lg overflow-y-auto" style="max-height: 380px;">
+                <div class="ep-list-container mt-10 bg-white/20 backdrop-blur-lg p-6 rounded-lg overflow-y-auto overflow-x-hidden" style="max-height: 380px;">
                     <div class="text-2xl font-semibold mb-4">قائمة الحلقات </div>
                     <div class="ep-card-grid" id="episode-grid">
                         @foreach ($animeLink->batches as $batch)
                         @php
                             $allLinks = $batch->batchLinks->filter(fn ($link) =>
-                                $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard || $link->url_pixeldrain
+                                $link->url_torrent || $link->url_rr_torrent || $link->url_mega || $link->url_gdrive || $link->url_megaHard || $link->url_gdriveHard
                             );
 
                             $groupedLinks = $allLinks->groupBy(function ($link) {
@@ -585,7 +666,21 @@
                             });
 
                             $maxRes = $allLinks->max('resolution');
-                            $episodeTitle = $anime['title'] . ' - ' . ($batch->episodes ?? '??');
+
+                            // Format episode number with leading zeros for consistency with badge
+                            $rawEpisodes = $batch->episodes ?? '??';
+                            if (strpos($rawEpisodes, '-') !== false) {
+                                $epParts = explode('-', $rawEpisodes);
+                                $epStart = str_pad(trim($epParts[0]), 2, '0', STR_PAD_LEFT);
+                                $epEnd = isset($epParts[1]) ? str_pad(trim($epParts[1]), 2, '0', STR_PAD_LEFT) : '';
+                                $formattedEpisodes = $epStart . '-' . $epEnd;
+                            } elseif (is_numeric(trim($rawEpisodes))) {
+                                $formattedEpisodes = str_pad(trim($rawEpisodes), 2, '0', STR_PAD_LEFT);
+                            } else {
+                                $formattedEpisodes = $rawEpisodes;
+                            }
+
+                            $episodeTitle = $anime['title'] . ' - ' . $formattedEpisodes;
                             if ($maxRes) $episodeTitle .= ' [' . $maxRes . 'p]';
 
                             $isNew = in_array($batch->id, $latestBatchIds);
@@ -599,12 +694,26 @@
                             $isOVA = in_array('OVA', $animeTypes);
                             $isSeries = in_array('TV', $animeTypes) || in_array('WEB', $animeTypes);
 
+                            $contentLabelTop = '';
+                            $contentLabelBottom = '';
+
                             if ($isMovie) {
-                                $contentLabel = 'فيلم';
+                                $contentLabelBottom = 'فيلم';
                             } elseif ($isOVA) {
-                                $contentLabel = 'OVA';
+                                $contentLabelBottom = 'OVA';
                             } else {
-                                $contentLabel = $batch->episodes;
+                                $episodesStr = $batch->episodes;
+                                if (strpos($episodesStr, '-') !== false) {
+                                    $parts = explode('-', $episodesStr);
+                                    $start = str_pad(trim($parts[0]), 2, '0', STR_PAD_LEFT);
+                                    $end = isset($parts[1]) ? str_pad(trim($parts[1]), 2, '0', STR_PAD_LEFT) : '';
+                                    $contentLabelTop = 'الحلقات';
+                                    $contentLabelBottom = $start . '-' . $end;
+                                } else {
+                                    $num = str_pad(trim($episodesStr), 2, '0', STR_PAD_LEFT);
+                                    $contentLabelTop = 'الحلقة';
+                                    $contentLabelBottom = $num;
+                                }
                             }
                         @endphp
 
@@ -613,104 +722,97 @@
                                  class="ep-card"
                                  :class="{ 'z-50': openDropdown !== null, 'z-10': openDropdown === null }">
 
-                                {{-- Header: Episode Number/Badge + Episode Title --}}
-                                <div class="flex flex-col items-start gap-1.5 mb-3 w-full">
-                                    {{-- Episode Number + NEW Badge --}}
-                                    <div class="flex items-center gap-2">
-                                        <span class="ep-card__ep-num">{{ $contentLabel }}</span>
-                                    </div>
-                                    
+                                {{-- Square Content Label (Right side in RTL) --}}
+                                <div class="ep-card__square">
+                                    @if($contentLabelTop)
+                                        <span class="ep-card__square-top">{{ $contentLabelTop }}</span>
+                                    @endif
+                                    <span class="ep-card__square-bottom">{{ $contentLabelBottom }}</span>
+                                </div>
+
+                                {{-- Content: Title & Buttons (Left side in RTL) --}}
+                                <div class="ep-card__content">
                                     {{-- Episode Title --}}
-                                    <div class="ep-card__title w-full mt-2" title="{{ $episodeTitle }}">
+                                    <div class="ep-card__title w-full" title="{{ $episodeTitle }}">
                                         @if ($isNew)
                                             <span class="ep-card__badge-new">NEW</span>
                                         @endif
                                         {{ $episodeTitle }}
                                     </div>
+
+                                    {{-- Bottom row: Date only now --}}
+                                    <div class="ep-card__meta-row">
+                                        <div class="ep-card__date">
+                                            {{ \Carbon\Carbon::parse($batch->created_at ?? now())->locale('ar')->translatedFormat('j F Y') }}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {{-- Bottom row: Download Buttons + Date --}}
-                                <div class="ep-card__meta-row">
+                                {{-- Far Left: Download Buttons --}}
+                                <div class="ep-card__actions">
+                                    @foreach ($groupedLinks as $codecName => $links)
+                                        <div class="relative w-full">
+                                            @php $safeCodec = \Illuminate\Support\Str::slug($codecName); @endphp
+                                            <button @click="openDropdown = (openDropdown === '{{ $safeCodec }}' ? null : '{{ $safeCodec }}')"
+                                                    @click.outside="if(openDropdown === '{{ $safeCodec }}') openDropdown = null"
+                                                    class="ep-card__dl-btn">
+                                                <svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+                                                </svg>
+                                                <span>{{ $codecName }}</span>
+                                            </button>
 
-                                    {{-- Download Buttons --}}
-                                    <div class="ep-card__actions">
-                                        @foreach ($groupedLinks as $codecName => $links)
-                                            <div class="relative">
-                                                @php $safeCodec = \Illuminate\Support\Str::slug($codecName); @endphp
-                                                <button @click="openDropdown = (openDropdown === '{{ $safeCodec }}' ? null : '{{ $safeCodec }}')"
-                                                        @click.outside="if(openDropdown === '{{ $safeCodec }}') openDropdown = null"
-                                                        class="ep-card__dl-btn">
-                                                    <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
-                                                    </svg>
-                                                    <span>{{ $codecName }}</span>
-                                                    <svg class="w-3 h-3 opacity-50 transition-transform duration-200" :class="{ 'rotate-180': openDropdown === '{{ $safeCodec }}' }" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                </button>
+                                            {{-- Dropdown --}}
+                                            <div x-show="openDropdown === '{{ $safeCodec }}'" x-cloak
+                                                 x-transition:enter="transition ease-out duration-150"
+                                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                 x-transition:leave="transition ease-in duration-100"
+                                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                                 x-transition:leave-end="opacity-0 translate-y-1"
+                                                 class="ep-card__dropdown left-0">
+                                                @foreach ($links as $link)
+                                                    @if ($link->url_mega)
+                                                        <a href="{{ $link->url_mega }}" target="_blank">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                                                            <span>Mega</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_megaHard)
+                                                        <a href="{{ $link->url_megaHard }}" target="_blank">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                                                            <span>Mega Hardsub</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_gdrive)
+                                                        <a href="{{ $link->url_gdrive }}" target="_blank">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                                                            <span>GDrive</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_gdriveHard)
+                                                        <a href="{{ $link->url_gdriveHard }}" target="_blank">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                                                            <span>GDrive Hardsub</span>
+                                                        </a>
+                                                    @endif
 
-                                                {{-- Dropdown --}}
-                                                <div x-show="openDropdown === '{{ $safeCodec }}'" x-cloak
-                                                     x-transition:enter="transition ease-out duration-150"
-                                                     x-transition:enter-start="opacity-0 translate-y-1"
-                                                     x-transition:enter-end="opacity-100 translate-y-0"
-                                                     x-transition:leave="transition ease-in duration-100"
-                                                     x-transition:leave-start="opacity-100 translate-y-0"
-                                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                                     class="ep-card__dropdown right-0">
-                                                    @foreach ($links as $link)
-                                                        @if ($link->url_mega)
-                                                            <a href="{{ $link->url_mega }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>Mega</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_megaHard)
-                                                            <a href="{{ $link->url_megaHard }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>Mega Hardsub</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_gdrive)
-                                                            <a href="{{ $link->url_gdrive }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>GDrive</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_gdriveHard)
-                                                            <a href="{{ $link->url_gdriveHard }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>GDrive Hardsub</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_pixeldrain)
-                                                            <a href="{{ $link->url_pixeldrain }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                                                                <span>PixelDrain</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_torrent)
-                                                            <a href="{{ $link->url_torrent }}" target="_blank">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                                                                <span>Torrent</span>
-                                                            </a>
-                                                        @endif
-                                                        @if ($link->url_rr_torrent)
-                                                            <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}">
-                                                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                                                                <span>RR Torrent</span>
-                                                            </a>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
+                                                    @if ($link->url_torrent)
+                                                        <a href="{{ $link->url_torrent }}" target="_blank">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                                                            <span>Torrent</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($link->url_rr_torrent)
+                                                        <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('torrent.download', ['filename' => $link->url_rr_torrent], now()->addHours(2)) }}">
+                                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                                                            <span>RR Torrent</span>
+                                                        </a>
+                                                    @endif
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </div>
-
-                                    {{-- Date --}}
-                                    <div class="ep-card__date">
-                                        {{ \Carbon\Carbon::parse($batch->created_at ?? now())->locale('ar')->translatedFormat('j F Y') }}
-                                    </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
                         @endif
@@ -825,9 +927,9 @@
                 @endauth
 
                 {{-- Comments List --}}
-                @if ($animeLink && $animeLink->comments->isNotEmpty())
-                    <div class="space-y-6 mt-6">
-                        @foreach ($animeLink->comments->whereNull('parent_id') as $comment)
+                @if ($comments && $comments->isNotEmpty())
+                    <div class="space-y-6 mt-6" id="comments-section">
+                        @foreach ($comments as $comment)
                             @php
                                 $avatar = $comment->user && $comment->user->profile_photo_url
                                     ? $comment->user->profile_photo_url
@@ -884,6 +986,53 @@
                             </div>
                         @endforeach
                     </div>
+
+                    {{-- Pagination --}}
+                    @if ($comments->hasPages())
+                        <div class="flex justify-center mt-8" dir="rtl">
+                            <nav class="flex items-center space-x-2 rtl:space-x-reverse">
+                                @if (!$comments->onFirstPage())
+                                    <a href="{{ $comments->url(1) }}#comments-section"
+                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                                        title="الصفحة الأولى">
+                                        &laquo;
+                                    </a>
+                                    <a href="{{ $comments->previousPageUrl() }}#comments-section"
+                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                                        title="السابقة">
+                                        &lsaquo;
+                                    </a>
+                                @endif
+
+                                @foreach ($comments->getUrlRange(max(1, $comments->currentPage() - 2), min($comments->lastPage(), $comments->currentPage() + 2)) as $page => $url)
+                                    <a href="{{ $url }}#comments-section"
+                                        class="w-10 h-10 flex items-center justify-center rounded-full text-sm transition
+                                        {{ $comments->currentPage() == $page ? 'bg-red-500 text-white font-bold' : 'bg-white text-black hover:bg-gray-300' }}"
+                                        title="صفحة {{ $page }}">
+                                        {{ $page }}
+                                    </a>
+                                @endforeach
+
+                                @if ($comments->hasMorePages())
+                                    <a href="{{ $comments->nextPageUrl() }}#comments-section"
+                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                                        title="التالي">
+                                        &rsaquo;
+                                    </a>
+                                    <a href="{{ $comments->url($comments->lastPage()) }}#comments-section"
+                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-gray-300 text-black text-lg transition"
+                                        title="الأخيرة">
+                                        &raquo;
+                                    </a>
+                                @endif
+                            </nav>
+                        </div>
+
+                        <div class="text-center mt-3 text-white/50 text-sm" dir="rtl">
+                            صفحة {{ $comments->currentPage() }} من {{ $comments->lastPage() }}
+                        </div>
+                    @endif
+
                 @else
                     <p class="text-white/70 italic mt-6">لا توجد تعليقات بعد.</p>
                 @endif

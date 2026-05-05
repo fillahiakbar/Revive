@@ -164,12 +164,12 @@ class AnimeLinkResource extends Resource
             ->label('IMDb ID')
             ->dehydrated(true),
 
-            Section::make('Subtitles')
+            Section::make('Subtitle and PixelDrain URL')
                 ->description('Manage subtitle files or links.')
                 ->schema([
                     TextInput::make('subtitle_url')
                         ->label('Subtitle URL')
-                        ->URL()
+                        ->URL() 
                         ->placeholder('https://...'),
                     TextInput::make('subtitle_url_pixeldrain')
                         ->label('PixelDrain URL')
@@ -251,7 +251,6 @@ class AnimeLinkResource extends Resource
             Textarea::make('url_gdrive')->label('Google Drive URL')->rows(1),
             Textarea::make('url_megaHard')->label('Mega Hardsub URL')->rows(1),
             Textarea::make('url_gdriveHard')->label('Google Drive Hardsub URL')->rows(1),
-            Textarea::make('url_pixeldrain')->label('PixelDrain URL')->rows(1),
         ]);
     }
 
