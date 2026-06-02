@@ -45,7 +45,7 @@
 
                 {{-- Main Info --}}
                 <div class="flex-1 flex flex-col">
-                    <div class="bg-white/20 backdrop-blur-lg p-6 sm:p-10 shadow-2xl rounded-lg flex-1 flex flex-col">
+                    <div class="bg-white/20 backdrop-blur-lg p-4 sm:p-10 shadow-2xl rounded-lg flex-1 flex flex-col">
                         <div class="mb-8">
                             <style>
                                 @media (max-width: 640px) {
@@ -103,7 +103,7 @@
                             <div class="grid md:grid-cols-2 gap-4 lg:gap-6 flex-1">
                                 
                                 {{-- Card 1 --}}
-                                <div class="bg-white/5 border border-white/10 rounded-xl p-5 lg:p-6 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
+                                <div class="bg-white/5 border border-white/10 rounded-xl px-8 py-6 lg:px-10 lg:py-8 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
                                     <div class="flex flex-col gap-3 text-sm lg:text-[0.95rem]">
                                         <div class="flex justify-between items-center w-full">
                                             <span class="text-white/60 font-medium whitespace-nowrap">حالة الأنمي:</span>
@@ -145,7 +145,7 @@
                                 </div>
 
                                 {{-- Card 2 --}}
-                                <div class="bg-white/5 border border-white/10 rounded-xl p-5 lg:p-6 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
+                                <div class="bg-white/5 border border-white/10 rounded-xl px-8 py-6 lg:px-10 lg:py-8 flex flex-col justify-center h-full backdrop-blur-md shadow-lg" dir="rtl">
                                     <div class="flex flex-col gap-3 text-sm lg:text-[0.95rem]">
                                         <div class="flex justify-between items-center w-full">
                                             <span class="text-white/60 font-medium whitespace-nowrap">نوع الأنمي:</span>
@@ -361,7 +361,7 @@
 
             {{-- Synopsis (RTL) --}}
             <div class="mt-8" dir="rtl">
-                <div class="bg-white/30 backdrop-blur-lg p-6 border border-white/20 rounded-lg">
+                <div class="bg-white/30 backdrop-blur-lg p-4 sm:p-6 border border-white/20 rounded-lg">
                     <h3 class="text-lg font-semibold mb-4 text-right">مُلخَّص القصَّة:</h3>
                     <p class="text-white/90 leading-relaxed text-justify text-sm">
                         {!! $anime['synopsis'] ?? 'لا يوجد ملخص متاح لهذا الأنمي.' !!}
@@ -372,10 +372,10 @@
            
             {{-- Subtitle & PixelDrain --}}
             @if(isset($animeLink) && ($animeLink->subtitle_url || $animeLink->subtitle_url_pixeldrain))
-            <div class="mt-6 flex justify-start gap-3 flex-wrap" dir="ltr">
+            <div class="mt-6 flex justify-start gap-4 flex-wrap" dir="ltr">
                 @if($animeLink->subtitle_url)
                 <a href="{{ $animeLink->subtitle_url }}" target="_blank"
-                   class="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
+                   class="inline-flex items-center gap-4 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
                    style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
                     <svg class="w-5 h-5 opacity-90 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
@@ -387,7 +387,7 @@
 
                 @if($animeLink->subtitle_url_pixeldrain)
                 <a href="{{ $animeLink->subtitle_url_pixeldrain }}" target="_blank"
-                   class="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
+                   class="inline-flex items-center gap-4 px-6 py-3 rounded-xl text-base font-semibold text-white hover:brightness-125 transition-all duration-200 hover:scale-105 active:scale-95"
                    style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
                     <svg class="w-5 h-5 opacity-90 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -402,26 +402,30 @@
             {{-- Episode Cards Section --}}
             @if ($animeLink && $animeLink->batches->isNotEmpty())
                 @php
-                    // Determine the latest batch(es) for NEW badge — top 2 most recent
+                    // Determine the latest batch for NEW badge — only if it's within 14 days
                     $sortedBatches = $animeLink->batches->sortByDesc('created_at');
-                    $latestBatchIds = $sortedBatches->take(2)->pluck('id')->toArray();
+                    $latestBatch = $sortedBatches->first();
+                    $latestBatchId = null;
+                    if ($latestBatch && $latestBatch->created_at && $latestBatch->created_at->diffInDays(now()) <= 14) {
+                        $latestBatchId = $latestBatch->id;
+                    }
                 @endphp
 
                 <style>
                     .ep-card-grid {
                         display: grid;
-                        grid-template-columns: repeat(2, 1fr);
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
                         gap: 1rem;
                     }
                     @media (max-width: 768px) {
                         .ep-card-grid {
-                            grid-template-columns: 1fr;
+                            grid-template-columns: minmax(0, 1fr);
                         }
                     }
                     .ep-card {
                         position: relative;
                         border-radius: 14px;
-                        padding: 1.25rem 1.5rem;
+                        padding: 1rem 0.75rem;
                         background: rgba(255, 255, 255, 0.04);
                         border: 1px solid rgba(255, 255, 255, 0.07);
                         backdrop-filter: blur(16px);
@@ -429,13 +433,20 @@
                         overflow: visible;
                         display: flex;
                         align-items: center;
-                        gap: 1rem;
-                        min-height: 144px;
+                        gap: 0.5rem;
+                        min-height: 120px;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card {
+                            padding: 1.25rem 1.5rem;
+                            gap: 1rem;
+                            min-height: 144px;
+                        }
                     }
                     .ep-card__square {
                         flex-shrink: 0;
-                        width: 4rem;
-                        height: 4rem;
+                        width: 3.5rem;
+                        height: 3.5rem;
                         background: rgba(0, 0, 0, 0.2);
                         border: 1px solid rgba(255, 255, 255, 0.08);
                         border-radius: 0.5rem;
@@ -455,7 +466,7 @@
                         }
                     }
                     .ep-card__square-top {
-                        font-size: 0.65rem;
+                        font-size: 0.55rem;
                         font-weight: 600;
                         color: rgba(255, 255, 255, 0.6);
                         margin-bottom: 0.1rem;
@@ -467,7 +478,7 @@
                         }
                     }
                     .ep-card__square-bottom {
-                        font-size: 0.95rem;
+                        font-size: 0.85rem;
                         font-weight: 700;
                         color: rgba(255, 255, 255, 0.95);
                         line-height: 1.1;
@@ -501,18 +512,35 @@
                         direction: rtl;
                     }
                     .ep-card__badge-new {
+                        position: absolute;
+                        top: -8px;
+                        right: -8px;
                         display: inline-flex;
                         align-items: center;
-                        padding: 2px 8px;
+                        padding: 2px 6px;
                         border-radius: 4px;
                         font-size: 0.65rem;
                         font-weight: 800;
-                        letter-spacing: 0.08em;
-                        text-transform: uppercase;
-                        color: #ff0000;
-                        background: rgba(185, 4, 4, 0.486);
-                        margin-left: 0.5rem;
-                        flex-shrink: 0;
+                        color: #ffffff;
+                        background: #ef4444;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                        z-index: 10;
+                    }
+                    .ep-card__badge-source {
+                        position: absolute;
+                        top: -8px;
+                        left: -8px;
+                        display: inline-flex;
+                        align-items: center;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-size: 0.65rem;
+                        font-weight: 800;
+                        color: #ffffff;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                        z-index: 10;
                     }
                     .ep-card__date {
                         font-size: 0.78rem;
@@ -521,7 +549,7 @@
                         text-align: right;
                     }
                     .ep-card__title {
-                        font-size: 0.95rem;
+                        font-size: 0.8rem;
                         font-weight: 600;
                         color: rgba(255, 255, 255, 0.92);
                         direction: ltr;
@@ -532,6 +560,11 @@
                         white-space: nowrap;
                         flex: 1;
                         min-width: 0;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__title {
+                            font-size: 0.95rem;
+                        }
                     }
                     .ep-card__meta-row {
                         display: flex;
@@ -566,16 +599,21 @@
                         align-items: stretch;
                         gap: 0.35rem;
                         flex-shrink: 0;
-                        width: 100px;
+                        width: 85px;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__actions {
+                            width: 100px;
+                        }
                     }
                     .ep-card__dl-btn {
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        gap: 6px;
-                        padding: 6px 12px;
+                        gap: 4px;
+                        padding: 5px 8px;
                         border-radius: 6px;
-                        font-size: 0.8rem;
+                        font-size: 0.75rem;
                         font-weight: 600;
                         color: #fff;
                         background: rgba(255, 255, 255, 0.15);
@@ -587,6 +625,13 @@
                         flex-shrink: 0;
                         white-space: nowrap;
                         width: 100%;
+                    }
+                    @media (min-width: 640px) {
+                        .ep-card__dl-btn {
+                            gap: 6px;
+                            padding: 6px 12px;
+                            font-size: 0.8rem;
+                        }
                     }
                     .ep-card__dropdown {
                         position: absolute;
@@ -645,7 +690,7 @@
 
                
 
-                <div class="ep-list-container mt-10 bg-white/20 backdrop-blur-lg p-6 rounded-lg overflow-y-auto overflow-x-hidden" style="max-height: 380px;">
+                <div class="ep-list-container mt-10 bg-white/20 backdrop-blur-lg p-3 sm:p-6 rounded-lg overflow-y-auto" style="max-height: 1050px;">
                     <div class="text-2xl font-semibold mb-4">قائمة الحلقات </div>
                     <div class="ep-card-grid" id="episode-grid">
                         @foreach ($animeLink->batches as $batch)
@@ -680,10 +725,19 @@
                                 $formattedEpisodes = $rawEpisodes;
                             }
 
-                            $episodeTitle = $anime['title'] . ' - ' . $formattedEpisodes;
-                            if ($maxRes) $episodeTitle .= ' [' . $maxRes . 'p]';
+                            $episodeTitle = $batch->name ?: ($anime['title'] . ' - ' . $formattedEpisodes . ($maxRes ? ' [' . $maxRes . 'p]' : ''));
 
-                            $isNew = in_array($batch->id, $latestBatchIds);
+                            $isNew = ($batch->id === $latestBatchId);
+
+                            $sourceBadgeType = null;
+                            if (isset($animeLink->types)) {
+                                foreach (['BD', 'WEB', 'DVD', 'VHS'] as $pTag) {
+                                    $sourceBadgeType = $animeLink->types->first(fn($t) => stripos($t->name, $pTag) !== false);
+                                    if ($sourceBadgeType) {
+                                        break;
+                                    }
+                                }
+                            }
 
                             // Collect unique codecs for pills
                             $codecs = $allLinks->pluck('codec')->filter()->unique()->values();
@@ -723,7 +777,15 @@
                                  :class="{ 'z-50': openDropdown !== null, 'z-10': openDropdown === null }">
 
                                 {{-- Square Content Label (Right side in RTL) --}}
-                                <div class="ep-card__square">
+                                <div class="ep-card__square relative">
+                                    @if ($isNew)
+                                        <span class="ep-card__badge-new">جديد</span>
+                                    @endif
+                                    @if ($sourceBadgeType)
+                                        <span class="ep-card__badge-source" style="background-color: {{ $sourceBadgeType->color ?? '#6b7280' }}; color: white;">
+                                            {{ $sourceBadgeType->name }}
+                                        </span>
+                                    @endif
                                     @if($contentLabelTop)
                                         <span class="ep-card__square-top">{{ $contentLabelTop }}</span>
                                     @endif
@@ -734,9 +796,6 @@
                                 <div class="ep-card__content">
                                     {{-- Episode Title --}}
                                     <div class="ep-card__title w-full" title="{{ $episodeTitle }}">
-                                        @if ($isNew)
-                                            <span class="ep-card__badge-new">NEW</span>
-                                        @endif
                                         {{ $episodeTitle }}
                                     </div>
 
@@ -816,6 +875,9 @@
                                 </div>
                             </div>
                         @endif
+                        @if ($loop->first && $loop->count % 2 !== 0)
+                            <div class="hidden md:block"></div>
+                        @endif
                     @endforeach
                     </div>
                 </div>
@@ -887,7 +949,7 @@
 @endif
 
             {{-- Comments Section --}}
-            <div class="mt-10 px-4 md:px-8 lg:px-16 mx-0 sm:mx-4 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-6 space-y-6 rounded-lg text-white">
+            <div class="mt-10 px-4 md:px-8 lg:px-16 mx-0 sm:mx-4 lg:mx-20 xl:mx-0 bg-white/20 backdrop-blur-lg p-4 sm:p-6 space-y-6 rounded-lg text-white">
                 <h2 class="text-2xl font-bold mb-4">💬 التعليقات</h2>
 
                 {{-- Flash Message --}}
@@ -1229,7 +1291,7 @@
                             }).then(res => res.json())
                               .then(data => console.log('Referral tracked'))
                               .catch(err => console.error(err));
-                        }, 8000); // 8 seconds delay
+                        }, 8000); 
                     }
                 });
             </script>

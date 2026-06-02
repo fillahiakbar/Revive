@@ -214,20 +214,16 @@ class AnimeLinkResource extends Resource
             ->label('Download Links')
             ->grid(3)
             ->schema([
-            TextInput::make('codec')
+            Select::make('codec')
             ->label('Codec / Format')
-            ->datalist([
+            ->options([
                 'x264' => 'H.264 (x264)',
                 'x265' => 'HEVC (x265)',
-                'AV1' => 'AV1',
                 'Hardsub' => 'Hardsub',
-                'Dual Audio' => 'Dual Audio',
-                'RAW' => 'RAW',
-                'xvid' => 'XViD',
             ])
             ->required()
             ->default('x264')
-            ->helperText('Select from preset or type custom codec/format'),
+            ->helperText('Select the codec/format'),
 
             Select::make('resolution')
             ->label('Resolution')

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="o4GWJgW4daHVLmoDr6OhnVTwnZrQ4Gm3J238pA8W">
+
+    <title>Revive</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://www.revivesubs.com/img/logo.png" type="image/x-icon">
+
+    <!-- Scripts -->
+    <link rel="preload" as="style" href="https://www.revivesubs.com/build/assets/app-BG93xb2n.css" /><link rel="modulepreload" href="https://www.revivesubs.com/build/assets/app-B_xQyjHH.js" /><link rel="stylesheet" href="https://www.revivesubs.com/build/assets/app-BG93xb2n.css" data-navigate-track="reload" /><script type="module" src="https://www.revivesubs.com/build/assets/app-B_xQyjHH.js" data-navigate-track="reload"></script>
+<script>
+     window.addEventListener('load', () => window.setTimeout(() => {
+        const makeLink = (asset) => {
+            const link = document.createElement('link')
+
+            Object.keys(asset).forEach((attribute) => {
+                link.setAttribute(attribute, asset[attribute])
+            })
+
+            return link
+        }
+
+        const loadNext = (assets, count) => window.setTimeout(() => {
+            if (count > assets.length) {
+                count = assets.length
+
+                if (count === 0) {
+                    return
+                }
+            }
+
+            const fragment = new DocumentFragment
+
+            while (count > 0) {
+                const link = makeLink(assets.shift())
+                fragment.append(link)
+                count--
+
+                if (assets.length) {
+                    link.onload = () => loadNext(assets, 1)
+                    link.onerror = () => loadNext(assets, 1)
+                }
+            }
+
+            document.head.append(fragment)
+        })
+
+        loadNext([], 3)
+    }))
+</script>
+    <!-- Styles -->
+    <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}</style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="font-cairo bg-center bg-no-repeat bg-cover min-h-screen overflow-auto text-white"
+      style="background-image: url('https://www.revivesubs.com/img/bg-login.png'); direction: rtl;">
+
+      
+    <div class="w-full min-h-screen flex items-center justify-center py-4">
+        <div class="w-[500px]">
+            
+            <div class="flex items-center justify-center px-4 py-4 sm:px-6">
+        <div class="w-full max-w-md sm:max-w-lg md:max-w-xl px-4 sm:px-6 py-4 sm:py-6 rounded-xl">
+
+            
+            <div class="flex flex-col items-center justify-center mb-3 sm:mb-4 text-center">
+                <img src="https://www.revivesubs.com/img/logo.png" alt="Logo" class="h-20 w-auto" />                   <h1 class="text-xl sm:text-2xl font-bold mt-3 sm:mt-4 text-white">السلام عليكم</h1>
+                <p class="text-xs sm:text-sm text-gray-300 mt-1">أهلاً وسهلاً! أدخل بياناتك</p>
+            </div>
+
+            
+                                    
+            
+            <form method="POST" action="https://www.revivesubs.com/login" class="space-y-3 sm:space-y-4">
+                <input type="hidden" name="_token" value="o4GWJgW4daHVLmoDr6OhnVTwnZrQ4Gm3J238pA8W" autocomplete="off">
+                
+                <div>
+                    <label class="block font-medium text-sm text-white block text-right text-white mb-1 text-sm sm:text-base" for="email">
+    عنوان البريد الإلكتروني:
+</label>
+                    <div class="relative">
+                        <input id="email" 
+                               type="email" 
+                               name="email" 
+                               :value="old('email')" 
+                               required 
+                               autofocus 
+                               autocomplete="username"
+                               class="w-full pr-10 pl-4 py-2 sm:py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400"
+                               placeholder="عنوان بريدك الإلكتروني" />
+                        <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
+                            <i class="fas fa-envelope text-sm sm:text-base"></i>
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div>
+                    <label class="block font-medium text-sm text-white block text-right text-white mb-1 text-sm sm:text-base" for="password">
+    كلمة المرور:
+</label>
+                    <div class="relative">
+                        <input id="password" 
+                               type="password" 
+                               name="password" 
+                               required 
+                               autocomplete="current-password"
+                               class="w-full pr-10 pl-10 py-2 sm:py-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-right text-sm text-black placeholder-gray-400 selection:bg-red-500 selection:text-white"
+                               placeholder="كلمة المرور الخاصة بك" />
+
+                        <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">
+                            <i class="fas fa-lock text-sm sm:text-base"></i>
+                        </span>
+                        <span class="absolute inset-y-0 left-3 flex items-center cursor-pointer text-gray-400" onclick="togglePassword()">
+                            <i class="fas fa-eye text-sm sm:text-base" id="togglePasswordIcon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="flex justify-between items-center text-sm text-white">
+                    <label class="flex items-center space-x-2 space-x-reverse">
+                        <input type="checkbox" name="remember" class="form-checkbox text-red-600 rounded" checked>
+                        <span>تذكّرني</span>
+                    </label>
+                                            <a class="text-blue-500 hover:underline" href="https://www.revivesubs.com/forgot-password">
+                            هل نسيت كلمة المرور؟
+                        </a>
+                                    </div>
+
+                
+                <div class="flex flex-col items-center justify-center">
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAACw7oj4gO5p04_uP" data-theme="dark"></div>
+                                    </div>
+
+                
+                <div>
+                    <button type="submit"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium sm:font-semibold py-2 sm:py-3 rounded-lg text-base sm:text-lg transition">
+                        تسجيل الدخول
+                    </button>
+                </div>
+            </form>
+
+            
+                            <div class="mt-4 text-right">
+                    <a href="https://www.revivesubs.com/register" class="text-blue-400 hover:text-blue-300 hover:underline text-sm sm:text-base">
+                        تسجيل حساب جديد
+                    </a>
+                </div>
+            
+            
+            <div class="flex justify-center flex-wrap gap-3 sm:gap-4 text-white text-2xl sm:text-3xl mt-4 sm:mt-6">
+                                    <a href="https://t.me/revivesubs" class="hover:text-red-500 transition" target="_blank" title="Telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                                    <a href="https://x.com/ReviveSubs" class="hover:text-red-500 transition" target="_blank" title="twitter">
+                        <i class="fab fa-x-twitter"></i>
+                    </a>
+                                    <a href="https://www.instagram.com/ReviveSubs/" class="hover:text-red-500 transition" target="_blank" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                                    <a href="https://discord.com/invite/X8BNPYbQsq" class="hover:text-red-500 transition" target="_blank" title="Discord">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('togglePasswordIcon');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        </div>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fd056e82e789b97',t:'MTc3ODk5Njk3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"b0ebe7361420461cbcbb2ca05a663f3d","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
